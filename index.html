@@ -3368,11 +3368,12 @@
             const columnWidths = [48, 14, 26, 14, 16, 22, 22];
             
             doc.setFillColor(...colorPrimario);
+            doc.rect(marginLeft, yPosition - 6, contentWidth, 8, 'F');
             doc.setTextColor(255, 255, 255);
             doc.setFont(undefined, 'bold');
             doc.setFontSize(9);
             
-            let xPos = marginLeft;
+            let xPos = marginLeft + 1;
             columnHeaders.forEach((header, i) => {
                 doc.text(header, xPos, yPosition, { maxWidth: columnWidths[i], align: 'left' });
                 xPos += columnWidths[i];
@@ -3393,11 +3394,12 @@
                     
                     // Re-dibujar headers en nueva página
                     doc.setFillColor(...colorPrimario);
+                    doc.rect(marginLeft, yPosition - 6, contentWidth, 8, 'F');
                     doc.setTextColor(255, 255, 255);
                     doc.setFont(undefined, 'bold');
                     doc.setFontSize(9);
                     
-                    xPos = marginLeft;
+                    xPos = marginLeft + 1;
                     columnHeaders.forEach((header, i) => {
                         doc.text(header, xPos, yPosition, { maxWidth: columnWidths[i], align: 'left' });
                         xPos += columnWidths[i];
