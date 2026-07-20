@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -857,6 +858,9 @@
                 <div class="nav-item" onclick="switchModule('stock')">
                     📦 Stock
                 </div>
+                <div class="nav-item" onclick="switchModule('implantes')">
+                    🔩 Stock Implantes Fixum
+                </div>
                 <div class="nav-item" onclick="switchModule('reportes')">
                     📈 Reportes
                 </div>
@@ -1484,6 +1488,88 @@
                         <div class="alerts-list" id="alertasInfoList"></div>
                     </div>
                 </div>
+
+                <!-- STOCK IMPLANTES FIXUM -->
+                <div id="implantesModule" class="module-content hidden">
+                    <div class="quick-actions">
+                        <button class="btn btn-primary" onclick="openImplanteForm()">➕ Agregar Implante</button>
+                    </div>
+
+                    <div class="tabs-container">
+                        <button class="tab-btn active" onclick="switchTab(this, 'implantes-todos')">Todos</button>
+                        <button class="tab-btn" onclick="switchTab(this, 'implantes-bajo')">Stock Bajo</button>
+                        <button class="tab-btn" onclick="switchTab(this, 'implantes-vencidos')">Vencidos</button>
+                    </div>
+
+                    <div id="implantes-todos" class="tab-content active" style="margin-top: 20px;">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Modelo</th>
+                                        <th>Código Lote</th>
+                                        <th>Diámetro</th>
+                                        <th>Largo</th>
+                                        <th>Material</th>
+                                        <th>Stock</th>
+                                        <th>Mínimo</th>
+                                        <th>Costo</th>
+                                        <th>Venta</th>
+                                        <th>Vencimiento</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="implantesTableBody">
+                                    <tr>
+                                        <td colspan="12" style="text-align: center; color: var(--text-light);">Sin implantes registrados</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="implantes-bajo" class="tab-content" style="margin-top: 20px;">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Modelo</th>
+                                        <th>Stock Actual</th>
+                                        <th>Stock Mínimo</th>
+                                        <th>Faltante</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bajoImplantesTableBody">
+                                    <tr>
+                                        <td colspan="5" style="text-align: center; color: var(--text-light);">Todos los implantes tienen stock suficiente</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="implantes-vencidos" class="tab-content" style="margin-top: 20px;">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Modelo</th>
+                                        <th>Vencimiento</th>
+                                        <th>Días Restantes</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="vencidosImplantesTableBody">
+                                    <tr>
+                                        <td colspan="4" style="text-align: center; color: var(--text-light);">Sin implantes vencidos</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1770,6 +1856,128 @@
         </div>
     </div>
 
+    <div id="implanteModal" class="modal" data-edit-id="">
+        <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3>Agregar/Editar Implante</h3>
+                <button class="modal-close" onclick="closeImplanteModal()">×</button>
+            </div>
+            
+            <div style="padding: 20px 0; border-bottom: 1px solid #ddd; margin-bottom: 15px;">
+                <h4 style="color: var(--text-dark); margin-bottom: 10px;">📋 Información Básica</h4>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Modelo/Nombre</label>
+                    <input type="text" id="impNombre" placeholder="Ej: Implante Standard 3.5mm">
+                </div>
+                <div class="form-group">
+                    <label>Código de Lote</label>
+                    <input type="text" id="impCodigoLote" placeholder="Ej: LOT-2024-001">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Diámetro (mm)</label>
+                    <input type="number" id="impDiametro" placeholder="3.5" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Largo (mm)</label>
+                    <input type="number" id="impLargo" placeholder="10" step="0.1">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Material</label>
+                    <select id="impMaterial">
+                        <option value="titanio">Titanio</option>
+                        <option value="titanio-grado5">Titanio Grado 5</option>
+                        <option value="zirconio">Zirconio</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fabricante</label>
+                    <input type="text" id="impFabricante" placeholder="Ej: Fixum, Straumann, Nobel, etc.">
+                </div>
+            </div>
+
+            <div style="padding: 20px 0; border-bottom: 1px solid #ddd; margin-bottom: 15px; margin-top: 15px;">
+                <h4 style="color: var(--text-dark); margin-bottom: 10px;">📦 Stock</h4>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Cantidad Disponible</label>
+                    <input type="number" id="impCantidad" placeholder="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Stock Mínimo</label>
+                    <input type="number" id="impStockMinimo" placeholder="5" min="0">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Precio de Costo ($)</label>
+                    <input type="number" id="impCosto" placeholder="0.00" step="0.01" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Precio de Venta ($)</label>
+                    <input type="number" id="impPrecio" placeholder="0.00" step="0.01" min="0">
+                </div>
+            </div>
+
+            <div style="padding: 20px 0; border-bottom: 1px solid #ddd; margin-bottom: 15px; margin-top: 15px;">
+                <h4 style="color: var(--text-dark); margin-bottom: 10px;">📅 Logística</h4>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fecha de Vencimiento</label>
+                    <input type="date" id="impVencimiento">
+                </div>
+                <div class="form-group">
+                    <label>Proveedor</label>
+                    <input type="text" id="impProveedor" placeholder="Nombre del proveedor">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>País de Origen</label>
+                    <input type="text" id="impPais" placeholder="Ej: Alemania, Suiza, etc.">
+                </div>
+                <div class="form-group">
+                    <label>Garantía (meses)</label>
+                    <input type="number" id="impGarantia" placeholder="24" min="0">
+                </div>
+            </div>
+
+            <div style="padding: 20px 0; border-bottom: 1px solid #ddd; margin-bottom: 15px; margin-top: 15px;">
+                <h4 style="color: var(--text-dark); margin-bottom: 10px;">✅ Otros</h4>
+            </div>
+
+            <div class="form-group">
+                <label>Certificaciones</label>
+                <input type="text" id="impCertificaciones" placeholder="Ej: ISO 13485, FDA, CE, etc.">
+            </div>
+
+            <div class="form-group">
+                <label>Notas/Observaciones</label>
+                <textarea id="impNotas" placeholder="Cualquier nota adicional del implante..."></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeImplanteModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveImplante()">✅ Guardar Implante</button>
+            </div>
+        </div>
+    </div>
+
     <div id="odontoDetalleModal" class="modal" data-odonto-id="">
         <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
@@ -1875,6 +2083,7 @@
             facturas: [],
             odontos: [],
             stock: [],
+            implantes: [],
             citas: [],
             movimientosStock: [],
             tratamientos: [],
@@ -1929,6 +2138,7 @@
                 'facturacion': '💰 Facturación',
                 'odontos': '👨‍⚕️ Odontólogos',
                 'stock': '📦 Stock',
+                'implantes': '🔩 Stock Implantes Fixum',
                 'reportes': '📈 Reportes',
                 'citas': '📅 Citas',
                 'tratamientos': '🦷 Tratamientos',
@@ -1948,6 +2158,8 @@
                 renderStock();
                 renderMovimientos();
                 initStockForm();
+            } else if (module === 'implantes') {
+                renderImplantes();
             } else if (module === 'citas') {
                 renderCitas();
             } else if (module === 'tratamientos') {
@@ -1987,6 +2199,14 @@
                 { id: 2, nombre: 'Resina PMMA', categoria: 'materiales', actual: 5, minimo: 20, valorUnit: 850, unidad: 'kg' },
                 { id: 3, nombre: 'Anestésico Lidocaína', categoria: 'medicamentos', actual: 25, minimo: 30, valorUnit: 450, unidad: 'frasco' },
                 { id: 4, nombre: 'Guantes Quirúrgicos', categoria: 'insumos', actual: 8, minimo: 50, valorUnit: 120, unidad: 'caja' }
+            ];
+
+            appState.implantes = [
+                { id: 1, nombre: 'Implante Standard 3.5x10', codigoLote: 'FXM-2024-001', diametro: 3.5, largo: 10, material: 'titanio', fabricante: 'Fixum', cantidad: 12, stockMinimo: 5, costo: 2800, precio: 15000, vencimiento: '2027-06-15', proveedor: 'Fixum Direct', pais: 'Suiza', garantia: 24, certificaciones: 'ISO 13485, FDA, CE', notas: 'Titanio grado 5 premium', fechaCreacion: '2026-01-15' },
+                { id: 2, nombre: 'Implante Wide 4.5x10', codigoLote: 'FXM-2024-002', diametro: 4.5, largo: 10, material: 'titanio', fabricante: 'Fixum', cantidad: 8, stockMinimo: 5, costo: 3200, precio: 16500, vencimiento: '2027-08-20', proveedor: 'Fixum Direct', pais: 'Suiza', garantia: 24, certificaciones: 'ISO 13485, FDA, CE', notas: 'Para huesos amplios', fechaCreacion: '2026-02-01' },
+                { id: 3, nombre: 'Implante Short 3.5x8', codigoLote: 'FXM-2024-003', diametro: 3.5, largo: 8, material: 'titanio', fabricante: 'Fixum', cantidad: 3, stockMinimo: 5, costo: 2600, precio: 14000, vencimiento: '2027-09-10', proveedor: 'Fixum Direct', pais: 'Suiza', garantia: 24, certificaciones: 'ISO 13485, FDA, CE', notas: 'Para espacios limitados', fechaCreacion: '2026-03-05' },
+                { id: 4, nombre: 'Implante Zirconio 4.0x11', codigoLote: 'FXM-2024-004', diametro: 4.0, largo: 11, material: 'zirconio', fabricante: 'Fixum', cantidad: 5, stockMinimo: 3, costo: 3800, precio: 18000, vencimiento: '2027-12-01', proveedor: 'Fixum Direct', pais: 'Suiza', garantia: 24, certificaciones: 'ISO 13485, FDA, CE', notas: 'Estético para zona anterior', fechaCreacion: '2026-03-20' },
+                { id: 5, nombre: 'Implante Premium 3.75x12', codigoLote: 'FXM-2024-005', diametro: 3.75, largo: 12, material: 'titanio-grado5', fabricante: 'Fixum', cantidad: 6, stockMinimo: 5, costo: 3100, precio: 16000, vencimiento: '2026-10-30', proveedor: 'Fixum Direct', pais: 'Suiza', garantia: 24, certificaciones: 'ISO 13485, FDA, CE', notas: 'Largo extra para maxilar', fechaCreacion: '2026-04-12' }
             ];
 
             appState.citas = [
@@ -2924,6 +3144,245 @@
             });
         }
 
+        // ============ IMPLANTES FIXUM ============
+        function openImplanteForm() {
+            clearImplanteForm();
+            document.getElementById('implanteModal').removeAttribute('data-edit-id');
+            document.getElementById('implanteModal').classList.add('active');
+        }
+
+        function closeImplanteModal() {
+            document.getElementById('implanteModal').classList.remove('active');
+            clearImplanteForm();
+        }
+
+        function clearImplanteForm() {
+            document.getElementById('impNombre').value = '';
+            document.getElementById('impCodigoLote').value = '';
+            document.getElementById('impDiametro').value = '';
+            document.getElementById('impLargo').value = '';
+            document.getElementById('impMaterial').value = 'titanio';
+            document.getElementById('impFabricante').value = '';
+            document.getElementById('impCantidad').value = '';
+            document.getElementById('impStockMinimo').value = '';
+            document.getElementById('impCosto').value = '';
+            document.getElementById('impPrecio').value = '';
+            document.getElementById('impVencimiento').value = '';
+            document.getElementById('impProveedor').value = '';
+            document.getElementById('impPais').value = '';
+            document.getElementById('impGarantia').value = '';
+            document.getElementById('impCertificaciones').value = '';
+            document.getElementById('impNotas').value = '';
+        }
+
+        function saveImplante() {
+            const nombre = document.getElementById('impNombre').value;
+            const codigoLote = document.getElementById('impCodigoLote').value;
+            const diametro = parseFloat(document.getElementById('impDiametro').value) || 0;
+            const largo = parseFloat(document.getElementById('impLargo').value) || 0;
+            const material = document.getElementById('impMaterial').value;
+            const fabricante = document.getElementById('impFabricante').value;
+            const cantidad = parseInt(document.getElementById('impCantidad').value) || 0;
+            const stockMinimo = parseInt(document.getElementById('impStockMinimo').value) || 0;
+            const costo = parseFloat(document.getElementById('impCosto').value) || 0;
+            const precio = parseFloat(document.getElementById('impPrecio').value) || 0;
+            const vencimiento = document.getElementById('impVencimiento').value;
+            const proveedor = document.getElementById('impProveedor').value;
+            const pais = document.getElementById('impPais').value;
+            const garantia = parseInt(document.getElementById('impGarantia').value) || 0;
+            const certificaciones = document.getElementById('impCertificaciones').value;
+            const notas = document.getElementById('impNotas').value;
+
+            if (!nombre || !codigoLote) {
+                alert('❌ Nombre y Código de Lote son requeridos');
+                return;
+            }
+
+            const editId = document.getElementById('implanteModal').getAttribute('data-edit-id');
+
+            if (editId) {
+                // Actualizar
+                const implante = appState.implantes.find(i => i.id == editId);
+                if (implante) {
+                    implante.nombre = nombre;
+                    implante.codigoLote = codigoLote;
+                    implante.diametro = diametro;
+                    implante.largo = largo;
+                    implante.material = material;
+                    implante.fabricante = fabricante;
+                    implante.cantidad = cantidad;
+                    implante.stockMinimo = stockMinimo;
+                    implante.costo = costo;
+                    implante.precio = precio;
+                    implante.vencimiento = vencimiento;
+                    implante.proveedor = proveedor;
+                    implante.pais = pais;
+                    implante.garantia = garantia;
+                    implante.certificaciones = certificaciones;
+                    implante.notas = notas;
+                    alert('✅ Implante actualizado exitosamente');
+                }
+            } else {
+                // Crear nuevo
+                const nuevoImplante = {
+                    id: appState.implantes.length + 1,
+                    nombre,
+                    codigoLote,
+                    diametro,
+                    largo,
+                    material,
+                    fabricante,
+                    cantidad,
+                    stockMinimo,
+                    costo,
+                    precio,
+                    vencimiento,
+                    proveedor,
+                    pais,
+                    garantia,
+                    certificaciones,
+                    notas,
+                    fechaCreacion: new Date().toISOString().split('T')[0]
+                };
+                appState.implantes.push(nuevoImplante);
+                alert('✅ Implante agregado exitosamente');
+            }
+
+            closeImplanteModal();
+            renderImplantes();
+            updateAlertCount();
+        }
+
+        function editImplante(id) {
+            const implante = appState.implantes.find(i => i.id === id);
+            if (!implante) return;
+
+            document.getElementById('impNombre').value = implante.nombre;
+            document.getElementById('impCodigoLote').value = implante.codigoLote;
+            document.getElementById('impDiametro').value = implante.diametro;
+            document.getElementById('impLargo').value = implante.largo;
+            document.getElementById('impMaterial').value = implante.material;
+            document.getElementById('impFabricante').value = implante.fabricante;
+            document.getElementById('impCantidad').value = implante.cantidad;
+            document.getElementById('impStockMinimo').value = implante.stockMinimo;
+            document.getElementById('impCosto').value = implante.costo;
+            document.getElementById('impPrecio').value = implante.precio;
+            document.getElementById('impVencimiento').value = implante.vencimiento;
+            document.getElementById('impProveedor').value = implante.proveedor;
+            document.getElementById('impPais').value = implante.pais;
+            document.getElementById('impGarantia').value = implante.garantia;
+            document.getElementById('impCertificaciones').value = implante.certificaciones;
+            document.getElementById('impNotas').value = implante.notas;
+
+            document.getElementById('implanteModal').setAttribute('data-edit-id', id);
+            document.getElementById('implanteModal').classList.add('active');
+        }
+
+        function deleteImplante(id) {
+            if (confirm('¿Estás seguro de que quieres eliminar este implante?')) {
+                appState.implantes = appState.implantes.filter(i => i.id !== id);
+                renderImplantes();
+                updateAlertCount();
+                alert('✅ Implante eliminado');
+            }
+        }
+
+        function renderImplantes() {
+            // Tab Todos
+            const tbody = document.getElementById('implantesTableBody');
+            tbody.innerHTML = '';
+
+            if (appState.implantes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="12" style="text-align: center; color: var(--text-light);">Sin implantes registrados</td></tr>';
+            } else {
+                appState.implantes.forEach(imp => {
+                    const ganancia = ((imp.precio - imp.costo) / imp.precio * 100).toFixed(1);
+                    const hoy = new Date().toISOString().split('T')[0];
+                    const estado = imp.cantidad < imp.stockMinimo ? '⚠️ Bajo' : '✅ OK';
+                    const vencido = imp.vencimiento && imp.vencimiento < hoy ? '❌ Vencido' : imp.vencimiento ? '✅ Vigente' : '-';
+
+                    const row = `<tr>
+                        <td><strong>${imp.nombre}</strong></td>
+                        <td>${imp.codigoLote}</td>
+                        <td>${imp.diametro}mm</td>
+                        <td>${imp.largo}mm</td>
+                        <td>${imp.material}</td>
+                        <td><strong>${imp.cantidad}</strong></td>
+                        <td>${imp.stockMinimo}</td>
+                        <td>$${imp.costo.toLocaleString('es-MX')}</td>
+                        <td>$${imp.precio.toLocaleString('es-MX')}</td>
+                        <td>${imp.vencimiento || '-'}</td>
+                        <td>${estado}</td>
+                        <td>
+                            <button class="btn btn-small btn-primary" onclick="editImplante(${imp.id})">Editar</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteImplante(${imp.id})">Eliminar</button>
+                        </td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            }
+
+            // Tab Stock Bajo
+            const bajostockBody = document.getElementById('bajoImplantesTableBody');
+            const itemsBajo = appState.implantes.filter(i => i.cantidad < i.stockMinimo);
+            bajostockBody.innerHTML = '';
+
+            if (itemsBajo.length === 0) {
+                bajostockBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-light);">Todos los implantes tienen stock suficiente</td></tr>';
+            } else {
+                itemsBajo.forEach(imp => {
+                    const faltante = imp.stockMinimo - imp.cantidad;
+                    const row = `<tr>
+                        <td><strong>${imp.nombre}</strong></td>
+                        <td>${imp.cantidad}</td>
+                        <td>${imp.stockMinimo}</td>
+                        <td><strong style="color: var(--danger);">${faltante}</strong></td>
+                        <td><button class="btn btn-small btn-warning" onclick="editImplante(${imp.id})">Reabastecer</button></td>
+                    </tr>`;
+                    bajostockBody.innerHTML += row;
+                });
+            }
+
+            // Tab Vencidos
+            const vencidosBody = document.getElementById('vencidosImplantesTableBody');
+            const hoy = new Date().toISOString().split('T')[0];
+            const itemsVencidos = appState.implantes.filter(i => i.vencimiento && i.vencimiento < hoy);
+            const itemsPorVencer = appState.implantes.filter(i => {
+                if (!i.vencimiento) return false;
+                const diasRestantes = Math.ceil((new Date(i.vencimiento) - new Date()) / (1000 * 60 * 60 * 24));
+                return diasRestantes > 0 && diasRestantes <= 90;
+            });
+
+            vencidosBody.innerHTML = '';
+            if (itemsVencidos.length === 0 && itemsPorVencer.length === 0) {
+                vencidosBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-light);">Sin implantes vencidos o próximos a vencer</td></tr>';
+            } else {
+                // Vencidos
+                itemsVencidos.forEach(imp => {
+                    const diasPasados = Math.floor((new Date() - new Date(imp.vencimiento)) / (1000 * 60 * 60 * 24));
+                    const row = `<tr style="background-color: #ffe0e0;">
+                        <td><strong>${imp.nombre}</strong></td>
+                        <td>${imp.vencimiento}</td>
+                        <td style="color: var(--danger);">❌ Hace ${diasPasados} días</td>
+                        <td><span class="badge badge-danger">VENCIDO</span></td>
+                    </tr>`;
+                    vencidosBody.innerHTML += row;
+                });
+
+                // Por vencer
+                itemsPorVencer.forEach(imp => {
+                    const diasRestantes = Math.ceil((new Date(imp.vencimiento) - new Date()) / (1000 * 60 * 60 * 24));
+                    const row = `<tr style="background-color: #fff3cd;">
+                        <td><strong>${imp.nombre}</strong></td>
+                        <td>${imp.vencimiento}</td>
+                        <td style="color: #ff6b00;">⚠️ Faltan ${diasRestantes} días</td>
+                        <td><span class="badge badge-warning">POR VENCER</span></td>
+                    </tr>`;
+                    vencidosBody.innerHTML += row;
+                });
+            }
+        }
+
         // ============ CITAS ============
         function openCitaForm() {
             clearCitaForm();
@@ -3298,6 +3757,46 @@
                         type: 'danger',
                         icon: '⚠️'
                     });
+                }
+            });
+
+            // Stock Implantes bajo
+            appState.implantes.forEach(i => {
+                if (i.cantidad < i.stockMinimo) {
+                    alertas.push({
+                        title: '🔩 Implante Bajo Stock: ' + i.nombre,
+                        description: `Quedan ${i.cantidad} unidades. Mínimo: ${i.stockMinimo}`,
+                        type: 'danger',
+                        icon: '⚠️'
+                    });
+                }
+            });
+
+            // Implantes vencidos
+            appState.implantes.forEach(i => {
+                if (i.vencimiento && i.vencimiento < today) {
+                    const diasPasados = Math.floor((new Date() - new Date(i.vencimiento)) / (1000 * 60 * 60 * 24));
+                    alertas.push({
+                        title: '🔩 Implante Vencido: ' + i.nombre,
+                        description: `Vencido hace ${diasPasados} días (${i.vencimiento}). ¡ELIMINAR!`,
+                        type: 'danger',
+                        icon: '❌'
+                    });
+                }
+            });
+
+            // Implantes próximos a vencer
+            appState.implantes.forEach(i => {
+                if (i.vencimiento) {
+                    const diasRestantes = Math.ceil((new Date(i.vencimiento) - new Date()) / (1000 * 60 * 60 * 24));
+                    if (diasRestantes > 0 && diasRestantes <= 90) {
+                        alertas.push({
+                            title: '🔩 Implante Próximo a Vencer: ' + i.nombre,
+                            description: `Vence en ${diasRestantes} días (${i.vencimiento})`,
+                            type: 'warning',
+                            icon: '⚠️'
+                        });
+                    }
                 }
             });
 
