@@ -851,6 +851,9 @@
                 <div class="nav-item" onclick="switchModule('facturacion')">
                     💰 Facturación
                 </div>
+                <div class="nav-item" onclick="switchModule('caja')">
+                    💵 Control de Caja
+                </div>
                 <div class="nav-item" onclick="switchModule('odontos')">
                     👨‍⚕️ Odontólogos
                 </div>
@@ -1137,6 +1140,126 @@
                         </div>
 
                         <div id="reportResults"></div>
+                    </div>
+                </div>
+
+                <!-- CONTROL DE CAJA -->
+                <div id="cajaModule" class="module-content hidden">
+                    <div class="quick-actions">
+                        <button class="btn btn-primary" onclick="openCajaForm()">+ Registrar Movimiento</button>
+                    </div>
+
+                    <div class="stat-row">
+                        <div class="stat-item" style="border-left-color: var(--success);">
+                            <div class="stat-label">Ingresos Efectivo</div>
+                            <div class="stat-value" id="cajaIngresoEfectivo">$0</div>
+                        </div>
+                        <div class="stat-item" style="border-left-color: var(--success);">
+                            <div class="stat-label">Ingresos Tarjeta</div>
+                            <div class="stat-value" id="cajaIngresoTarjeta">$0</div>
+                        </div>
+                        <div class="stat-item" style="border-left-color: var(--danger);">
+                            <div class="stat-label">Egresos Efectivo</div>
+                            <div class="stat-value" id="cajaEgresoEfectivo">$0</div>
+                        </div>
+                        <div class="stat-item" style="border-left-color: var(--danger);">
+                            <div class="stat-label">Egresos Tarjeta</div>
+                            <div class="stat-value" id="cajaEgresoTarjeta">$0</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-row">
+                        <div class="stat-item" style="border-left-color: var(--primary);">
+                            <div class="stat-label">Balance en Efectivo</div>
+                            <div class="stat-value" id="cajaBalanceEfectivo">$0</div>
+                        </div>
+                        <div class="stat-item" style="border-left-color: var(--primary);">
+                            <div class="stat-label">Balance en Tarjeta</div>
+                            <div class="stat-value" id="cajaBalanceTarjeta">$0</div>
+                        </div>
+                        <div class="stat-item" style="border-left-color: var(--secondary);">
+                            <div class="stat-label">Balance Total</div>
+                            <div class="stat-value" id="cajaBalanceTotal">$0</div>
+                        </div>
+                    </div>
+
+                    <div class="tabs-container">
+                        <button class="tab-btn active" onclick="switchTab(this, 'caja-todos')">Todos los Movimientos</button>
+                        <button class="tab-btn" onclick="switchTab(this, 'caja-ingresos')">Ingresos</button>
+                        <button class="tab-btn" onclick="switchTab(this, 'caja-egresos')">Egresos</button>
+                        <button class="tab-btn" onclick="switchTab(this, 'caja-resumen')">Resumen por Método</button>
+                    </div>
+
+                    <div id="caja-todos" class="tab-content active">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Tipo</th>
+                                        <th>Categoría</th>
+                                        <th>Descripción</th>
+                                        <th>Método</th>
+                                        <th>Monto</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cajaTableBody">
+                                    <tr>
+                                        <td colspan="7" style="text-align: center; color: var(--text-light);">Sin movimientos registrados</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="caja-ingresos" class="tab-content">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Categoría</th>
+                                        <th>Descripción</th>
+                                        <th>Método</th>
+                                        <th>Monto</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cajaIngresosTableBody">
+                                    <tr>
+                                        <td colspan="5" style="text-align: center; color: var(--text-light);">Sin ingresos registrados</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="caja-egresos" class="tab-content">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Categoría</th>
+                                        <th>Descripción</th>
+                                        <th>Método</th>
+                                        <th>Monto</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cajaEgresosTableBody">
+                                    <tr>
+                                        <td colspan="5" style="text-align: center; color: var(--text-light);">Sin egresos registrados</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="caja-resumen" class="tab-content">
+                        <div class="chart-container">
+                            <h3>Ingresos vs Egresos por Método de Pago</h3>
+                            <canvas id="chartCajaResumen"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -1650,6 +1773,59 @@
         </div>
     </div>
 
+    <div id="cajaModal" class="modal" data-edit-id="">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Registrar Movimiento de Caja</h3>
+                <button class="modal-close" onclick="closeCajaModal()">×</button>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tipo de Movimiento</label>
+                    <select id="cajaTipo" onchange="updateCajaCategorias()">
+                        <option value="ingreso">📥 Ingreso</option>
+                        <option value="egreso">📤 Egreso</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Categoría</label>
+                    <select id="cajaCategoria"></select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <input type="text" id="cajaDescripcion" placeholder="Ej: Pago de María García, Insumos dentales, etc.">
+                </div>
+                <div class="form-group">
+                    <label>Monto</label>
+                    <input type="number" id="cajaMonto" placeholder="0.00" step="0.01" min="0">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Método de Pago</label>
+                    <select id="cajaMetodo">
+                        <option value="efectivo">💵 Efectivo</option>
+                        <option value="tarjeta">💳 Tarjeta</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" id="cajaFecha">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Nota (opcional)</label>
+                <textarea id="cajaNota" placeholder="Observaciones adicionales..."></textarea>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeCajaModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveCaja()">✅ Registrar Movimiento</button>
+            </div>
+        </div>
+    </div>
+
     <div id="odontoModal" class="modal" data-edit-id="">
         <div class="modal-content">
             <div class="modal-header">
@@ -2029,6 +2205,7 @@
             odontos: [],
             stock: [],
             implantes: [],
+            caja: [],
             citas: [],
             movimientosStock: [],
             tratamientos: [],
@@ -2081,6 +2258,7 @@
                 'dashboard': '📊 Dashboard',
                 'pacientes': '👥 Pacientes',
                 'facturacion': '💰 Facturación',
+                'caja': '💵 Control de Caja',
                 'odontos': '👨‍⚕️ Odontólogos',
                 'stock': '📦 Stock',
                 'implantes': '🔩 Stock Implantes Fixum',
@@ -2097,6 +2275,8 @@
                 renderPacientes();
             } else if (module === 'facturacion') {
                 renderFacturas();
+            } else if (module === 'caja') {
+                renderCaja();
             } else if (module === 'odontos') {
                 renderOdontos();
             } else if (module === 'stock') {
@@ -2176,6 +2356,14 @@
             appState.facturas = [
                 { id: 1, paciente: 'María García', tratamiento: 'Implante', ingresos: 15000, costos: 3500, honorarios: 5250, insumos: 800, metodo: 'efectivo', fecha: '2026-06-29', estado: 'pagado' },
                 { id: 2, paciente: 'Juan López', tratamiento: 'Ortodoncia', ingresos: 4000, costos: 500, honorarios: 1200, insumos: 200, metodo: 'financiado', fecha: '2026-06-28', estado: 'pendiente' }
+            ];
+
+            appState.caja = [
+                { id: 1, tipo: 'ingreso', categoria: 'pago_paciente', descripcion: 'Pago de María García - Implante', monto: 15000, metodo: 'efectivo', fecha: '2026-06-29', nota: '', usuario: 'admin' },
+                { id: 2, tipo: 'ingreso', categoria: 'pago_paciente', descripcion: 'Pago de Juan López - Ortodoncia', monto: 4000, metodo: 'tarjeta', fecha: '2026-06-28', nota: '', usuario: 'admin' },
+                { id: 3, tipo: 'egreso', categoria: 'pago_proveedor', descripcion: 'Proveedor Fixum Direct - Implantes', monto: 8000, metodo: 'tarjeta', fecha: '2026-06-27', nota: 'Pedido mensual', usuario: 'admin' },
+                { id: 4, tipo: 'egreso', categoria: 'gasto_operativo', descripcion: 'Compra de guantes e insumos', monto: 1200, metodo: 'efectivo', fecha: '2026-06-27', nota: '', usuario: 'admin' },
+                { id: 5, tipo: 'egreso', categoria: 'honorarios', descripcion: 'Honorarios Dr. Alberto Rivera', monto: 5250, metodo: 'tarjeta', fecha: '2026-06-25', nota: '', usuario: 'admin' }
             ];
 
             updateAlertCount();
@@ -2499,6 +2687,268 @@
                     <td><span class="badge badge-success">${f.estado}</span></td>
                 </tr>`;
                 tbody.innerHTML += row;
+            });
+        }
+
+        // ============ CONTROL DE CAJA ============
+        const CAJA_CATEGORIAS = {
+            ingreso: [
+                { value: 'pago_paciente', label: 'Pago de Paciente' },
+                { value: 'otro_ingreso', label: 'Otro Ingreso' }
+            ],
+            egreso: [
+                { value: 'pago_proveedor', label: 'Pago a Proveedor' },
+                { value: 'gasto_operativo', label: 'Gasto Operativo' },
+                { value: 'honorarios', label: 'Honorarios / Nómina' },
+                { value: 'otro_egreso', label: 'Otro Egreso' }
+            ]
+        };
+
+        const CAJA_CATEGORIA_LABELS = {
+            pago_paciente: 'Pago de Paciente',
+            otro_ingreso: 'Otro Ingreso',
+            pago_proveedor: 'Pago a Proveedor',
+            gasto_operativo: 'Gasto Operativo',
+            honorarios: 'Honorarios / Nómina',
+            otro_egreso: 'Otro Egreso'
+        };
+
+        function updateCajaCategorias() {
+            const tipo = document.getElementById('cajaTipo').value;
+            const select = document.getElementById('cajaCategoria');
+            select.innerHTML = '';
+            CAJA_CATEGORIAS[tipo].forEach(cat => {
+                select.innerHTML += `<option value="${cat.value}">${cat.label}</option>`;
+            });
+        }
+
+        function openCajaForm() {
+            clearCajaForm();
+            document.getElementById('cajaModal').removeAttribute('data-edit-id');
+            updateCajaCategorias();
+            document.getElementById('cajaFecha').valueAsDate = new Date();
+            document.getElementById('cajaModal').classList.add('active');
+        }
+
+        function closeCajaModal() {
+            document.getElementById('cajaModal').classList.remove('active');
+            clearCajaForm();
+        }
+
+        function clearCajaForm() {
+            document.getElementById('cajaTipo').value = 'ingreso';
+            document.getElementById('cajaDescripcion').value = '';
+            document.getElementById('cajaMonto').value = '';
+            document.getElementById('cajaMetodo').value = 'efectivo';
+            document.getElementById('cajaFecha').value = '';
+            document.getElementById('cajaNota').value = '';
+        }
+
+        function saveCaja() {
+            const editId = document.getElementById('cajaModal').getAttribute('data-edit-id');
+            const tipo = document.getElementById('cajaTipo').value;
+            const categoria = document.getElementById('cajaCategoria').value;
+            const descripcion = document.getElementById('cajaDescripcion').value;
+            const monto = parseFloat(document.getElementById('cajaMonto').value) || 0;
+            const metodo = document.getElementById('cajaMetodo').value;
+            const fecha = document.getElementById('cajaFecha').value;
+            const nota = document.getElementById('cajaNota').value;
+
+            if (!descripcion || monto <= 0 || !fecha) {
+                alert('❌ Completa descripción, monto y fecha');
+                return;
+            }
+
+            if (editId) {
+                const mov = appState.caja.find(c => c.id == editId);
+                if (mov) {
+                    mov.tipo = tipo;
+                    mov.categoria = categoria;
+                    mov.descripcion = descripcion;
+                    mov.monto = monto;
+                    mov.metodo = metodo;
+                    mov.fecha = fecha;
+                    mov.nota = nota;
+                    alert('✅ Movimiento actualizado exitosamente');
+                }
+            } else {
+                const mov = {
+                    id: appState.caja.length + 1,
+                    tipo: tipo,
+                    categoria: categoria,
+                    descripcion: descripcion,
+                    monto: monto,
+                    metodo: metodo,
+                    fecha: fecha,
+                    nota: nota,
+                    usuario: appState.currentUser
+                };
+                appState.caja.push(mov);
+                alert('✅ Movimiento registrado exitosamente');
+            }
+
+            document.getElementById('cajaModal').removeAttribute('data-edit-id');
+            closeCajaModal();
+            renderCaja();
+        }
+
+        function editCaja(id) {
+            const mov = appState.caja.find(c => c.id === id);
+            if (!mov) return;
+
+            document.getElementById('cajaTipo').value = mov.tipo;
+            updateCajaCategorias();
+            document.getElementById('cajaCategoria').value = mov.categoria;
+            document.getElementById('cajaDescripcion').value = mov.descripcion;
+            document.getElementById('cajaMonto').value = mov.monto;
+            document.getElementById('cajaMetodo').value = mov.metodo;
+            document.getElementById('cajaFecha').value = mov.fecha;
+            document.getElementById('cajaNota').value = mov.nota;
+
+            document.getElementById('cajaModal').setAttribute('data-edit-id', id);
+            document.getElementById('cajaModal').classList.add('active');
+        }
+
+        function deleteCaja(id) {
+            if (confirm('¿Eliminar este movimiento de caja?')) {
+                appState.caja = appState.caja.filter(c => c.id !== id);
+                renderCaja();
+            }
+        }
+
+        function renderCaja() {
+            // Totales por método y tipo
+            const ingresoEfectivo = appState.caja.filter(c => c.tipo === 'ingreso' && c.metodo === 'efectivo').reduce((sum, c) => sum + c.monto, 0);
+            const ingresoTarjeta = appState.caja.filter(c => c.tipo === 'ingreso' && c.metodo === 'tarjeta').reduce((sum, c) => sum + c.monto, 0);
+            const egresoEfectivo = appState.caja.filter(c => c.tipo === 'egreso' && c.metodo === 'efectivo').reduce((sum, c) => sum + c.monto, 0);
+            const egresoTarjeta = appState.caja.filter(c => c.tipo === 'egreso' && c.metodo === 'tarjeta').reduce((sum, c) => sum + c.monto, 0);
+
+            const balanceEfectivo = ingresoEfectivo - egresoEfectivo;
+            const balanceTarjeta = ingresoTarjeta - egresoTarjeta;
+            const balanceTotal = balanceEfectivo + balanceTarjeta;
+
+            document.getElementById('cajaIngresoEfectivo').textContent = '$' + ingresoEfectivo.toLocaleString('es-MX');
+            document.getElementById('cajaIngresoTarjeta').textContent = '$' + ingresoTarjeta.toLocaleString('es-MX');
+            document.getElementById('cajaEgresoEfectivo').textContent = '$' + egresoEfectivo.toLocaleString('es-MX');
+            document.getElementById('cajaEgresoTarjeta').textContent = '$' + egresoTarjeta.toLocaleString('es-MX');
+            document.getElementById('cajaBalanceEfectivo').textContent = '$' + balanceEfectivo.toLocaleString('es-MX');
+            document.getElementById('cajaBalanceTarjeta').textContent = '$' + balanceTarjeta.toLocaleString('es-MX');
+            document.getElementById('cajaBalanceTotal').textContent = '$' + balanceTotal.toLocaleString('es-MX');
+
+            // Tabla completa (más recientes primero)
+            const tbody = document.getElementById('cajaTableBody');
+            tbody.innerHTML = '';
+            const movimientosOrdenados = appState.caja.slice().reverse();
+
+            if (movimientosOrdenados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-light);">Sin movimientos registrados</td></tr>';
+            } else {
+                movimientosOrdenados.forEach(c => {
+                    const tipoBadge = c.tipo === 'ingreso'
+                        ? '<span class="badge badge-success">Ingreso</span>'
+                        : '<span class="badge badge-danger">Egreso</span>';
+                    const metodoBadge = c.metodo === 'efectivo'
+                        ? '<span class="badge badge-primary">💵 Efectivo</span>'
+                        : '<span class="badge badge-warning">💳 Tarjeta</span>';
+                    const montoColor = c.tipo === 'ingreso' ? 'var(--success)' : 'var(--danger)';
+                    const montoSigno = c.tipo === 'ingreso' ? '+' : '-';
+
+                    const row = `<tr>
+                        <td>${c.fecha}</td>
+                        <td>${tipoBadge}</td>
+                        <td>${CAJA_CATEGORIA_LABELS[c.categoria] || c.categoria}</td>
+                        <td>${c.descripcion}</td>
+                        <td>${metodoBadge}</td>
+                        <td style="font-weight: 600; color: ${montoColor};">${montoSigno}$${c.monto.toLocaleString('es-MX')}</td>
+                        <td>
+                            <button class="btn btn-small btn-primary" onclick="editCaja(${c.id})">Editar</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteCaja(${c.id})">Eliminar</button>
+                        </td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            }
+
+            // Tabla de ingresos
+            const ingresosBody = document.getElementById('cajaIngresosTableBody');
+            const ingresos = appState.caja.filter(c => c.tipo === 'ingreso').slice().reverse();
+            ingresosBody.innerHTML = '';
+            if (ingresos.length === 0) {
+                ingresosBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-light);">Sin ingresos registrados</td></tr>';
+            } else {
+                ingresos.forEach(c => {
+                    const metodoBadge = c.metodo === 'efectivo'
+                        ? '<span class="badge badge-primary">💵 Efectivo</span>'
+                        : '<span class="badge badge-warning">💳 Tarjeta</span>';
+                    const row = `<tr>
+                        <td>${c.fecha}</td>
+                        <td>${CAJA_CATEGORIA_LABELS[c.categoria] || c.categoria}</td>
+                        <td>${c.descripcion}</td>
+                        <td>${metodoBadge}</td>
+                        <td style="font-weight: 600; color: var(--success);">+$${c.monto.toLocaleString('es-MX')}</td>
+                    </tr>`;
+                    ingresosBody.innerHTML += row;
+                });
+            }
+
+            // Tabla de egresos
+            const egresosBody = document.getElementById('cajaEgresosTableBody');
+            const egresos = appState.caja.filter(c => c.tipo === 'egreso').slice().reverse();
+            egresosBody.innerHTML = '';
+            if (egresos.length === 0) {
+                egresosBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-light);">Sin egresos registrados</td></tr>';
+            } else {
+                egresos.forEach(c => {
+                    const metodoBadge = c.metodo === 'efectivo'
+                        ? '<span class="badge badge-primary">💵 Efectivo</span>'
+                        : '<span class="badge badge-warning">💳 Tarjeta</span>';
+                    const row = `<tr>
+                        <td>${c.fecha}</td>
+                        <td>${CAJA_CATEGORIA_LABELS[c.categoria] || c.categoria}</td>
+                        <td>${c.descripcion}</td>
+                        <td>${metodoBadge}</td>
+                        <td style="font-weight: 600; color: var(--danger);">-$${c.monto.toLocaleString('es-MX')}</td>
+                    </tr>`;
+                    egresosBody.innerHTML += row;
+                });
+            }
+
+            // Gráfico resumen por método
+            createCajaChart(ingresoEfectivo, ingresoTarjeta, egresoEfectivo, egresoTarjeta);
+        }
+
+        function createCajaChart(ingresoEfectivo, ingresoTarjeta, egresoEfectivo, egresoTarjeta) {
+            const ctx = document.getElementById('chartCajaResumen');
+            if (!ctx) return;
+
+            if (window.chartCajaResumenInstance) {
+                window.chartCajaResumenInstance.destroy();
+            }
+
+            window.chartCajaResumenInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Efectivo', 'Tarjeta'],
+                    datasets: [
+                        {
+                            label: 'Ingresos',
+                            data: [ingresoEfectivo, ingresoTarjeta],
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Egresos',
+                            data: [egresoEfectivo, egresoTarjeta],
+                            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
             });
         }
 
