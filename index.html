@@ -827,7 +827,7 @@
                 <label>Rol</label>
                 <select id="loginRole">
                     <option value="admin">Administrador</option>
-                    <option value="user">Usuario Regular</option>
+                    <option value="operador">Operador (Ventas)</option>
                 </select>
             </div>
             <button class="login-btn" onclick="handleLogin()">Iniciar Sesión</button>
@@ -1613,105 +1613,189 @@
 
                 <!-- STOCK IMPLANTES FIXUM -->
                 <div id="implantesModule" class="module-content hidden">
-                    <div class="quick-actions">
-                        <button class="btn btn-primary" onclick="openImplanteForm()">➕ Agregar Implante</button>
-                        <button class="btn btn-secondary" onclick="exportImplantesPDF()">📥 Descargar PDF</button>
-                    </div>
-
-                    <div class="tabs-container">
-                        <button class="tab-btn active" onclick="switchTab(this, 'implantes-todos')">Todos</button>
-                        <button class="tab-btn" onclick="switchTab(this, 'implantes-bajo')">Stock Bajo</button>
-                        <button class="tab-btn" onclick="switchTab(this, 'implantes-auditoria')">Auditoría</button>
-                    </div>
-
-                    <div id="implantes-todos" class="tab-content active" style="margin-top: 20px;">
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Modelo</th>
-                                        <th>Largo</th>
-                                        <th>Fabricante</th>
-                                        <th>Stock</th>
-                                        <th>Mínimo</th>
-                                        <th>Costo</th>
-                                        <th>Venta</th>
-                                        <th>Estado</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="implantesTableBody">
-                                    <tr>
-                                        <td colspan="9" style="text-align: center; color: var(--text-light);">Sin implantes registrados</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    
+                    <!-- VISTA ADMINISTRADOR -->
+                    <div id="implantesAdminView" style="display: none;">
+                        <div class="quick-actions">
+                            <button class="btn btn-primary" onclick="openImplanteForm()">➕ Agregar Implante</button>
+                            <button class="btn btn-secondary" onclick="exportImplantesPDF()">📥 Descargar PDF</button>
                         </div>
-                    </div>
 
-                    <div id="implantes-bajo" class="tab-content" style="margin-top: 20px;">
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Modelo</th>
-                                        <th>Stock Actual</th>
-                                        <th>Stock Mínimo</th>
-                                        <th>Faltante</th>
-                                        <th>Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="bajoImplantesTableBody">
-                                    <tr>
-                                        <td colspan="5" style="text-align: center; color: var(--text-light);">Todos los implantes tienen stock suficiente</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="tabs-container">
+                            <button class="tab-btn active" onclick="switchTab(this, 'implantes-todos')">Todos</button>
+                            <button class="tab-btn" onclick="switchTab(this, 'implantes-bajo')">Stock Bajo</button>
+                            <button class="tab-btn" onclick="switchTab(this, 'implantes-auditoria')">Auditoría</button>
                         </div>
-                    </div>
 
-                    <div id="implantes-auditoria" class="tab-content" style="margin-top: 20px;">
-                        <div class="form-card">
-                            <h3 style="margin-bottom: 15px; color: var(--text-dark);">📋 Filtros</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Tipo de Movimiento</label>
-                                    <select id="auditFiltroTipo" onchange="renderAuditoria()">
-                                        <option value="">Todos</option>
-                                        <option value="ALTA">ALTA</option>
-                                        <option value="BAJA">BAJA</option>
-                                        <option value="MODIFICACIÓN">MODIFICACIÓN</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Desde</label>
-                                    <input type="date" id="auditFiltroDesde" onchange="renderAuditoria()">
-                                </div>
-                                <div class="form-group">
-                                    <label>Hasta</label>
-                                    <input type="date" id="auditFiltroHasta" onchange="renderAuditoria()">
-                                </div>
+                        <div id="implantes-todos" class="tab-content active" style="margin-top: 20px;">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Modelo</th>
+                                            <th>Largo</th>
+                                            <th>Fabricante</th>
+                                            <th>Stock</th>
+                                            <th>Mínimo</th>
+                                            <th>Costo</th>
+                                            <th>Venta</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="implantesTableBody">
+                                        <tr>
+                                            <td colspan="9" style="text-align: center; color: var(--text-light);">Sin implantes registrados</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 
-                        <div class="table-container" style="margin-top: 20px;">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Fecha / Hora</th>
-                                        <th>Tipo</th>
-                                        <th>Modelo Implante</th>
-                                        <th>Detalles del Cambio</th>
-                                        <th>Usuario</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="auditImplantesTableBody">
-                                    <tr>
-                                        <td colspan="6" style="text-align: center; color: var(--text-light);">Sin cambios registrados</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div id="implantes-bajo" class="tab-content" style="margin-top: 20px;">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Modelo</th>
+                                            <th>Stock Actual</th>
+                                            <th>Stock Mínimo</th>
+                                            <th>Faltante</th>
+                                            <th>Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bajoImplantesTableBody">
+                                        <tr>
+                                            <td colspan="5" style="text-align: center; color: var(--text-light);">Todos los implantes tienen stock suficiente</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="implantes-auditoria" class="tab-content" style="margin-top: 20px;">
+                            <div class="form-card">
+                                <h3 style="margin-bottom: 15px; color: var(--text-dark);">📋 Filtros</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Tipo de Movimiento</label>
+                                        <select id="auditFiltroTipo" onchange="renderAuditoria()">
+                                            <option value="">Todos</option>
+                                            <option value="ALTA">ALTA</option>
+                                            <option value="BAJA POR VENTA">BAJA POR VENTA</option>
+                                            <option value="MODIFICACIÓN">MODIFICACIÓN</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Desde</label>
+                                        <input type="date" id="auditFiltroDesde" onchange="renderAuditoria()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Hasta</label>
+                                        <input type="date" id="auditFiltroHasta" onchange="renderAuditoria()">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="table-container" style="margin-top: 20px;">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha / Hora</th>
+                                            <th>Tipo</th>
+                                            <th>Modelo Implante</th>
+                                            <th>Detalles del Cambio</th>
+                                            <th>Usuario</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="auditImplantesTableBody">
+                                        <tr>
+                                            <td colspan="6" style="text-align: center; color: var(--text-light);">Sin cambios registrados</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VISTA OPERADOR (SOLO VENTAS) -->
+                    <div id="implantesOperadorView" style="display: none;">
+                        <div style="background: rgba(40, 100, 240, 0.1); border-left: 4px solid var(--primary); padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                            <strong style="color: var(--primary);">👤 Modo Operador - Registro de Ventas</strong><br>
+                            <span style="font-size: 12px; color: var(--text-light);">Solo puedes registrar bajas de stock por remito de venta con datos del cliente</span>
+                        </div>
+
+                        <div class="quick-actions">
+                            <button class="btn btn-primary btn-lg" onclick="openRemitoForm()" style="padding: 12px 24px; font-size: 16px;">📄 Crear Remito de Venta</button>
+                        </div>
+
+                        <div class="tabs-container">
+                            <button class="tab-btn active" onclick="switchTab(this, 'remitos-lista')">Remitos Registrados</button>
+                            <button class="tab-btn" onclick="switchTab(this, 'remitos-historial')">Histórico de Ventas</button>
+                        </div>
+
+                        <div id="remitos-lista" class="tab-content active" style="margin-top: 20px;">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Remito #</th>
+                                            <th>Fecha</th>
+                                            <th>Cliente</th>
+                                            <th>Teléfono</th>
+                                            <th>Implante</th>
+                                            <th>Cantidad</th>
+                                            <th>Total</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="remitosTableBody">
+                                        <tr>
+                                            <td colspan="8" style="text-align: center; color: var(--text-light);">Sin remitos registrados</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="remitos-historial" class="tab-content" style="margin-top: 20px;">
+                            <div class="stat-row">
+                                <div class="stat-item">
+                                    <div class="stat-label">Total Vendido (Hoy)</div>
+                                    <div class="stat-value" id="remitosVentaHoy">$0</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-label">Total Vendido (Semana)</div>
+                                    <div class="stat-value" id="remitosVentaSemana">$0</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-label">Implantes Vendidos (Total)</div>
+                                    <div class="stat-value" id="remitosImplantesVendidos">0</div>
+                                </div>
+                            </div>
+
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Remito #</th>
+                                            <th>Fecha</th>
+                                            <th>Cliente</th>
+                                            <th>Implante</th>
+                                            <th>Cant.</th>
+                                            <th>P. Unit.</th>
+                                            <th>Subtotal</th>
+                                            <th>Operador</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="remitosHistorialTableBody">
+                                        <tr>
+                                            <td colspan="8" style="text-align: center; color: var(--text-light);">Sin ventas registradas</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2089,6 +2173,94 @@
         </div>
     </div>
 
+    <div id="remitoModal" class="modal" data-edit-id="">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>📄 Crear Remito de Venta</h3>
+                <button class="modal-close" onclick="closeRemitoModal()">×</button>
+            </div>
+
+            <div style="background: #f0f9ff; padding: 12px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid var(--primary);">
+                <strong style="color: var(--primary);">Datos del Cliente</strong>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nombre del Cliente *</label>
+                    <input type="text" id="remitoCliente" placeholder="Ej: María García">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono *</label>
+                    <input type="tel" id="remitoTelefono" placeholder="+55 123456789">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="remitoEmail" placeholder="cliente@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Fecha de Venta *</label>
+                    <input type="date" id="remitoFecha">
+                </div>
+            </div>
+
+            <div style="background: #fef3c7; padding: 12px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid var(--warning); margin-top: 15px;">
+                <strong style="color: var(--warning);">Datos del Implante a Vender</strong>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Implante a Vender *</label>
+                    <select id="remitoImplante" onchange="updateRemitoImplanteData()">
+                        <option value="">Selecciona un implante</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Stock Disponible</label>
+                    <input type="number" id="remitoStockDisponible" readonly style="background: #f0f0f0; font-weight: 600;">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Cantidad a Vender *</label>
+                    <input type="number" id="remitoQuantidad" placeholder="1" min="1" onchange="calculateRemitoTotal()">
+                </div>
+                <div class="form-group">
+                    <label>Precio Unitario *</label>
+                    <input type="number" id="remitoPrecioUnitario" placeholder="0.00" step="0.01" min="0" onchange="calculateRemitoTotal()">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Método de Pago *</label>
+                    <select id="remitoMetodoPago">
+                        <option value="efectivo">💵 Efectivo</option>
+                        <option value="tarjeta">💳 Tarjeta</option>
+                        <option value="transferencia">🏦 Transferencia</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Total Venta</label>
+                    <input type="number" id="remitoTotal" readonly style="background: #f0f0f0; font-weight: 600; color: var(--success); font-size: 16px;">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Observaciones</label>
+                <textarea id="remitoObservaciones" placeholder="Notas adicionales..."></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeRemitoModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveRemito()">✅ Generar Remito y Baja de Stock</button>
+            </div>
+        </div>
+    </div>
+
     <div id="implanteModal" class="modal" data-edit-id="">
         <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
             <div class="modal-header">
@@ -2287,6 +2459,7 @@
             stock: [],
             implantes: [],
             auditoria_implantes: [],
+            remitos: [],
             caja: [],
             citas: [],
             movimientosStock: [],
@@ -2366,8 +2539,7 @@
                 renderMovimientos();
                 initStockForm();
             } else if (module === 'implantes') {
-                renderImplantes();
-                renderAuditoria();
+                showImplantesView();
             } else if (module === 'citas') {
                 renderCitas();
             } else if (module === 'tratamientos') {
@@ -3901,11 +4073,16 @@
             }
 
             registros.forEach(r => {
-                const tipoBadge = r.tipo === 'ALTA'
-                    ? '<span class="badge badge-success">✅ ALTA</span>'
-                    : r.tipo === 'BAJA'
-                    ? '<span class="badge badge-danger">❌ BAJA</span>'
-                    : '<span class="badge badge-primary">✏️ MODIFICACIÓN</span>';
+                let tipoBadge;
+                if (r.tipo === 'ALTA') {
+                    tipoBadge = '<span class="badge badge-success">✅ ALTA</span>';
+                } else if (r.tipo === 'BAJA POR VENTA') {
+                    tipoBadge = '<span class="badge badge-warning">🛒 BAJA POR VENTA</span>';
+                } else if (r.tipo === 'BAJA') {
+                    tipoBadge = '<span class="badge badge-danger">❌ BAJA</span>';
+                } else {
+                    tipoBadge = '<span class="badge badge-primary">✏️ MODIFICACIÓN</span>';
+                }
 
                 const row = `<tr>
                     <td><strong>${r.fecha}</strong><br>${r.hora}</td>
@@ -3919,6 +4096,341 @@
                 </tr>`;
                 tbody.innerHTML += row;
             });
+        }
+
+        // ============ REMITO DE VENTA (OPERADOR) ============
+        function showImplantesView() {
+            const adminView = document.getElementById('implantesAdminView');
+            const operadorView = document.getElementById('implantesOperadorView');
+
+            if (appState.userRole === 'admin') {
+                adminView.style.display = 'block';
+                operadorView.style.display = 'none';
+                renderImplantes();
+                renderAuditoria();
+            } else if (appState.userRole === 'operador') {
+                adminView.style.display = 'none';
+                operadorView.style.display = 'block';
+                renderRemitos();
+            }
+        }
+
+        function openRemitoForm() {
+            clearRemitoForm();
+            document.getElementById('remitoFecha').valueAsDate = new Date();
+            
+            const select = document.getElementById('remitoImplante');
+            select.innerHTML = '<option value="">Selecciona un implante</option>';
+            appState.implantes.forEach(imp => {
+                select.innerHTML += `<option value="${imp.id}">${imp.nombre} (Stock: ${imp.cantidad})</option>`;
+            });
+            
+            document.getElementById('remitoModal').classList.add('active');
+        }
+
+        function closeRemitoModal() {
+            document.getElementById('remitoModal').classList.remove('active');
+            clearRemitoForm();
+        }
+
+        function clearRemitoForm() {
+            document.getElementById('remitoCliente').value = '';
+            document.getElementById('remitoTelefono').value = '';
+            document.getElementById('remitoEmail').value = '';
+            document.getElementById('remitoFecha').value = '';
+            document.getElementById('remitoImplante').value = '';
+            document.getElementById('remitoQuantidad').value = '';
+            document.getElementById('remitoPrecioUnitario').value = '';
+            document.getElementById('remitoMetodoPago').value = 'efectivo';
+            document.getElementById('remitoObservaciones').value = '';
+            document.getElementById('remitoStockDisponible').value = '';
+            document.getElementById('remitoTotal').value = '';
+        }
+
+        function updateRemitoImplanteData() {
+            const implanteId = document.getElementById('remitoImplante').value;
+            if (!implanteId) {
+                document.getElementById('remitoStockDisponible').value = '';
+                document.getElementById('remitoPrecioUnitario').value = '';
+                return;
+            }
+
+            const implante = appState.implantes.find(i => i.id == implanteId);
+            if (implante) {
+                document.getElementById('remitoStockDisponible').value = implante.cantidad;
+                document.getElementById('remitoPrecioUnitario').value = implante.precio;
+                calculateRemitoTotal();
+            }
+        }
+
+        function calculateRemitoTotal() {
+            const cantidad = parseFloat(document.getElementById('remitoQuantidad').value) || 0;
+            const precio = parseFloat(document.getElementById('remitoPrecioUnitario').value) || 0;
+            const total = cantidad * precio;
+            document.getElementById('remitoTotal').value = total.toLocaleString('es-MX');
+        }
+
+        function saveRemito() {
+            const cliente = document.getElementById('remitoCliente').value;
+            const telefono = document.getElementById('remitoTelefono').value;
+            const implanteId = document.getElementById('remitoImplante').value;
+            const cantidad = parseInt(document.getElementById('remitoQuantidad').value) || 0;
+            const precioUnitario = parseFloat(document.getElementById('remitoPrecioUnitario').value) || 0;
+            const fecha = document.getElementById('remitoFecha').value;
+
+            if (!cliente || !telefono || !implanteId || cantidad <= 0 || !fecha) {
+                alert('❌ Completa todos los campos obligatorios');
+                return;
+            }
+
+            const implante = appState.implantes.find(i => i.id == implanteId);
+            if (!implante) {
+                alert('❌ Implante no encontrado');
+                return;
+            }
+
+            if (cantidad > implante.cantidad) {
+                alert('❌ No hay stock suficiente. Disponible: ' + implante.cantidad);
+                return;
+            }
+
+            const email = document.getElementById('remitoEmail').value;
+            const metodo = document.getElementById('remitoMetodoPago').value;
+            const observaciones = document.getElementById('remitoObservaciones').value;
+            const total = cantidad * precioUnitario;
+
+            const now = new Date();
+            const timestamp = now.toISOString();
+            const hora = timestamp.split('T')[1].slice(0, 5);
+
+            // Crear remito
+            const remito = {
+                id: appState.remitos.length + 1,
+                numero: 'REM-' + new Date().getFullYear() + '-' + String(appState.remitos.length + 1).padStart(4, '0'),
+                cliente: cliente,
+                telefono: telefono,
+                email: email,
+                fecha: fecha,
+                hora: hora,
+                implante_id: implante.id,
+                implante_nombre: implante.nombre,
+                implante_largo: implante.largo,
+                cantidad: cantidad,
+                precio_unitario: precioUnitario,
+                total: total,
+                metodo: metodo,
+                observaciones: observaciones,
+                operador: appState.currentUser,
+                timestamp: timestamp
+            };
+
+            appState.remitos.push(remito);
+
+            // Actualizar stock del implante
+            implante.cantidad -= cantidad;
+
+            // Registrar en auditoría
+            const audit = {
+                id: appState.auditoria_implantes.length + 1,
+                tipo: 'BAJA POR VENTA',
+                implante_id: implante.id,
+                implante_nombre: implante.nombre,
+                fecha: fecha,
+                hora: hora,
+                usuario: appState.currentUser,
+                detalles: `Remito: ${remito.numero} | Cliente: ${cliente} | Cantidad: ${cantidad} | Total: $${total.toLocaleString('es-MX')}`,
+                timestamp: timestamp
+            };
+            appState.auditoria_implantes.push(audit);
+
+            // Generar comprobante
+            generateRemitoComprobante(audit, implante, remito);
+
+            // Limpiar y cerrar
+            closeRemitoModal();
+            renderRemitos();
+
+            alert('✅ Remito generado exitosamente\n\nRemito #: ' + remito.numero + '\n📄 Comprobante guardado');
+        }
+
+        function generateRemitoComprobante(audit, implante, remito) {
+            window.remitoData = { audit, implante, remito };
+        }
+
+        function renderRemitos() {
+            const remitosOrdenados = appState.remitos.slice().reverse();
+
+            // Tabla de remitos
+            const tbody = document.getElementById('remitosTableBody');
+            tbody.innerHTML = '';
+
+            if (remitosOrdenados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-light);">Sin remitos registrados</td></tr>';
+            } else {
+                remitosOrdenados.forEach(r => {
+                    const row = `<tr>
+                        <td><strong>${r.numero}</strong></td>
+                        <td>${r.fecha}</td>
+                        <td><strong>${r.cliente}</strong></td>
+                        <td>${r.telefono}</td>
+                        <td>${r.implante_nombre}</td>
+                        <td style="text-align: center;">${r.cantidad}</td>
+                        <td style="font-weight: 600; color: var(--success);">$${r.total.toLocaleString('es-MX')}</td>
+                        <td>
+                            <button class="btn btn-small btn-primary" onclick="downloadRemitoPDF(${r.id})">📥 PDF</button>
+                        </td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            }
+
+            // Tabla histórico
+            const historialBody = document.getElementById('remitosHistorialTableBody');
+            historialBody.innerHTML = '';
+
+            if (remitosOrdenados.length === 0) {
+                historialBody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-light);">Sin ventas registradas</td></tr>';
+            } else {
+                remitosOrdenados.forEach(r => {
+                    const row = `<tr>
+                        <td>${r.numero}</td>
+                        <td>${r.fecha}</td>
+                        <td>${r.cliente}</td>
+                        <td>${r.implante_nombre}</td>
+                        <td>${r.cantidad}</td>
+                        <td>$${r.precio_unitario.toLocaleString('es-MX')}</td>
+                        <td style="font-weight: 600;">$${r.total.toLocaleString('es-MX')}</td>
+                        <td>${r.operador}</td>
+                    </tr>`;
+                    historialBody.innerHTML += row;
+                });
+            }
+
+            // KPIs
+            const today = new Date().toISOString().split('T')[0];
+            const ventaHoy = appState.remitos.filter(r => r.fecha === today).reduce((sum, r) => sum + r.total, 0);
+            const semanaPasada = new Date();
+            semanaPasada.setDate(semanaPasada.getDate() - 7);
+            const ventaSemana = appState.remitos.filter(r => new Date(r.fecha) >= semanaPasada).reduce((sum, r) => sum + r.total, 0);
+            const totalImplantes = appState.remitos.reduce((sum, r) => sum + r.cantidad, 0);
+
+            document.getElementById('remitosVentaHoy').textContent = '$' + ventaHoy.toLocaleString('es-MX');
+            document.getElementById('remitosVentaSemana').textContent = '$' + ventaSemana.toLocaleString('es-MX');
+            document.getElementById('remitosImplantesVendidos').textContent = totalImplantes;
+        }
+
+        function downloadRemitoPDF(remitoId) {
+            const remito = appState.remitos.find(r => r.id === remitoId);
+            if (!remito) return;
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const marginLeft = 15;
+            const marginRight = 15;
+
+            // Header
+            doc.setFillColor(40, 100, 240);
+            doc.rect(0, 0, pageWidth, 25, 'F');
+
+            doc.setFontSize(16);
+            doc.setTextColor(255, 255, 255);
+            doc.setFont(undefined, 'bold');
+            doc.text('FIXUM CLINIC', marginLeft, 10);
+            doc.setFontSize(9);
+            doc.text('Remito de Venta', marginLeft, 18);
+
+            doc.setFontSize(11);
+            doc.setTextColor(255, 255, 255);
+            doc.setFont(undefined, 'bold');
+            doc.text('REMITO DE VENTA', pageWidth / 2, 22, { align: 'center' });
+
+            let yPos = 35;
+
+            doc.setFontSize(9);
+            doc.setTextColor(30, 30, 30);
+            doc.setFont(undefined, 'bold');
+            doc.text('N° ' + remito.numero, marginLeft, yPos);
+            doc.setFont(undefined, 'normal');
+            doc.text('Fecha: ' + remito.fecha + ' ' + remito.hora, pageWidth - marginRight - 40, yPos);
+            yPos += 10;
+
+            doc.setFont(undefined, 'bold');
+            doc.text('DATOS DEL CLIENTE', marginLeft, yPos);
+            yPos += 6;
+
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(8);
+            doc.text('Nombre: ' + remito.cliente, marginLeft, yPos);
+            doc.text('Teléfono: ' + remito.telefono, pageWidth - marginRight - 50, yPos);
+            yPos += 5;
+            if (remito.email) {
+                doc.text('Email: ' + remito.email, marginLeft, yPos);
+                yPos += 5;
+            }
+
+            yPos += 5;
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(9);
+            doc.text('DETALLE DE IMPLANTES', marginLeft, yPos);
+            yPos += 8;
+
+            // Tabla de items
+            doc.setFontSize(8);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(255, 255, 255);
+            doc.setFillColor(40, 100, 240);
+            doc.rect(marginLeft, yPos - 4, pageWidth - marginLeft - marginRight, 5, 'F');
+
+            doc.text('Descripción', marginLeft + 2, yPos);
+            doc.text('Cantidad', marginLeft + 80, yPos);
+            doc.text('P. Unit.', marginLeft + 100, yPos);
+            doc.text('Subtotal', marginLeft + 130, yPos, { align: 'right' });
+
+            yPos += 8;
+            doc.setTextColor(30, 30, 30);
+            doc.setFont(undefined, 'normal');
+
+            const descrip = remito.implante_nombre + ' (' + remito.implante_largo + 'mm)';
+            doc.text(descrip, marginLeft + 2, yPos);
+            doc.text(remito.cantidad.toString(), marginLeft + 80, yPos);
+            doc.text('$' + remito.precio_unitario.toLocaleString('es-MX'), marginLeft + 100, yPos);
+            doc.text('$' + remito.total.toLocaleString('es-MX'), pageWidth - marginRight - 5, yPos, { align: 'right' });
+
+            yPos += 10;
+            doc.setDrawColor(150, 150, 150);
+            doc.line(marginLeft, yPos, pageWidth - marginRight, yPos);
+
+            yPos += 5;
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(10);
+            doc.setTextColor(16, 185, 129);
+            doc.text('TOTAL', marginLeft, yPos);
+            doc.text('$' + remito.total.toLocaleString('es-MX'), pageWidth - marginRight - 5, yPos, { align: 'right' });
+
+            yPos += 10;
+            doc.setFontSize(8);
+            doc.setTextColor(30, 30, 30);
+            doc.setFont(undefined, 'normal');
+            doc.text('Método de Pago: ' + (remito.metodo === 'efectivo' ? '💵 Efectivo' : remito.metodo === 'tarjeta' ? '💳 Tarjeta' : '🏦 Transferencia'), marginLeft, yPos);
+
+            if (remito.observaciones) {
+                yPos += 6;
+                doc.text('Observaciones: ' + remito.observaciones, marginLeft, yPos);
+            }
+
+            yPos = pageHeight - 20;
+            doc.setFontSize(7);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Operador: ' + remito.operador, marginLeft, yPos);
+            doc.text('Documento generado: ' + remito.timestamp.split('T')[0], pageWidth - marginRight - 60, yPos);
+
+            const filename = `Remito_${remito.numero.replace(/\//g, '_')}_${remito.cliente.replace(/\s+/g, '_')}.pdf`;
+            doc.save(filename);
+
+            alert('✅ PDF descargado: ' + filename);
         }
 
         function generateComprobanteImplante(audit, implante) {
