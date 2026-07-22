@@ -2248,7 +2248,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Cantidad a Vender *</label>
-                    <input type="number" id="remitoQuantidad" placeholder="1" min="1" oninput="calculateRemitoTotal()">
+                    <input type="number" id="remitoQuantidad" placeholder="1" min="1" step="1" oninput="calculateRemitoTotal()" onchange="calculateRemitoTotal()">
                 </div>
                 <div class="form-group">
                     <label>Precio Unitario (automático)</label>
@@ -2479,14 +2479,18 @@
             facturas: [],
             odontos: [],
             stock: [],
-            implantes: [],
-            auditoria_implantes: [],
-            remitos: [],
             caja: [],
             citas: [],
             movimientosStock: [],
             tratamientos: [],
             tratamientosRealizados: []
+        };
+
+        // ============ IMPLANTS STATE - MÓDULO COMPLETAMENTE INDEPENDIENTE ============
+        const implantsState = {
+            implantes: [],
+            remitos: [],
+            auditoria_implantes: []
         };
 
         // ============ AUTHENTICATION ============
@@ -2603,7 +2607,7 @@
                 { id: 4, nombre: 'Guantes Quirúrgicos', categoria: 'insumos', actual: 8, minimo: 50, valorUnit: 120, unidad: 'caja' }
             ];
 
-            appState.implantes = [
+            implantsState.implantes = [
                 { id: 1, nombre: 'Implante Standard 3.5x10', largo: 10, fabricante: 'Fixum', cantidad: 12, stockMinimo: 5, costo: 2800, precio: 15000, proveedor: 'Fixum Direct', pais: 'Suiza', garantia: 24, certificaciones: 'ISO 13485, FDA, CE', notas: 'Titanio grado 5 premium', fechaCreacion: '2026-01-15' },
                 { id: 2, nombre: 'Implante Wide 4.5x10', largo: 10, fabricante: 'Fixum', cantidad: 8, stockMinimo: 5, costo: 3200, precio: 16500, proveedor: 'Fixum Direct', pais: 'Suiza', garantia: 24, certificaciones: 'ISO 13485, FDA, CE', notas: 'Para huesos amplios', fechaCreacion: '2026-02-01' },
                 { id: 3, nombre: 'Implante Short 3.5x8', largo: 8, fabricante: 'Fixum', cantidad: 3, stockMinimo: 5, costo: 2600, precio: 14000, proveedor: 'Fixum Direct', pais: 'Suiza', garantia: 24, certificaciones: 'ISO 13485, FDA, CE', notas: 'Para espacios limitados', fechaCreacion: '2026-03-05' },
@@ -3870,7 +3874,7 @@
 
             if (editId) {
                 // MODIFICACIÓN
-                const implante = appState.implantes.find(i => i.id == editId);
+                const implante = implantsState.implantes.find(i => i.id == editId);
                 if (implante) {
                     const cambios = [];
                     if (implante.nombre !== nombre) cambios.push(`Nombre: "${implante.nombre}" → "${nombre}"`);
@@ -3896,7 +3900,7 @@
 
                     // Registrar en auditoría
                     const audit = {
-                        id: appState.auditoria_implantes.length + 1,
+                        id: implantsState.auditoria_implantes.length + 1,
                         tipo: 'MODIFICACIÓN',
                         implante_id: editId,
                         implante_nombre: nombre,
@@ -3906,7 +3910,7 @@
                         detalles: cambios.join(' | '),
                         timestamp: timestamp
                     };
-                    appState.auditoria_implantes.push(audit);
+                    implantsState.auditoria_implantes.push(audit);
 
                     // Generar comprobante
                     generateComprobanteImplante(audit, implante);
@@ -3916,7 +3920,7 @@
             } else {
                 // ALTA (crear nuevo)
                 const nuevoImplante = {
-                    id: appState.implantes.length + 1,
+                    id: implantsState.implantes.length + 1,
                     nombre,
                     largo,
                     fabricante,
@@ -3931,11 +3935,11 @@
                     notas,
                     fechaCreacion: fecha
                 };
-                appState.implantes.push(nuevoImplante);
+                implantsState.implantes.push(nuevoImplante);
 
                 // Registrar en auditoría
                 const audit = {
-                    id: appState.auditoria_implantes.length + 1,
+                    id: implantsState.auditoria_implantes.length + 1,
                     tipo: 'ALTA',
                     implante_id: nuevoImplante.id,
                     implante_nombre: nombre,
@@ -3945,7 +3949,7 @@
                     detalles: `Nuevo implante creado | Stock inicial: ${cantidad} | Precio: $${precio}`,
                     timestamp: timestamp
                 };
-                appState.auditoria_implantes.push(audit);
+                implantsState.auditoria_implantes.push(audit);
 
                 // Generar comprobante
                 generateComprobanteImplante(audit, nuevoImplante);
@@ -3960,7 +3964,7 @@
         }
 
         function editImplante(id) {
-            const implante = appState.implantes.find(i => i.id === id);
+            const implante = implantsState.implantes.find(i => i.id === id);
             if (!implante) return;
 
             document.getElementById('impNombre').value = implante.nombre;
@@ -3981,7 +3985,7 @@
         }
 
         function deleteImplante(id) {
-            const implante = appState.implantes.find(i => i.id === id);
+            const implante = implantsState.implantes.find(i => i.id === id);
             if (!implante) return;
 
             if (confirm('⚠️ ¿Confirmas la BAJA de este implante?\n\n' + implante.nombre + '\n\nSe generará un comprobante de baja.')) {
@@ -3992,7 +3996,7 @@
 
                 // Registrar BAJA en auditoría
                 const audit = {
-                    id: appState.auditoria_implantes.length + 1,
+                    id: implantsState.auditoria_implantes.length + 1,
                     tipo: 'BAJA',
                     implante_id: id,
                     implante_nombre: implante.nombre,
@@ -4002,13 +4006,13 @@
                     detalles: `Stock retirado: ${implante.cantidad} unidades | Valor total: $${(implante.cantidad * implante.costo).toLocaleString('es-MX')}`,
                     timestamp: timestamp
                 };
-                appState.auditoria_implantes.push(audit);
+                implantsState.auditoria_implantes.push(audit);
 
                 // Generar comprobante
                 generateComprobanteImplante(audit, implante);
 
                 // Eliminar el implante
-                appState.implantes = appState.implantes.filter(i => i.id !== id);
+                implantsState.implantes = implantsState.implantes.filter(i => i.id !== id);
                 renderImplantes();
                 updateAlertCount();
 
@@ -4021,10 +4025,10 @@
             const tbody = document.getElementById('implantesTableBody');
             tbody.innerHTML = '';
 
-            if (appState.implantes.length === 0) {
+            if (implantsState.implantes.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-light);">Sin implantes registrados</td></tr>';
             } else {
-                appState.implantes.forEach(imp => {
+                implantsState.implantes.forEach(imp => {
                     const estado = imp.cantidad < imp.stockMinimo ? '⚠️ Bajo' : '✅ OK';
 
                     const row = `<tr>
@@ -4047,7 +4051,7 @@
 
             // Tab Stock Bajo
             const bajostockBody = document.getElementById('bajoImplantesTableBody');
-            const itemsBajo = appState.implantes.filter(i => i.cantidad < i.stockMinimo);
+            const itemsBajo = implantsState.implantes.filter(i => i.cantidad < i.stockMinimo);
             bajostockBody.innerHTML = '';
 
             if (itemsBajo.length === 0) {
@@ -4072,7 +4076,7 @@
             const desdeFiltro = document.getElementById('auditFiltroDesde').value;
             const hastaFiltro = document.getElementById('auditFiltroHasta').value;
 
-            let registros = appState.auditoria_implantes.slice().reverse();
+            let registros = implantsState.auditoria_implantes.slice().reverse();
 
             if (tipoFiltro) {
                 registros = registros.filter(r => r.tipo === tipoFiltro);
@@ -4143,7 +4147,7 @@
             
             const select = document.getElementById('remitoImplante');
             select.innerHTML = '<option value="">Selecciona un implante</option>';
-            appState.implantes.forEach(imp => {
+            implantsState.implantes.forEach(imp => {
                 select.innerHTML += `<option value="${imp.id}">${imp.nombre} (Stock: ${imp.cantidad})</option>`;
             });
             
@@ -4174,14 +4178,17 @@
             if (!implanteId) {
                 document.getElementById('remitoStockDisponible').value = '';
                 document.getElementById('remitoPrecioUnitario').value = '';
+                document.getElementById('remitoQuantidad').value = '';
+                document.getElementById('remitoTotal').value = '';
                 return;
             }
 
-            const implante = appState.implantes.find(i => i.id == implanteId);
+            const implante = implantsState.implantes.find(i => i.id == implanteId);
             if (implante) {
                 document.getElementById('remitoStockDisponible').value = implante.cantidad;
                 document.getElementById('remitoPrecioUnitario').value = implante.precio;
-                calculateRemitoTotal();
+                document.getElementById('remitoQuantidad').value = '';
+                document.getElementById('remitoTotal').value = '';
             }
         }
 
@@ -4189,9 +4196,13 @@
             const cantidad = parseFloat(document.getElementById('remitoQuantidad').value) || 0;
             const precio = parseFloat(document.getElementById('remitoPrecioUnitario').value) || 0;
             const total = cantidad * precio;
-            // Store actual number but display formatted
-            document.getElementById('remitoTotal').dataset.value = total;
-            document.getElementById('remitoTotal').value = total.toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            
+            const totalField = document.getElementById('remitoTotal');
+            if (total > 0) {
+                totalField.value = '$' + total.toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            } else {
+                totalField.value = '';
+            }
         }
 
         function saveRemito() {
@@ -4207,7 +4218,7 @@
                 return;
             }
 
-            const implante = appState.implantes.find(i => i.id == implanteId);
+            const implante = implantsState.implantes.find(i => i.id == implanteId);
             if (!implante) {
                 alert('❌ Implante no encontrado');
                 return;
@@ -4229,8 +4240,8 @@
 
             // Crear remito
             const remito = {
-                id: appState.remitos.length + 1,
-                numero: 'REM-' + new Date().getFullYear() + '-' + String(appState.remitos.length + 1).padStart(4, '0'),
+                id: implantsState.remitos.length + 1,
+                numero: 'REM-' + new Date().getFullYear() + '-' + String(implantsState.remitos.length + 1).padStart(4, '0'),
                 cliente: cliente,
                 telefono: telefono,
                 email: email,
@@ -4248,14 +4259,14 @@
                 timestamp: timestamp
             };
 
-            appState.remitos.push(remito);
+            implantsState.remitos.push(remito);
 
             // Actualizar stock del implante
             implante.cantidad -= cantidad;
 
             // Registrar en auditoría
             const audit = {
-                id: appState.auditoria_implantes.length + 1,
+                id: implantsState.auditoria_implantes.length + 1,
                 tipo: 'BAJA POR VENTA',
                 implante_id: implante.id,
                 implante_nombre: implante.nombre,
@@ -4265,7 +4276,7 @@
                 detalles: `Remito: ${remito.numero} | Cliente: ${cliente} | Cantidad: ${cantidad} | Total: $${total.toLocaleString('es-MX')}`,
                 timestamp: timestamp
             };
-            appState.auditoria_implantes.push(audit);
+            implantsState.auditoria_implantes.push(audit);
 
             // Generar comprobante
             generateRemitoComprobante(audit, implante, remito);
@@ -4286,7 +4297,7 @@
             const stockBody = document.getElementById('operadorStockTableBody');
             stockBody.innerHTML = '';
 
-            const implantesConStock = appState.implantes.filter(i => i.cantidad > 0);
+            const implantesConStock = implantsState.implantes.filter(i => i.cantidad > 0);
             
             if (implantesConStock.length === 0) {
                 stockBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-light);">Sin implantes disponibles</td></tr>';
@@ -4303,7 +4314,7 @@
                 });
             }
 
-            const remitosOrdenados = appState.remitos.slice().reverse();
+            const remitosOrdenados = implantsState.remitos.slice().reverse();
 
             // Tabla de remitos
             const tbody = document.getElementById('remitosTableBody');
@@ -4353,11 +4364,11 @@
 
             // KPIs
             const today = new Date().toISOString().split('T')[0];
-            const ventaHoy = appState.remitos.filter(r => r.fecha === today).reduce((sum, r) => sum + r.total, 0);
+            const ventaHoy = implantsState.remitos.filter(r => r.fecha === today).reduce((sum, r) => sum + r.total, 0);
             const semanaPasada = new Date();
             semanaPasada.setDate(semanaPasada.getDate() - 7);
-            const ventaSemana = appState.remitos.filter(r => new Date(r.fecha) >= semanaPasada).reduce((sum, r) => sum + r.total, 0);
-            const totalImplantes = appState.remitos.reduce((sum, r) => sum + r.cantidad, 0);
+            const ventaSemana = implantsState.remitos.filter(r => new Date(r.fecha) >= semanaPasada).reduce((sum, r) => sum + r.total, 0);
+            const totalImplantes = implantsState.remitos.reduce((sum, r) => sum + r.cantidad, 0);
 
             document.getElementById('remitosVentaHoy').textContent = '$' + ventaHoy.toLocaleString('es-MX');
             document.getElementById('remitosVentaSemana').textContent = '$' + ventaSemana.toLocaleString('es-MX');
@@ -4365,7 +4376,7 @@
         }
 
         function downloadRemitoPDF(remitoId) {
-            const remito = appState.remitos.find(r => r.id === remitoId);
+            const remito = implantsState.remitos.find(r => r.id === remitoId);
             if (!remito) return;
 
             const { jsPDF } = window.jspdf;
@@ -4487,10 +4498,10 @@
         }
 
         function openComprobanteModal(auditId) {
-            const audit = appState.auditoria_implantes.find(a => a.id === auditId);
+            const audit = implantsState.auditoria_implantes.find(a => a.id === auditId);
             if (!audit) return;
 
-            const implante = appState.implantes.find(i => i.id === audit.implante_id);
+            const implante = implantsState.implantes.find(i => i.id === audit.implante_id);
 
             document.getElementById('comprobanteModal').setAttribute('data-audit-id', auditId);
 
@@ -4709,10 +4720,10 @@
             
             yPosition += 12;
             
-            const totalImplantes = appState.implantes.reduce((sum, i) => sum + i.cantidad, 0);
-            const totalStockMinimo = appState.implantes.reduce((sum, i) => sum + i.stockMinimo, 0);
-            const bajoStockCount = appState.implantes.filter(i => i.cantidad < i.stockMinimo).length;
-            const totalValorCosto = appState.implantes.reduce((sum, i) => sum + (i.cantidad * i.costo), 0);
+            const totalImplantes = implantsState.implantes.reduce((sum, i) => sum + i.cantidad, 0);
+            const totalStockMinimo = implantsState.implantes.reduce((sum, i) => sum + i.stockMinimo, 0);
+            const bajoStockCount = implantsState.implantes.filter(i => i.cantidad < i.stockMinimo).length;
+            const totalValorCosto = implantsState.implantes.reduce((sum, i) => sum + (i.cantidad * i.costo), 0);
             
             doc.setFontSize(10);
             doc.setTextColor(...colorTexto);
@@ -4771,7 +4782,7 @@
             doc.setTextColor(...colorTexto);
             doc.setFontSize(8);
             
-            appState.implantes.forEach((implante, index) => {
+            implantsState.implantes.forEach((implante, index) => {
                 // Verificar si necesita nueva página
                 if (yPosition > pageHeight - 20) {
                     doc.addPage();
@@ -5223,7 +5234,7 @@
             });
 
             // Stock Implantes bajo
-            appState.implantes.forEach(i => {
+            implantsState.implantes.forEach(i => {
                 if (i.cantidad < i.stockMinimo) {
                     alertas.push({
                         title: '🔩 Implante Bajo Stock: ' + i.nombre,
