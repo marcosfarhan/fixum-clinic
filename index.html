@@ -1731,11 +1731,33 @@
                         </div>
 
                         <div class="tabs-container">
-                            <button class="tab-btn active" onclick="switchTab(this, 'remitos-lista')">Remitos Registrados</button>
+                            <button class="tab-btn active" onclick="switchTab(this, 'operador-stock')">Stock Disponible</button>
+                            <button class="tab-btn" onclick="switchTab(this, 'remitos-lista')">Remitos Registrados</button>
                             <button class="tab-btn" onclick="switchTab(this, 'remitos-historial')">Histórico de Ventas</button>
                         </div>
 
-                        <div id="remitos-lista" class="tab-content active" style="margin-top: 20px;">
+                        <div id="operador-stock" class="tab-content active" style="margin-top: 20px;">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Implante</th>
+                                            <th>Largo</th>
+                                            <th>Fabricante</th>
+                                            <th>Stock Disponible</th>
+                                            <th>Precio de Venta</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="operadorStockTableBody">
+                                        <tr>
+                                            <td colspan="5" style="text-align: center; color: var(--text-light);">Sin implantes disponibles</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="remitos-lista" class="tab-content" style="margin-top: 20px;">
                             <div class="table-container">
                                 <table>
                                     <thead>
@@ -2226,11 +2248,11 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Cantidad a Vender *</label>
-                    <input type="number" id="remitoQuantidad" placeholder="1" min="1" onchange="calculateRemitoTotal()">
+                    <input type="number" id="remitoQuantidad" placeholder="1" min="1" oninput="calculateRemitoTotal()">
                 </div>
                 <div class="form-group">
-                    <label>Precio Unitario *</label>
-                    <input type="number" id="remitoPrecioUnitario" placeholder="0.00" step="0.01" min="0" onchange="calculateRemitoTotal()">
+                    <label>Precio Unitario (automático)</label>
+                    <input type="number" id="remitoPrecioUnitario" readonly style="background: #f0f0f0; font-weight: 600; color: var(--success);">
                 </div>
             </div>
 
@@ -2244,8 +2266,8 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Total Venta</label>
-                    <input type="number" id="remitoTotal" readonly style="background: #f0f0f0; font-weight: 600; color: var(--success); font-size: 16px;">
+                    <label style="color: var(--success); font-weight: 600;">💰 TOTAL VENTA</label>
+                    <input type="number" id="remitoTotal" readonly style="background: #f0f0f0; font-weight: 600; color: var(--success); font-size: 18px; border: 2px solid var(--success);">
                 </div>
             </div>
 
@@ -4167,7 +4189,9 @@
             const cantidad = parseFloat(document.getElementById('remitoQuantidad').value) || 0;
             const precio = parseFloat(document.getElementById('remitoPrecioUnitario').value) || 0;
             const total = cantidad * precio;
-            document.getElementById('remitoTotal').value = total.toLocaleString('es-MX');
+            // Store actual number but display formatted
+            document.getElementById('remitoTotal').dataset.value = total;
+            document.getElementById('remitoTotal').value = total.toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
         function saveRemito() {
@@ -4258,6 +4282,27 @@
         }
 
         function renderRemitos() {
+            // Tabla de stock disponible (sin costos)
+            const stockBody = document.getElementById('operadorStockTableBody');
+            stockBody.innerHTML = '';
+
+            const implantesConStock = appState.implantes.filter(i => i.cantidad > 0);
+            
+            if (implantesConStock.length === 0) {
+                stockBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-light);">Sin implantes disponibles</td></tr>';
+            } else {
+                implantesConStock.forEach(imp => {
+                    const row = `<tr>
+                        <td><strong>${imp.nombre}</strong></td>
+                        <td>${imp.largo}mm</td>
+                        <td>${imp.fabricante}</td>
+                        <td style="text-align: center; font-weight: 600;">${imp.cantidad}</td>
+                        <td style="color: var(--success); font-weight: 600;">$${imp.precio.toLocaleString('es-MX')}</td>
+                    </tr>`;
+                    stockBody.innerHTML += row;
+                });
+            }
+
             const remitosOrdenados = appState.remitos.slice().reverse();
 
             // Tabla de remitos
