@@ -5365,7 +5365,7 @@
             }
 
             content += `<div style="margin-top: 20px;">
-                <button class="btn btn-primary" onclick="exportReportPDF('${tipo}')">📥 Descargar PDF</button>
+                <button class="btn btn-primary" onclick="exportReportPDF('${tipo}', '${fecha}')">📥 Descargar PDF</button>
             </div></div>`;
 
             document.getElementById('reporteContent').innerHTML = content;
@@ -5573,13 +5573,23 @@
             return html;
         }
 
-        function exportReportPDF(tipo = 'general') {
-            const fecha = document.getElementById('reporteDate').value;
+        function exportReportPDF(tipo = 'general', fecha = null) {
+            if (!fecha) {
+                fecha = document.getElementById('reporteDate').value;
+            }
+            
+            if (!fecha) {
+                alert('❌ Selecciona una fecha primero');
+                return;
+            }
+
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth();
             const marginLeft = 15;
+            const marginRight = 15;
 
+            // Header
             doc.setFillColor(40, 100, 240);
             doc.rect(0, 0, pageWidth, 25, 'F');
             doc.setFontSize(14);
@@ -5588,14 +5598,96 @@
             doc.text('FIXUM CLINIC', marginLeft, 12);
             doc.setFontSize(9);
             doc.text('Reporte de Facturación', marginLeft, 18);
-            
+
             let yPos = 35;
             doc.setFontSize(9);
             doc.setTextColor(30, 30, 30);
             doc.setFont(undefined, 'normal');
-            doc.text('Período: ' + fecha, marginLeft, yPos);
-            doc.text('Generado: ' + new Date().toISOString().split('T')[0], pageWidth - marginLeft - 40, yPos);
-            
+
+            // Mostrar período según tipo
+            let periodoText = '';
+            let facturasFiltradas = [];
+
+            if (tipo === 'diario') {
+                periodoText = `Reporte Diario: ${fecha}`;
+                facturasFiltradas = appState.facturas.filter(f => f.fecha === fecha);
+            } else if (tipo === 'semanal') {
+                const selectedDate = new Date(fecha + 'T00:00:00');
+                const dayOfWeek = selectedDate.getDay();
+                const diff = selectedDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+                const start = new Date(selectedDate);
+                start.setDate(diff);
+                const end = new Date(start);
+                end.setDate(end.getDate() + 6);
+                const desde = start.toISOString().split('T')[0];
+                const hasta = end.toISOString().split('T')[0];
+                periodoText = `Reporte Semanal: ${desde} al ${hasta}`;
+                facturasFiltradas = appState.facturas.filter(f => f.fecha >= desde && f.fecha <= hasta);
+            } else if (tipo === 'mensual') {
+                const [year, month] = fecha.split('-');
+                periodoText = `Reporte Mensual: ${new Date(year, parseInt(month) - 1).toLocaleString('es-MX', { month: 'long', year: 'numeric' })}`;
+                facturasFiltradas = appState.facturas.filter(f => f.fecha.startsWith(year + '-' + month));
+            }
+
+            doc.text('Período: ' + periodoText, marginLeft, yPos);
+            doc.text('Generado: ' + new Date().toISOString().split('T')[0], pageWidth - marginRight - 40, yPos);
+            yPos += 12;
+
+            // Totales
+            const ingreso = facturasFiltradas.reduce((sum, f) => sum + f.ingresos, 0);
+            const costos = facturasFiltradas.reduce((sum, f) => sum + f.costos, 0);
+            const ganancia = ingreso - costos;
+
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(10);
+            doc.text('RESUMEN FINANCIERO', marginLeft, yPos);
+            yPos += 8;
+
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Total Facturas: ${facturasFiltradas.length}`, marginLeft, yPos);
+            yPos += 6;
+            doc.text(`Total Ingresos: $${ingreso.toLocaleString('es-MX')}`, marginLeft, yPos);
+            yPos += 6;
+            doc.text(`Total Costos: $${costos.toLocaleString('es-MX')}`, marginLeft, yPos);
+            yPos += 6;
+            doc.text(`Ganancia Neta: $${ganancia.toLocaleString('es-MX')}`, marginLeft, yPos);
+            yPos += 10;
+
+            // Tabla de facturas
+            doc.setFont(undefined, 'bold');
+            doc.text('DETALLE DE FACTURAS', marginLeft, yPos);
+            yPos += 8;
+
+            doc.setFontSize(8);
+            doc.setTextColor(255, 255, 255);
+            doc.setFillColor(40, 100, 240);
+            doc.rect(marginLeft - 1, yPos - 5, pageWidth - marginLeft - marginRight + 2, 5, 'F');
+            doc.text('Fecha', marginLeft + 2, yPos);
+            doc.text('Paciente', marginLeft + 20, yPos);
+            doc.text('Tratamiento', marginLeft + 50, yPos);
+            doc.text('Ingresos', pageWidth - marginRight - 25, yPos);
+
+            yPos += 8;
+            doc.setTextColor(30, 30, 30);
+            doc.setFont(undefined, 'normal');
+
+            if (facturasFiltradas.length === 0) {
+                doc.text('Sin facturas registradas en este período', marginLeft, yPos);
+            } else {
+                facturasFiltradas.forEach(f => {
+                    if (yPos > 270) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+                    doc.text(f.fecha, marginLeft + 2, yPos);
+                    doc.text(f.paciente.substring(0, 15), marginLeft + 20, yPos);
+                    doc.text(f.tratamiento.substring(0, 18), marginLeft + 50, yPos);
+                    doc.text('$' + f.ingresos.toLocaleString('es-MX'), pageWidth - marginRight - 25, yPos);
+                    yPos += 6;
+                });
+            }
+
             const filename = `Reporte_${tipo}_${fecha}.pdf`;
             doc.save(filename);
             alert('✅ PDF descargado: ' + filename);
