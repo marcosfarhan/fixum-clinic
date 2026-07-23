@@ -5308,7 +5308,32 @@
             const fecha = document.getElementById('reporteDate').value;
 
             let content = `<div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">`;
-            content += `<h2 style="margin-bottom: 20px; color: var(--text-dark);">📊 Reporte ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}</h2>`;
+            content += `<h2 style="margin-bottom: 15px; color: var(--text-dark);">📊 Reporte ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}</h2>`;
+
+            // Calcular y mostrar período
+            let desdeHasta = '';
+            if (tipo === 'diario') {
+                desdeHasta = `Período: ${fecha} (1 día)`;
+            } else if (tipo === 'semanal') {
+                const [year, week] = fecha.split('W');
+                const start = new Date(year, 0, 1 + (week - 1) * 7);
+                const end = new Date(start.getTime() + 6 * 24 * 60 * 60 * 1000);
+                const desde = start.toISOString().split('T')[0];
+                const hasta = end.toISOString().split('T')[0];
+                desdeHasta = `Período: ${desde} al ${hasta} (Semana ${week})`;
+            } else if (tipo === 'mensual') {
+                const [year, month] = fecha.split('-');
+                const monthName = new Date(year, parseInt(month) - 1).toLocaleString('es-MX', { month: 'long', year: 'numeric' });
+                desdeHasta = `Período: ${monthName} (${year}-${month})`;
+            } else if (tipo === 'tratamientos') {
+                desdeHasta = `Período: Todos los registros`;
+            } else if (tipo === 'odontologos') {
+                desdeHasta = `Período: Todos los registros`;
+            }
+
+            content += `<div style="background: #f3f4f6; padding: 12px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid var(--primary);">
+                <strong style="color: var(--text-dark);">📅 ${desdeHasta}</strong>
+            </div>`;
 
             if (tipo === 'diario') {
                 content += generateDailyReport(fecha);
@@ -5323,7 +5348,7 @@
             }
 
             content += `<div style="margin-top: 20px;">
-                <button class="btn btn-primary" onclick="exportReportPDF()">📥 Descargar PDF</button>
+                <button class="btn btn-primary" onclick="exportReportPDF('${tipo}')">📥 Descargar PDF</button>
             </div></div>`;
 
             document.getElementById('reporteContent').innerHTML = content;
