@@ -225,6 +225,18 @@
             align-items: center;
         }
 
+        .top-bar-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            height: 50px;
+        }
+
+        .top-bar-logo img {
+            height: 45px;
+            width: auto;
+        }
+
         .top-bar h2 {
             font-size: 22px;
             color: var(--text-dark);
@@ -886,7 +898,10 @@
         <!-- MAIN CONTENT -->
         <div class="main-content">
             <div class="top-bar">
-                <h2 id="pageTitle">Dashboard</h2>
+                <div class="top-bar-logo">
+                    <img src="data:image/png;base64,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" alt="Fixum Clinic">
+                    <h2 id="pageTitle">Dashboard</h2>
+                </div>
                 <div class="alerts-badge">
                     <div class="alert-indicator" onclick="switchModule('alertas')">
                         ⚠️ Alertas
