@@ -5288,18 +5288,22 @@
 
         // ============ REPORTES ============
         function initReportes() {
-            document.getElementById('reporteDate').valueAsDate = new Date();
-            updateReporteOptions();
+            const dateField = document.getElementById('reporteDate');
+            if (!dateField.value) {
+                dateField.valueAsDate = new Date();
+            }
         }
 
         function updateReporteOptions() {
             const tipo = document.getElementById('reporteType').value;
             const dateField = document.getElementById('reporteDate');
-            const today = new Date();
             
-            if (tipo === 'diario') {
-                dateField.type = 'date';
-                dateField.valueAsDate = today;
+            // Siempre mantener como tipo date para permitir seleccionar fechas específicas
+            dateField.type = 'date';
+            
+            // Solo establecer la fecha de hoy si está vacío
+            if (!dateField.value) {
+                dateField.valueAsDate = new Date();
             }
         }
 
@@ -5307,32 +5311,45 @@
             const tipo = document.getElementById('reporteType').value;
             const fecha = document.getElementById('reporteDate').value;
 
+            if (!fecha) {
+                alert('❌ Por favor selecciona una fecha');
+                return;
+            }
+
             let content = `<div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">`;
             content += `<h2 style="margin-bottom: 15px; color: var(--text-dark);">📊 Reporte ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}</h2>`;
 
             // Calcular y mostrar período
             let desdeHasta = '';
+            
             if (tipo === 'diario') {
-                desdeHasta = `Período: ${fecha} (1 día)`;
+                desdeHasta = `📅 Período: ${fecha}`;
             } else if (tipo === 'semanal') {
-                const [year, week] = fecha.split('W');
-                const start = new Date(year, 0, 1 + (week - 1) * 7);
-                const end = new Date(start.getTime() + 6 * 24 * 60 * 60 * 1000);
+                const selectedDate = new Date(fecha + 'T00:00:00');
+                const dayOfWeek = selectedDate.getDay();
+                const diff = selectedDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+                
+                const start = new Date(selectedDate.setDate(diff));
+                const end = new Date(start);
+                end.setDate(end.getDate() + 6);
+                
                 const desde = start.toISOString().split('T')[0];
                 const hasta = end.toISOString().split('T')[0];
-                desdeHasta = `Período: ${desde} al ${hasta} (Semana ${week})`;
+                const weekNum = Math.ceil((selectedDate.getDate() - selectedDate.getDay() + 1) / 7);
+                
+                desdeHasta = `📅 Período: ${desde} al ${hasta} (Semana ${weekNum} de ${selectedDate.getFullYear()})`;
             } else if (tipo === 'mensual') {
                 const [year, month] = fecha.split('-');
                 const monthName = new Date(year, parseInt(month) - 1).toLocaleString('es-MX', { month: 'long', year: 'numeric' });
-                desdeHasta = `Período: ${monthName} (${year}-${month})`;
+                desdeHasta = `📅 Período: ${monthName}`;
             } else if (tipo === 'tratamientos') {
-                desdeHasta = `Período: Todos los registros`;
+                desdeHasta = `📅 Período: Todos los registros`;
             } else if (tipo === 'odontologos') {
-                desdeHasta = `Período: Todos los registros`;
+                desdeHasta = `📅 Período: Todos los registros`;
             }
 
             content += `<div style="background: #f3f4f6; padding: 12px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid var(--primary);">
-                <strong style="color: var(--text-dark);">📅 ${desdeHasta}</strong>
+                <strong style="color: var(--text-dark);">${desdeHasta}</strong>
             </div>`;
 
             if (tipo === 'diario') {
@@ -5403,7 +5420,65 @@
         }
 
         function generateWeeklyReport(fecha) {
-            return `<p style="color: var(--text-light);">Reporte semanal para la semana de ${fecha}</p>`;
+            const selectedDate = new Date(fecha + 'T00:00:00');
+            const dayOfWeek = selectedDate.getDay();
+            const diff = selectedDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+            
+            const start = new Date(selectedDate);
+            start.setDate(diff);
+            const end = new Date(start);
+            end.setDate(end.getDate() + 6);
+            
+            const desde = start.toISOString().split('T')[0];
+            const hasta = end.toISOString().split('T')[0];
+            
+            const facturasWeek = appState.facturas.filter(f => f.fecha >= desde && f.fecha <= hasta);
+            const ingreso = facturasWeek.reduce((sum, f) => sum + f.ingresos, 0);
+            const costos = facturasWeek.reduce((sum, f) => sum + f.costos, 0);
+            const honorarios = facturasWeek.reduce((sum, f) => sum + f.honorarios, 0);
+            const ganancia = ingreso - costos - honorarios;
+
+            let html = `<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
+                <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; border-left: 4px solid var(--success);">
+                    <div style="font-size: 12px; color: var(--text-light);">Total Ingresos</div>
+                    <div style="font-size: 22px; font-weight: 600; color: var(--success);">$${ingreso.toLocaleString('es-MX')}</div>
+                </div>
+                <div style="background: #dbeafe; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary);">
+                    <div style="font-size: 12px; color: var(--text-light);">Ganancia Neta</div>
+                    <div style="font-size: 22px; font-weight: 600; color: var(--primary);">$${ganancia.toLocaleString('es-MX')}</div>
+                </div>
+            </div>`;
+
+            html += `<div style="background: #fafafa; padding: 15px; border-radius: 8px;">
+                <h4>Resumen por Día</h4>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <th style="text-align: left; padding: 8px;">Fecha</th>
+                        <th style="text-align: center; padding: 8px;">Facturas</th>
+                        <th style="text-align: right; padding: 8px;">Ingresos</th>
+                    </tr>`;
+            
+            const daysMap = {};
+            facturasWeek.forEach(f => {
+                if (!daysMap[f.fecha]) daysMap[f.fecha] = { count: 0, total: 0 };
+                daysMap[f.fecha].count++;
+                daysMap[f.fecha].total += f.ingresos;
+            });
+
+            if (Object.keys(daysMap).length === 0) {
+                html += `<tr><td colspan="3" style="text-align: center; padding: 15px; color: var(--text-light);">Sin facturas en esta semana</td></tr>`;
+            } else {
+                Object.keys(daysMap).sort().forEach(dia => {
+                    html += `<tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 8px;">${dia}</td>
+                        <td style="text-align: center; padding: 8px;">${daysMap[dia].count}</td>
+                        <td style="text-align: right; padding: 8px;">$${daysMap[dia].total.toLocaleString('es-MX')}</td>
+                    </tr>`;
+                });
+            }
+            
+            html += `</table></div>`;
+            return html;
         }
 
         function generateMonthlyReport(fecha) {
