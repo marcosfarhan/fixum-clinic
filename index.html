@@ -5289,6 +5289,18 @@
         // ============ REPORTES ============
         function initReportes() {
             document.getElementById('reporteDate').valueAsDate = new Date();
+            updateReporteOptions();
+        }
+
+        function updateReporteOptions() {
+            const tipo = document.getElementById('reporteType').value;
+            const dateField = document.getElementById('reporteDate');
+            const today = new Date();
+            
+            if (tipo === 'diario') {
+                dateField.type = 'date';
+                dateField.valueAsDate = today;
+            }
         }
 
         function generateCompleteReport() {
@@ -5370,19 +5382,123 @@
         }
 
         function generateMonthlyReport(fecha) {
-            return `<p style="color: var(--text-light);">Reporte mensual para ${fecha}</p>`;
+            const [year, month] = fecha.split('-');
+            const facturasMonth = appState.facturas.filter(f => f.fecha.startsWith(year + '-' + month));
+            const ingreso = facturasMonth.reduce((sum, f) => sum + f.ingresos, 0);
+            const costos = facturasMonth.reduce((sum, f) => sum + f.costos, 0);
+            const ganancia = ingreso - costos;
+            const totalFacturas = facturasMonth.length;
+            
+            let html = `<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
+                <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary);">
+                    <div style="font-size: 12px; color: var(--text-light);">Total Facturas</div>
+                    <div style="font-size: 22px; font-weight: 600; color: var(--primary);">${totalFacturas}</div>
+                </div>
+                <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; border-left: 4px solid var(--success);">
+                    <div style="font-size: 12px; color: var(--text-light);">Ingresos</div>
+                    <div style="font-size: 18px; font-weight: 600; color: var(--success);">$${ingreso.toLocaleString('es-MX')}</div>
+                </div>
+                <div style="background: #fef3c7; padding: 15px; border-radius: 8px; border-left: 4px solid var(--warning);">
+                    <div style="font-size: 12px; color: var(--text-light);">Costos</div>
+                    <div style="font-size: 18px; font-weight: 600; color: var(--warning);">$${costos.toLocaleString('es-MX')}</div>
+                </div>
+                <div style="background: #dbeafe; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary);">
+                    <div style="font-size: 12px; color: var(--text-light);">Ganancia</div>
+                    <div style="font-size: 18px; font-weight: 600; color: var(--primary);">$${ganancia.toLocaleString('es-MX')}</div>
+                </div>
+            </div>`;
+            
+            return html;
         }
 
         function generateTreatmentReport() {
-            return `<p style="color: var(--text-light);">Análisis por tipo de tratamiento</p>`;
+            const tratamientosMap = {};
+            appState.facturas.forEach(f => {
+                if (!tratamientosMap[f.tratamiento]) {
+                    tratamientosMap[f.tratamiento] = { count: 0, ingresos: 0 };
+                }
+                tratamientosMap[f.tratamiento].count++;
+                tratamientosMap[f.tratamiento].ingresos += f.ingresos;
+            });
+
+            let html = `<div style="background: #fafafa; padding: 15px; border-radius: 8px;">
+                <h4>Análisis de Tratamientos</h4>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr style="border-bottom: 1px solid #e5e7eb; background: #f3f4f6;">
+                        <th style="text-align: left; padding: 10px; font-weight: 600;">Tratamiento</th>
+                        <th style="text-align: center; padding: 10px; font-weight: 600;">Cantidad</th>
+                        <th style="text-align: right; padding: 10px; font-weight: 600;">Ingresos</th>
+                    </tr>`;
+            
+            Object.entries(tratamientosMap).sort((a, b) => b[1].ingresos - a[1].ingresos).forEach(([trat, data]) => {
+                html += `<tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 10px;"><strong>${trat}</strong></td>
+                    <td style="text-align: center; padding: 10px;">${data.count}</td>
+                    <td style="text-align: right; padding: 10px; color: var(--success); font-weight: 600;">$${data.ingresos.toLocaleString('es-MX')}</td>
+                </tr>`;
+            });
+            
+            html += `</table></div>`;
+            return html;
         }
 
         function generateDentistReport() {
-            return `<p style="color: var(--text-light);">Análisis por odontólogo</p>`;
+            const dentistasMap = {};
+            appState.facturas.forEach(f => {
+                if (!dentistasMap[f.odonto]) {
+                    dentistasMap[f.odonto] = { count: 0, ingresos: 0 };
+                }
+                dentistasMap[f.odonto].count++;
+                dentistasMap[f.odonto].ingresos += f.ingresos;
+            });
+
+            let html = `<div style="background: #fafafa; padding: 15px; border-radius: 8px;">
+                <h4>Análisis por Odontólogo</h4>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr style="border-bottom: 1px solid #e5e7eb; background: #f3f4f6;">
+                        <th style="text-align: left; padding: 10px; font-weight: 600;">Odontólogo</th>
+                        <th style="text-align: center; padding: 10px; font-weight: 600;">Tratamientos</th>
+                        <th style="text-align: right; padding: 10px; font-weight: 600;">Ingresos</th>
+                    </tr>`;
+            
+            Object.entries(dentistasMap).sort((a, b) => b[1].ingresos - a[1].ingresos).forEach(([dentista, data]) => {
+                html += `<tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 10px;"><strong>${dentista}</strong></td>
+                    <td style="text-align: center; padding: 10px;">${data.count}</td>
+                    <td style="text-align: right; padding: 10px; color: var(--primary); font-weight: 600;">$${data.ingresos.toLocaleString('es-MX')}</td>
+                </tr>`;
+            });
+            
+            html += `</table></div>`;
+            return html;
         }
 
-        function exportReportPDF() {
-            alert('📥 PDF generado y listo para descargar');
+        function exportReportPDF(tipo = 'general') {
+            const fecha = document.getElementById('reporteDate').value;
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const marginLeft = 15;
+
+            doc.setFillColor(40, 100, 240);
+            doc.rect(0, 0, pageWidth, 25, 'F');
+            doc.setFontSize(14);
+            doc.setTextColor(255, 255, 255);
+            doc.setFont(undefined, 'bold');
+            doc.text('FIXUM CLINIC', marginLeft, 12);
+            doc.setFontSize(9);
+            doc.text('Reporte de Facturación', marginLeft, 18);
+            
+            let yPos = 35;
+            doc.setFontSize(9);
+            doc.setTextColor(30, 30, 30);
+            doc.setFont(undefined, 'normal');
+            doc.text('Período: ' + fecha, marginLeft, yPos);
+            doc.text('Generado: ' + new Date().toISOString().split('T')[0], pageWidth - marginLeft - 40, yPos);
+            
+            const filename = `Reporte_${tipo}_${fecha}.pdf`;
+            doc.save(filename);
+            alert('✅ PDF descargado: ' + filename);
         }
 
         // ============ FUNCIONES AUXILIARES ============
