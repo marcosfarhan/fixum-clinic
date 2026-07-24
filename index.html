@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fixum Clinic - Gestión Integrada v2</title>
+    <title>Fixum Clinic - Gestión Integrada v3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -15,7 +13,6 @@
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
-            --info: #3b82f6;
             --text-dark: #1f2937;
             --text-light: #6b7280;
             --bg-light: #f9fafb;
@@ -31,7 +28,7 @@
 
         .hidden { display: none !important; }
 
-        /* ========== LOGIN SCREEN ========== */
+        /* LOGIN */
         #loginScreen {
             display: flex;
             justify-content: center;
@@ -53,7 +50,6 @@
             text-align: center;
             margin-bottom: 30px;
             font-size: 32px;
-            font-weight: bold;
         }
 
         .form-group {
@@ -64,7 +60,6 @@
             display: block;
             font-size: 12px;
             font-weight: 600;
-            color: var(--text-dark);
             margin-bottom: 5px;
             text-transform: uppercase;
         }
@@ -78,13 +73,6 @@
             font-size: 14px;
         }
 
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(40, 100, 240, 0.1);
-        }
-
         .login-btn {
             width: 100%;
             padding: 10px;
@@ -94,12 +82,11 @@
             border-radius: 5px;
             font-weight: 600;
             cursor: pointer;
-            font-size: 14px;
         }
 
         .login-btn:hover { background: #1e50d8; }
 
-        /* ========== MAIN APP ========== */
+        /* MAIN APP */
         #appContainer {
             display: flex;
             height: 100vh;
@@ -121,11 +108,9 @@
 
         .sidebar-logo {
             color: var(--secondary);
-            font-size: 20px;
             font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 8px;
         }
 
         .logo-svg {
@@ -174,7 +159,7 @@
             margin-top: 10px;
         }
 
-        /* ========== MAIN CONTENT ========== */
+        /* MAIN CONTENT */
         .main-content {
             flex: 1;
             display: flex;
@@ -189,24 +174,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 20px;
         }
 
         .top-bar h2 {
             font-size: 22px;
-            color: var(--text-dark);
             font-weight: 600;
             margin: 0;
         }
-
-        .top-bar-logo {
-            height: 38px;
-            width: auto;
-            cursor: pointer;
-            transition: opacity 0.3s;
-        }
-
-        .top-bar-logo:hover { opacity: 0.8; }
 
         .content-area {
             flex: 1;
@@ -222,7 +196,7 @@
             display: block;
         }
 
-        /* ========== TABS ========== */
+        /* TABS */
         .tab-buttons {
             display: flex;
             gap: 10px;
@@ -242,8 +216,6 @@
             transition: all 0.3s;
         }
 
-        .tab-btn:hover { color: var(--primary); }
-
         .tab-btn.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
@@ -257,7 +229,7 @@
             display: block;
         }
 
-        /* ========== CARDS & GRIDS ========== */
+        /* KPI CARDS */
         .kpi-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -273,10 +245,6 @@
             border-left: 4px solid var(--primary);
         }
 
-        .kpi-card.success { border-left-color: var(--success); }
-        .kpi-card.danger { border-left-color: var(--danger); }
-        .kpi-card.warning { border-left-color: var(--warning); }
-
         .kpi-label {
             font-size: 12px;
             color: var(--text-light);
@@ -288,46 +256,9 @@
         .kpi-value {
             font-size: 24px;
             font-weight: bold;
-            color: var(--text-dark);
         }
 
-        .table-container {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-
-        thead {
-            background: var(--bg-light);
-            border-bottom: 2px solid var(--border);
-        }
-
-        th {
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-dark);
-            text-transform: uppercase;
-            font-size: 11px;
-        }
-
-        td {
-            padding: 12px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        tbody tr:hover {
-            background: var(--bg-light);
-        }
-
-        /* ========== FORMS ========== */
+        /* FORMS */
         .form-container {
             background: white;
             padding: 20px;
@@ -351,7 +282,6 @@
         .form-field label {
             font-size: 12px;
             font-weight: 600;
-            color: var(--text-dark);
             margin-bottom: 5px;
             text-transform: uppercase;
         }
@@ -374,6 +304,43 @@
             box-shadow: 0 0 0 3px rgba(40, 100, 240, 0.1);
         }
 
+        /* TABLES */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead {
+            background: var(--bg-light);
+            border-bottom: 2px solid var(--border);
+        }
+
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody tr:hover {
+            background: var(--bg-light);
+        }
+
+        /* BUTTONS */
         .button-group {
             display: flex;
             gap: 10px;
@@ -397,13 +364,12 @@
 
         .btn-primary:hover { background: #1e50d8; }
 
-        .btn-secondary {
-            background: var(--bg-light);
-            color: var(--text-dark);
-            border: 1px solid var(--border);
+        .btn-success {
+            background: var(--success);
+            color: white;
         }
 
-        .btn-secondary:hover { background: #f0f1f3; }
+        .btn-success:hover { background: #059669; }
 
         .btn-danger {
             background: var(--danger);
@@ -412,19 +378,18 @@
 
         .btn-danger:hover { background: #dc2626; }
 
-        .btn-success {
-            background: var(--success);
-            color: white;
+        .btn-secondary {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            border: 1px solid var(--border);
         }
-
-        .btn-success:hover { background: #059669; }
 
         .btn-small {
             padding: 5px 10px;
             font-size: 11px;
         }
 
-        /* ========== STATUS BADGES ========== */
+        /* BADGES */
         .badge {
             display: inline-block;
             padding: 4px 8px;
@@ -439,75 +404,73 @@
         .badge-warning { background: #fef3c7; color: #d97706; }
         .badge-info { background: #dbeafe; color: #1e40af; }
 
-        /* ========== MODALS ========== */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
+        /* FACTURA ITEMS */
+        .factura-items {
             background: white;
-            padding: 30px;
             border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            font-size: 18px;
-            font-weight: 600;
+            padding: 15px;
             margin-bottom: 20px;
-            color: var(--text-dark);
         }
 
-        .modal-close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
+        .item-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr;
+            gap: 10px;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid var(--border);
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .item-text {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .item-value {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        /* RESUMEN FACTURA */
+        .resumen-factura {
+            background: #f0f7ff;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .resumen-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(40, 100, 240, 0.2);
+        }
+
+        .resumen-row.total {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary);
             border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: var(--text-light);
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid rgba(40, 100, 240, 0.3);
         }
 
-        /* ========== RESPONSIVE ========== */
+        .text-right { text-align: right; }
+        .font-bold { font-weight: bold; }
+        .mt-20 { margin-top: 20px; }
+
         @media (max-width: 768px) {
             .sidebar { width: 60px; }
-            .nav-item { padding: 12px 10px; font-size: 0; }
-            .nav-item::before { font-size: 20px; }
-            .kpi-container { grid-template-columns: 1fr; }
-            .form-row { grid-template-columns: 1fr; }
+            .item-row { grid-template-columns: 1fr; }
         }
-
-        /* ========== UTILITIES ========== */
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
-        .text-success { color: var(--success); }
-        .text-danger { color: var(--danger); }
-        .font-bold { font-weight: bold; }
-        .mt-10 { margin-top: 10px; }
-        .mt-20 { margin-top: 20px; }
-        .mb-10 { margin-bottom: 10px; }
-        .mb-20 { margin-bottom: 20px; }
     </style>
 </head>
 <body>
-    <!-- LOGIN SCREEN -->
+    <!-- LOGIN -->
     <div id="loginScreen">
         <div class="login-container">
             <div class="login-logo">
@@ -538,7 +501,7 @@
         </div>
     </div>
 
-    <!-- MAIN APP -->
+    <!-- APP -->
     <div id="appContainer" class="hidden">
         <!-- SIDEBAR -->
         <div class="sidebar">
@@ -557,8 +520,6 @@
                 <div class="nav-item" onclick="switchModule('caja', event)">💵 Caja</div>
                 <div class="nav-item" onclick="switchModule('pacientes', event)">👥 Pacientes</div>
                 <div class="nav-item" onclick="switchModule('odontos', event)">👨‍⚕️ Odontólogos</div>
-                <div class="nav-item" onclick="switchModule('stock', event)">📦 Stock</div>
-                <div class="nav-item" onclick="switchModule('reportes', event)">📈 Reportes</div>
             </nav>
             <div class="user-info">
                 <div><strong id="currentUser">Admin</strong></div>
@@ -569,38 +530,25 @@
 
         <!-- MAIN CONTENT -->
         <div class="main-content">
-            <!-- TOP BAR -->
             <div class="top-bar">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <svg class="top-bar-logo" viewBox="0 0 160 50" xmlns="http://www.w3.org/2000/svg">
-                        <text x="8" y="38" font-family="Arial, sans-serif" font-size="32" font-weight="bold" font-style="italic" fill="#2864f0">Fi</text>
-                        <text x="38" y="38" font-family="Arial, sans-serif" font-size="32" font-weight="bold" font-style="italic" fill="#f0c800">x</text>
-                        <text x="58" y="38" font-family="Arial, sans-serif" font-size="32" font-weight="bold" font-style="italic" fill="#2864f0">um</text>
-                    </svg>
-                    <h2 id="pageTitle">Dashboard</h2>
-                </div>
+                <h2 id="pageTitle">Dashboard</h2>
             </div>
 
-            <!-- CONTENT AREA -->
             <div class="content-area">
-                <!-- DASHBOARD MODULE -->
+                <!-- DASHBOARD -->
                 <div id="dashboardModule" class="module-content active">
                     <div class="kpi-container">
-                        <div class="kpi-card success">
+                        <div class="kpi-card">
                             <div class="kpi-label">Ingresos Hoy</div>
                             <div class="kpi-value" id="kpiIngresoHoy">$0</div>
                         </div>
                         <div class="kpi-card">
-                            <div class="kpi-label">Ganancias Hoy</div>
-                            <div class="kpi-value" id="kpiGananciaHoy">$0</div>
-                        </div>
-                        <div class="kpi-card warning">
-                            <div class="kpi-label">Por Cobrar</div>
+                            <div class="kpi-label">Total Por Cobrar</div>
                             <div class="kpi-value" id="kpiPorCobrar">$0</div>
                         </div>
-                        <div class="kpi-card danger">
-                            <div class="kpi-label">Pagos Pendientes (Odontólogos)</div>
-                            <div class="kpi-value" id="kpiPagosOdontos">$0</div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Honorarios Pendientes</div>
+                            <div class="kpi-value" id="kpiHonorariosPendientes">$0</div>
                         </div>
                     </div>
                     <div class="table-container" style="margin-top: 20px;">
@@ -609,7 +557,9 @@
                                 <tr>
                                     <th>Últimas Facturas</th>
                                     <th>Paciente</th>
-                                    <th>Monto</th>
+                                    <th>Total</th>
+                                    <th>Pagado</th>
+                                    <th>Deuda</th>
                                     <th>Estado</th>
                                 </tr>
                             </thead>
@@ -618,65 +568,116 @@
                     </div>
                 </div>
 
-                <!-- FACTURACIÓN MODULE -->
+                <!-- FACTURACIÓN -->
                 <div id="facturacionModule" class="module-content">
                     <div class="tab-buttons">
-                        <button class="tab-btn active" onclick="switchTab(this, 'facturacion-nueva')">Nueva Factura</button>
-                        <button class="tab-btn" onclick="switchTab(this, 'facturacion-lista')">Lista de Facturas</button>
+                        <button class="tab-btn active" onclick="switchTab(this, 'factura-nueva')">Nueva Factura</button>
+                        <button class="tab-btn" onclick="switchTab(this, 'factura-lista')">Lista de Facturas</button>
                     </div>
 
-                    <div id="facturacion-nueva" class="tab-content active">
+                    <!-- NUEVA FACTURA -->
+                    <div id="factura-nueva" class="tab-content active">
                         <div class="form-container">
                             <h3 style="margin-bottom: 20px;">Crear Nueva Factura</h3>
+                            
                             <div class="form-row">
                                 <div class="form-field">
                                     <label>Paciente *</label>
-                                    <select id="factPacienteSelect" onchange="onSelectPaciente()">
+                                    <select id="factPaciente" onchange="onPacienteChange()">
                                         <option value="">Seleccionar paciente...</option>
                                     </select>
                                 </div>
                                 <div class="form-field">
                                     <label>Odontólogo *</label>
-                                    <select id="factOdontoSelect">
+                                    <select id="factOdonto" onchange="onOdontoChange()">
                                         <option value="">Seleccionar odontólogo...</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Tratamiento *</label>
-                                    <select id="factTratamientoSelect" onchange="onSelectTratamiento()">
-                                        <option value="">Seleccionar tratamiento...</option>
-                                    </select>
+
+                            <div style="margin: 30px 0; padding: 20px; background: #f0f7ff; border-radius: 8px;">
+                                <h4 style="margin-bottom: 15px;">Agregar Tratamientos</h4>
+                                <div class="form-row">
+                                    <div class="form-field">
+                                        <label>Tratamiento *</label>
+                                        <select id="factTratamiento">
+                                            <option value="">Seleccionar tratamiento...</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-field">
+                                        <label>Honorario Odontólogo</label>
+                                        <input type="number" id="factHonorario" readonly>
+                                    </div>
                                 </div>
-                                <div class="form-field">
-                                    <label>Monto a Cobrar *</label>
-                                    <input type="number" id="factMonto" readonly>
+                                <div class="form-row">
+                                    <div class="form-field">
+                                        <label>Precio a Cobrar</label>
+                                        <input type="number" id="factPrecio" readonly>
+                                    </div>
+                                    <div style="display: flex; align-items: flex-end;">
+                                        <button type="button" class="btn btn-primary" onclick="agregarTratamientoAFactura()">Agregar Tratamiento</button>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Método de Pago</label>
-                                    <select id="factMetodoPago">
-                                        <option value="efectivo">Efectivo</option>
-                                        <option value="tarjeta">Tarjeta</option>
-                                        <option value="transferencia">Transferencia</option>
-                                        <option value="financiado">Financiado</option>
-                                    </select>
+
+                            <div id="facturaTratamientos" class="factura-items">
+                                <h4 style="margin-bottom: 10px;">Tratamientos en la Factura:</h4>
+                                <div id="tratamientosLista"></div>
+                            </div>
+
+                            <div class="resumen-factura">
+                                <div class="resumen-row">
+                                    <span>Total de Servicios:</span>
+                                    <span id="resumenTotal" class="font-bold">$0</span>
                                 </div>
+                                <div class="resumen-row">
+                                    <span>Total Honorarios:</span>
+                                    <span id="resumenHonorarios" class="font-bold">$0</span>
+                                </div>
+                                <div class="resumen-row total">
+                                    <span>TOTAL A COBRAR:</span>
+                                    <span id="resumenTotalCobrar">$0</span>
+                                </div>
+                            </div>
+
+                            <div class="form-container" style="background: #fffbf0; border: 2px solid #f59e0b;">
+                                <h4 style="margin-bottom: 15px;">Registrar Pago</h4>
+                                <div class="form-row">
+                                    <div class="form-field">
+                                        <label>Monto a Pagar</label>
+                                        <input type="number" id="factMontoPago" placeholder="0.00" min="0">
+                                    </div>
+                                    <div class="form-field">
+                                        <label>Método de Pago</label>
+                                        <select id="factMetodoPago">
+                                            <option value="efectivo">Efectivo</option>
+                                            <option value="tarjeta">Tarjeta</option>
+                                            <option value="transferencia">Transferencia</option>
+                                            <option value="financiado">Financiado</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <p style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                                    💡 Deja en blanco para NO registrar pago aún (factura quedará con deuda)
+                                </p>
+                            </div>
+
+                            <div class="form-row">
                                 <div class="form-field">
                                     <label>Notas</label>
-                                    <textarea id="factNotas" rows="3"></textarea>
+                                    <textarea id="factNotas" rows="3" placeholder="Observaciones o notas de la factura..."></textarea>
                                 </div>
                             </div>
+
                             <div class="button-group">
-                                <button class="btn btn-primary" onclick="crearFactura()">Crear Factura</button>
-                                <button class="btn btn-secondary" onclick="limpiarFormoFactura()">Limpiar</button>
+                                <button class="btn btn-success" onclick="crearFactura()">💾 Crear Factura y Registrar</button>
+                                <button class="btn btn-secondary" onclick="limpiarFormularioFactura()">Limpiar</button>
                             </div>
                         </div>
                     </div>
 
-                    <div id="facturacion-lista" class="tab-content">
+                    <!-- LISTA FACTURAS -->
+                    <div id="factura-lista" class="tab-content" style="margin-top: 20px;">
                         <div class="table-container">
                             <table>
                                 <thead>
@@ -684,27 +685,28 @@
                                         <th>ID</th>
                                         <th>Paciente</th>
                                         <th>Odontólogo</th>
-                                        <th>Tratamiento</th>
-                                        <th>Monto</th>
+                                        <th>Total</th>
+                                        <th>Pagado</th>
+                                        <th>Deuda</th>
+                                        <th>Método</th>
                                         <th>Fecha</th>
-                                        <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
-                                <tbody id="facturacionLista"></tbody>
+                                <tbody id="facturaLista"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- CAJA MODULE -->
+                <!-- CAJA -->
                 <div id="cajaModule" class="module-content">
                     <div class="kpi-container">
-                        <div class="kpi-card success">
+                        <div class="kpi-card">
                             <div class="kpi-label">Total Ingresos</div>
                             <div class="kpi-value" id="cajaTotalIngresos">$0</div>
                         </div>
-                        <div class="kpi-card danger">
+                        <div class="kpi-card">
                             <div class="kpi-label">Total Egresos</div>
                             <div class="kpi-value" id="cajaTotalEgresos">$0</div>
                         </div>
@@ -714,308 +716,177 @@
                         </div>
                     </div>
 
-                    <div class="tab-buttons" style="margin-top: 20px;">
-                        <button class="tab-btn active" onclick="switchTab(this, 'caja-ingresos-tab')">Ingresos</button>
-                        <button class="tab-btn" onclick="switchTab(this, 'caja-egresos-tab')">Egresos</button>
-                        <button class="tab-btn" onclick="switchTab(this, 'caja-historial-tab')">Historial</button>
-                    </div>
-
-                    <div id="caja-ingresos-tab" class="tab-content active" style="margin-top: 20px;">
-                        <div class="form-container">
-                            <h3 style="margin-bottom: 20px;">Registrar Ingreso</h3>
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Tipo de Ingreso</label>
-                                    <select id="ingresoTipo" onchange="onChangeIngresoTipo()">
-                                        <option value="pago_paciente">Pago de Paciente</option>
-                                        <option value="otro">Otro</option>
-                                    </select>
-                                </div>
-                                <div class="form-field" id="ingrePacienteField" style="display: block;">
-                                    <label>Seleccionar Paciente</label>
-                                    <select id="ingresoPacienteSelect"></select>
-                                </div>
+                    <div class="form-container" style="margin-top: 20px;">
+                        <h3 style="margin-bottom: 20px;">Registrar Egreso (Pago a Odontólogo)</h3>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Odontólogo</label>
+                                <select id="egresoOdonto"></select>
                             </div>
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Monto</label>
-                                    <input type="number" id="ingresoMonto" min="0">
-                                </div>
-                                <div class="form-field">
-                                    <label>Método de Pago</label>
-                                    <select id="ingresoMetodo">
-                                        <option value="efectivo">Efectivo</option>
-                                        <option value="tarjeta">Tarjeta</option>
-                                        <option value="transferencia">Transferencia</option>
-                                    </select>
-                                </div>
+                            <div class="form-field">
+                                <label>Monto a Pagar</label>
+                                <input type="number" id="egresoMonto" min="0">
                             </div>
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Descripción</label>
-                                    <textarea id="ingresoDesc" rows="2"></textarea>
-                                </div>
+                            <div class="form-field">
+                                <label>Método</label>
+                                <select id="egresoMetodo">
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="tarjeta">Tarjeta</option>
+                                    <option value="transferencia">Transferencia</option>
+                                </select>
                             </div>
-                            <div class="button-group">
-                                <button class="btn btn-success" onclick="registrarIngreso()">Registrar Ingreso</button>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Descripción</label>
+                                <textarea id="egresoDesc" rows="2"></textarea>
                             </div>
+                        </div>
+                        <div class="button-group">
+                            <button class="btn btn-danger" onclick="registrarEgreso()">Registrar Egreso</button>
                         </div>
                     </div>
 
-                    <div id="caja-egresos-tab" class="tab-content" style="margin-top: 20px;">
-                        <div class="form-container">
-                            <h3 style="margin-bottom: 20px;">Registrar Egreso</h3>
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Tipo de Egreso</label>
-                                    <select id="egresoTipo" onchange="onChangeEgresoTipo()">
-                                        <option value="pago_odonto">Pago a Odontólogo</option>
-                                        <option value="pago_empleado">Pago a Empleado</option>
-                                        <option value="gasto_operativo">Gasto Operativo</option>
-                                        <option value="otro">Otro</option>
-                                    </select>
-                                </div>
-                                <div class="form-field" id="egresoOdontoField" style="display: block;">
-                                    <label>Seleccionar Odontólogo</label>
-                                    <select id="egresoOdontoSelect"></select>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Monto</label>
-                                    <input type="number" id="egresoMonto" min="0">
-                                </div>
-                                <div class="form-field">
-                                    <label>Método de Pago</label>
-                                    <select id="egresoMetodo">
-                                        <option value="efectivo">Efectivo</option>
-                                        <option value="tarjeta">Tarjeta</option>
-                                        <option value="transferencia">Transferencia</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Descripción</label>
-                                    <textarea id="egresoDesc" rows="2"></textarea>
-                                </div>
-                            </div>
-                            <div class="button-group">
-                                <button class="btn btn-danger" onclick="registrarEgreso()">Registrar Egreso</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="caja-historial-tab" class="tab-content" style="margin-top: 20px;">
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Fecha</th>
-                                        <th>Tipo</th>
-                                        <th>Descripción</th>
-                                        <th>Monto</th>
-                                        <th>Método</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="cajaHistorial"></tbody>
-                            </table>
-                        </div>
+                    <div class="table-container" style="margin-top: 30px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Descripción</th>
+                                    <th>Monto</th>
+                                    <th>Método</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cajaHistorial"></tbody>
+                        </table>
                     </div>
                 </div>
 
-                <!-- PACIENTES MODULE -->
+                <!-- PACIENTES -->
                 <div id="pacientesModule" class="module-content">
-                    <div class="tab-buttons">
-                        <button class="tab-btn active" onclick="switchTab(this, 'pacientes-lista')">Lista de Pacientes</button>
-                        <button class="tab-btn" onclick="switchTab(this, 'pacientes-nuevo')">Nuevo Paciente</button>
-                    </div>
-
-                    <div id="pacientes-lista" class="tab-content active" style="margin-top: 20px;">
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Nombre</th>
-                                        <th>Teléfono</th>
-                                        <th>Tratamientos</th>
-                                        <th>Cobrado</th>
-                                        <th>Por Cobrar</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="pacientesLista"></tbody>
-                            </table>
+                    <div class="form-container" style="margin-bottom: 30px;">
+                        <h3 style="margin-bottom: 20px;">Agregar Nuevo Paciente</h3>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Nombre Completo *</label>
+                                <input type="text" id="nuevoPacienteNombre">
+                            </div>
+                            <div class="form-field">
+                                <label>Teléfono</label>
+                                <input type="text" id="nuevoPacienteTelefono">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Email</label>
+                                <input type="email" id="nuevoPacienteEmail">
+                            </div>
+                        </div>
+                        <div class="button-group">
+                            <button class="btn btn-primary" onclick="agregarNuevoPaciente()">Agregar Paciente</button>
                         </div>
                     </div>
 
-                    <div id="pacientes-nuevo" class="tab-content" style="margin-top: 20px;">
-                        <div class="form-container">
-                            <h3 style="margin-bottom: 20px;">Agregar Nuevo Paciente</h3>
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Nombre Completo *</label>
-                                    <input type="text" id="nuevoPacienteNombre">
-                                </div>
-                                <div class="form-field">
-                                    <label>Teléfono</label>
-                                    <input type="text" id="nuevoPacienteTelefono">
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Email</label>
-                                    <input type="email" id="nuevoPacienteEmail">
-                                </div>
-                                <div class="form-field">
-                                    <label>Notas</label>
-                                    <textarea id="nuevoPacienteNotas" rows="2"></textarea>
-                                </div>
-                            </div>
-                            <div class="button-group">
-                                <button class="btn btn-primary" onclick="agregarNuevoPaciente()">Agregar Paciente</button>
-                            </div>
-                        </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Teléfono</th>
+                                    <th>Email</th>
+                                    <th>Facturas</th>
+                                    <th>Cobrado</th>
+                                    <th>Deuda</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pacientesLista"></tbody>
+                        </table>
                     </div>
                 </div>
 
-                <!-- ODONTÓLOGOS MODULE -->
+                <!-- ODONTÓLOGOS -->
                 <div id="odontosModule" class="module-content">
-                    <div class="tab-buttons">
-                        <button class="tab-btn active" onclick="switchTab(this, 'odontos-lista')">Lista de Odontólogos</button>
-                        <button class="tab-btn" onclick="switchTab(this, 'odontos-pendiente')">Pendiente de Cobro</button>
-                        <button class="tab-btn" onclick="switchTab(this, 'odontos-nuevo')">Nuevo Odontólogo</button>
-                    </div>
-
-                    <div id="odontos-lista" class="tab-content active" style="margin-top: 20px;">
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Nombre</th>
-                                        <th>Especialidad</th>
-                                        <th>Celular</th>
-                                        <th>Comisión %</th>
-                                        <th>Por Cobrar</th>
-                                        <th>Cobrado (Mes)</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="odontosLista"></tbody>
-                            </table>
+                    <div class="form-container" style="margin-bottom: 30px;">
+                        <h3 style="margin-bottom: 20px;">Agregar Nuevo Odontólogo</h3>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Nombre Completo *</label>
+                                <input type="text" id="nuevoOdontoNombre">
+                            </div>
+                            <div class="form-field">
+                                <label>Especialidad</label>
+                                <input type="text" id="nuevoOdontoEspecialidad">
+                            </div>
+                            <div class="form-field">
+                                <label>Celular</label>
+                                <input type="text" id="nuevoOdontoCelular">
+                            </div>
+                        </div>
+                        <div class="button-group">
+                            <button class="btn btn-primary" onclick="agregarNuevoOdonto()">Agregar Odontólogo</button>
                         </div>
                     </div>
 
-                    <div id="odontos-pendiente" class="tab-content" style="margin-top: 20px;">
-                        <div id="odontoPendienteLista"></div>
-                    </div>
-
-                    <div id="odontos-nuevo" class="tab-content" style="margin-top: 20px;">
-                        <div class="form-container">
-                            <h3 style="margin-bottom: 20px;">Agregar Nuevo Odontólogo</h3>
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Nombre Completo *</label>
-                                    <input type="text" id="nuevoOdontoNombre">
-                                </div>
-                                <div class="form-field">
-                                    <label>Especialidad</label>
-                                    <input type="text" id="nuevoOdontoEspecialidad">
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Celular</label>
-                                    <input type="text" id="nuevoOdontoCelular">
-                                </div>
-                                <div class="form-field">
-                                    <label>Comisión %</label>
-                                    <input type="number" id="nuevoOdontoComision" min="0" max="100">
-                                </div>
-                            </div>
-                            <div class="button-group">
-                                <button class="btn btn-primary" onclick="agregarNuevoOdonto()">Agregar Odontólogo</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- STOCK MODULE -->
-                <div id="stockModule" class="module-content">
-                    <p>Módulo de Stock (en construcción)</p>
-                </div>
-
-                <!-- REPORTES MODULE -->
-                <div id="reportesModule" class="module-content">
-                    <p>Módulo de Reportes (en construcción)</p>
+                    <h3 style="margin-bottom: 20px;">Odontólogos Registrados</h3>
+                    <div id="odontosDetalles"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ============ GLOBAL STATE WITH BIDIRECTIONAL SYNC ============
-        const appState = {
+        // STATE
+        const app = {
             currentUser: null,
-            userRole: 'admin',
             pacientes: [],
             odontos: [],
             tratamientos: [],
             facturas: [],
             caja: [],
-            ultimoIdFactura: 0,
-            ultimoIdPaciente: 0,
-            ultimoIdOdonto: 0
+            facturaEnEdicion: { tratamientos: [] },
+            ultimoId: { paciente: 0, odonto: 0, factura: 0, caja: 0 }
         };
 
-        // ============ AUTHENTICATION ============
+        // LOGIN
         function handleLogin() {
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
+            const user = document.getElementById('loginUsername').value;
             const role = document.getElementById('loginRole').value;
-
-            if (username && password) {
-                appState.currentUser = username;
-                appState.userRole = role;
+            if (user) {
+                app.currentUser = user;
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('appContainer').classList.remove('hidden');
-                document.getElementById('currentUser').textContent = username;
+                document.getElementById('currentUser').textContent = user;
                 document.getElementById('userRole').textContent = role === 'admin' ? 'Administrador' : 'Usuario';
-                loadSampleData();
+                loadData();
                 updateDashboard();
             }
         }
 
         function handleLogout() {
-            if (confirm('¿Deseas cerrar sesión?')) {
-                appState.currentUser = null;
+            if (confirm('¿Cerrar sesión?')) {
                 document.getElementById('loginScreen').classList.remove('hidden');
                 document.getElementById('appContainer').classList.add('hidden');
             }
         }
 
-        // ============ MODULE SWITCHING ============
+        // NAVIGATION
         function switchModule(module, event) {
             if (event) {
-                const modules = document.querySelectorAll('.module-content');
-                modules.forEach(m => m.classList.remove('active'));
+                document.querySelectorAll('.module-content').forEach(m => m.classList.remove('active'));
                 document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
                 event.target.classList.add('active');
             }
-
-            const moduleElement = document.getElementById(module + 'Module');
-            if (moduleElement) {
-                moduleElement.classList.add('active');
-            }
+            const elem = document.getElementById(module + 'Module');
+            if (elem) elem.classList.add('active');
 
             const titles = {
                 'dashboard': '📊 Dashboard',
                 'facturacion': '💰 Facturación',
-                'caja': '💵 Control de Caja',
+                'caja': '💵 Caja',
                 'pacientes': '👥 Pacientes',
-                'odontos': '👨‍⚕️ Odontólogos',
-                'stock': '📦 Stock',
-                'reportes': '📈 Reportes'
+                'odontos': '👨‍⚕️ Odontólogos'
             };
             document.getElementById('pageTitle').textContent = titles[module] || module;
 
@@ -1026,309 +897,317 @@
             else if (module === 'odontos') renderOdontos();
         }
 
-        function switchTab(button, tabId) {
-            const container = button.parentElement;
-            container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            button.classList.add('active');
-
-            const parent = container.parentElement;
-            parent.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        function switchTab(btn, tabId) {
+            btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            btn.parentElement.parentElement.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
         }
 
-        // ============ LOAD SAMPLE DATA ============
-        function loadSampleData() {
-            appState.pacientes = [
-                { id: 1, nombre: 'María García', telefono: '+52 555 123 4567', email: 'maria@email.com', cobrado: 15000, porCobrar: 0, tratamientosRealizados: [], pagosRegistrados: [], notas: 'Paciente frecuente' },
-                { id: 2, nombre: 'Juan López', telefono: '+52 555 987 6543', email: 'juan@email.com', cobrado: 8000, porCobrar: 4000, tratamientosRealizados: [], pagosRegistrados: [], notas: '' },
-                { id: 3, nombre: 'Carmen Sánchez', telefono: '+52 555 555 5555', email: 'carmen@email.com', cobrado: 1500, porCobrar: 0, tratamientosRealizados: [], pagosRegistrados: [], notas: '' }
+        // LOAD DATA
+        function loadData() {
+            app.pacientes = [
+                { id: 1, nombre: 'María García', telefono: '+52 555 123 4567', email: 'maria@email.com', facturas: [], cobrado: 0, deuda: 0 },
+                { id: 2, nombre: 'Juan López', telefono: '+52 555 987 6543', email: 'juan@email.com', facturas: [], cobrado: 0, deuda: 0 }
             ];
-            appState.ultimoIdPaciente = 3;
+            app.ultimoId.paciente = 2;
 
-            appState.odontos = [
-                { id: 1, nombre: 'Dr. Alberto Rivera', especialidad: 'Implantología', celular: '+52 555 111 1111', comision: 35, porCobrar: 0, cobradoMes: 0, tratamientosRealizados: [], pagosRecibidos: [] },
-                { id: 2, nombre: 'Dra. Ana Martínez', especialidad: 'Prostodoncia', celular: '+52 555 222 2222', comision: 30, porCobrar: 0, cobradoMes: 0, tratamientosRealizados: [], pagosRecibidos: [] }
-            ];
-            appState.ultimoIdOdonto = 2;
-
-            appState.tratamientos = [
-                { id: 1, nombre: 'Implante Titanio', categoria: 'implantes', costo: 3500, precio: 15000, duracion: 120, descripcion: 'Implante dental de última generación' },
-                { id: 2, nombre: 'Corona PMMA', categoria: 'prostodoncia', costo: 800, precio: 3500, duracion: 90, descripcion: 'Corona de acrílico reforzado' },
-                { id: 3, nombre: 'Corona de Porcelana', categoria: 'prostodoncia', costo: 1200, precio: 6000, duracion: 90, descripcion: 'Corona de porcelana' },
-                { id: 4, nombre: 'Corona de Zirconio', categoria: 'prostodoncia', costo: 1800, precio: 8500, duracion: 90, descripcion: 'Corona de zirconio' },
-                { id: 5, nombre: 'Limpieza Profesional', categoria: 'limpiezas', costo: 200, precio: 1500, duracion: 45, descripcion: 'Limpieza profunda' },
-                { id: 6, nombre: 'Consulta Inicial', categoria: 'otro', costo: 100, precio: 900, duracion: 30, descripcion: 'Evaluación inicial' }
+            app.tratamientos = [
+                { id: 1, nombre: 'Implante Titanio', precio: 15000 },
+                { id: 2, nombre: 'Corona PMMA', precio: 3500 },
+                { id: 3, nombre: 'Corona Porcelana', precio: 6000 },
+                { id: 4, nombre: 'Corona Zirconio', precio: 8500 },
+                { id: 5, nombre: 'Limpieza Profesional', precio: 1500 },
+                { id: 6, nombre: 'Consulta Inicial', precio: 900 }
             ];
 
-            appState.facturas = [
-                { id: 1, pacienteId: 1, pacienteNombre: 'María García', odontologoId: 1, odontologoNombre: 'Dr. Alberto Rivera', tratamientoId: 1, tratamientoNombre: 'Implante Titanio', monto: 15000, metodoPago: 'efectivo', fecha: '2026-06-29', estado: 'pagado', notas: '' },
-                { id: 2, pacienteId: 2, pacienteNombre: 'Juan López', odontologoId: 2, odontologoNombre: 'Dra. Ana Martínez', tratamientoId: 3, tratamientoNombre: 'Corona de Porcelana', monto: 6000, metodoPago: 'tarjeta', fecha: '2026-06-28', estado: 'pendiente', notas: '' }
-            ];
-            appState.ultimoIdFactura = 2;
-
-            appState.caja = [
-                { id: 1, tipo: 'ingreso', categoria: 'pago_paciente', descripcion: 'Pago de María García', monto: 15000, metodo: 'efectivo', fecha: '2026-06-29', pacienteId: 1, nota: '', usuario: 'admin' },
-                { id: 2, tipo: 'ingreso', categoria: 'pago_paciente', descripcion: 'Pago de Juan López', monto: 4000, metodo: 'tarjeta', fecha: '2026-06-28', pacienteId: 2, nota: '', usuario: 'admin' },
-                { id: 3, tipo: 'egreso', categoria: 'pago_odonto', descripcion: 'Pago a Dr. Alberto Rivera', monto: 5250, metodo: 'tarjeta', fecha: '2026-06-25', odontologoId: 1, nota: '', usuario: 'admin' }
-            ];
-
-            updateDashboard();
-            renderSelectOptions();
-        }
-
-        // ============ SINCRONIZATION FUNCTIONS ============
-        function sincronizarFacturaConOdonto(factura) {
-            const odonto = appState.odontos.find(o => o.id === factura.odontologoId);
-            if (odonto) {
-                const comisionMonto = (factura.monto * odonto.comision) / 100;
-                
-                // Registrar en odontólogo como pendiente de cobro
-                odonto.tratamientosRealizados.push({
-                    facturaId: factura.id,
-                    pacienteNombre: factura.pacienteNombre,
-                    tratamientoNombre: factura.tratamientoNombre,
-                    monto: factura.monto,
-                    comision: odonto.comision,
-                    comisionMonto: comisionMonto,
-                    fecha: factura.fecha,
-                    estado: 'pendiente'
-                });
-                odonto.porCobrar += comisionMonto;
-            }
-        }
-
-        function sincronizarFacturaConPaciente(factura) {
-            const paciente = appState.pacientes.find(p => p.id === factura.pacienteId);
-            if (paciente) {
-                paciente.tratamientosRealizados.push({
-                    facturaId: factura.id,
-                    tratamientoNombre: factura.tratamientoNombre,
-                    odontologoNombre: factura.odontologoNombre,
-                    monto: factura.monto,
-                    fecha: factura.fecha,
-                    estado: factura.estado
-                });
-                
-                if (factura.estado !== 'pagado') {
-                    paciente.porCobrar += factura.monto;
+            app.odontos = [
+                { 
+                    id: 1, 
+                    nombre: 'Dr. Alberto Rivera', 
+                    especialidad: 'Implantología', 
+                    celular: '+52 555 111 1111',
+                    honorarios: {1: 5000, 2: 800, 3: 1500, 4: 2000, 5: 300, 6: 200},
+                    porCobrar: 0,
+                    cobradoMes: 0,
+                    facturas: []
+                },
+                { 
+                    id: 2, 
+                    nombre: 'Dra. Ana Martínez', 
+                    especialidad: 'Prostodoncia', 
+                    celular: '+52 555 222 2222',
+                    honorarios: {1: 4500, 2: 700, 3: 1300, 4: 1800, 5: 250, 6: 150},
+                    porCobrar: 0,
+                    cobradoMes: 0,
+                    facturas: []
                 }
-            }
+            ];
+            app.ultimoId.odonto = 2;
+
+            app.facturas = [
+                { id: 1, pacienteId: 1, pacienteNombre: 'María García', odontologoId: 1, odontologoNombre: 'Dr. Alberto Rivera', items: [{tratamientoId: 1, nombre: 'Implante Titanio', precio: 15000, honorario: 5000}], total: 15000, pagado: 15000, deuda: 0, metodo: 'efectivo', fecha: '2026-07-20', notas: '' },
+                { id: 2, pacienteId: 2, pacienteId: 2, pacienteNombre: 'Juan López', odontologoId: 2, odontologoNombre: 'Dra. Ana Martínez', items: [{tratamientoId: 3, nombre: 'Corona Porcelana', precio: 6000, honorario: 1300}], total: 6000, pagado: 2000, deuda: 4000, metodo: 'tarjeta', fecha: '2026-07-19', notas: '' }
+            ];
+            app.ultimoId.factura = 2;
+
+            app.caja = [
+                { id: 1, tipo: 'ingreso', facturaId: 1, descripcion: 'Pago María García - Implante', monto: 15000, metodo: 'efectivo', fecha: '2026-07-20', usuario: app.currentUser },
+                { id: 2, tipo: 'ingreso', facturaId: 2, descripcion: 'Pago Juan López - Parcial', monto: 2000, metodo: 'tarjeta', fecha: '2026-07-19', usuario: app.currentUser },
+                { id: 3, tipo: 'egreso', odontologoId: 1, descripcion: 'Pago Dr. Alberto Rivera', monto: 5000, metodo: 'transferencia', fecha: '2026-07-18', usuario: app.currentUser }
+            ];
+            app.ultimoId.caja = 3;
+
+            renderSelects();
+            updateDashboard();
         }
 
-        function registrarPagoOdonto(odontologoId, monto) {
-            const odonto = appState.odontos.find(o => o.id === odontologoId);
-            if (odonto) {
-                odonto.porCobrar -= monto;
-                odonto.cobradoMes += monto;
-                odonto.pagosRecibidos.push({
-                    monto: monto,
-                    fecha: new Date().toISOString().split('T')[0],
-                    metodo: 'transferencia'
-                });
-            }
+        // FACTURACIÓN
+        function onPacienteChange() {
+            const pacienteId = document.getElementById('factPaciente').value;
+            if (!pacienteId) app.facturaEnEdicion.pacienteId = null;
+            else app.facturaEnEdicion.pacienteId = parseInt(pacienteId);
         }
 
-        function registrarPagoPaciente(pacienteId, monto) {
-            const paciente = appState.pacientes.find(p => p.id === pacienteId);
-            if (paciente) {
-                paciente.porCobrar -= monto;
-                paciente.cobrado += monto;
-                paciente.pagosRegistrados.push({
-                    monto: monto,
-                    fecha: new Date().toISOString().split('T')[0],
-                    metodo: 'efectivo'
-                });
+        function onOdontoChange() {
+            const odontologoId = document.getElementById('factOdonto').value;
+            if (!odontologoId) {
+                app.facturaEnEdicion.odontologoId = null;
+                document.getElementById('factTratamiento').innerHTML = '<option value="">Seleccionar tratamiento...</option>';
+                return;
             }
+            app.facturaEnEdicion.odontologoId = parseInt(odontologoId);
+            renderTratamientosDisponibles();
         }
 
-        // ============ FACTURACIÓN ============
-        function onSelectPaciente() {
-            const pacienteId = document.getElementById('factPacienteSelect').value;
-            // Cargar tratamientos del paciente si lo necesitas
+        function renderTratamientosDisponibles() {
+            const odontologoId = app.facturaEnEdicion.odontologoId;
+            const odonto = app.odontos.find(o => o.id === odontologoId);
+            const select = document.getElementById('factTratamiento');
+            select.innerHTML = '<option value="">Seleccionar tratamiento...</option>';
+
+            app.tratamientos.forEach(t => {
+                const honorario = odonto.honorarios[t.id] || 0;
+                select.innerHTML += `<option value="${t.id}" data-honorario="${honorario}" data-precio="${t.precio}">${t.nombre}</option>`;
+            });
         }
 
-        function onSelectTratamiento() {
-            const tratamientoId = document.getElementById('factTratamientoSelect').value;
-            const tratamiento = appState.tratamientos.find(t => t.id === parseInt(tratamientoId));
-            if (tratamiento) {
-                document.getElementById('factMonto').value = tratamiento.precio;
+        function onTratamientoChange() {
+            const select = document.getElementById('factTratamiento');
+            if (!select.value) {
+                document.getElementById('factHonorario').value = '';
+                document.getElementById('factPrecio').value = '';
+                return;
             }
+            const option = select.options[select.selectedIndex];
+            document.getElementById('factHonorario').value = option.dataset.honorario;
+            document.getElementById('factPrecio').value = option.dataset.precio;
+        }
+
+        document.addEventListener('change', function(e) {
+            if (e.target.id === 'factTratamiento') onTratamientoChange();
+        });
+
+        function agregarTratamientoAFactura() {
+            const tratamientoId = document.getElementById('factTratamiento').value;
+            const honorario = parseFloat(document.getElementById('factHonorario').value);
+            const precio = parseFloat(document.getElementById('factPrecio').value);
+
+            if (!tratamientoId || !honorario || !precio) {
+                alert('Selecciona tratamiento y verifica los montos');
+                return;
+            }
+
+            const tratamiento = app.tratamientos.find(t => t.id === parseInt(tratamientoId));
+            
+            app.facturaEnEdicion.tratamientos.push({
+                tratamientoId: parseInt(tratamientoId),
+                nombre: tratamiento.nombre,
+                precio: precio,
+                honorario: honorario
+            });
+
+            renderTratamientosEnFactura();
+            document.getElementById('factTratamiento').value = '';
+            document.getElementById('factHonorario').value = '';
+            document.getElementById('factPrecio').value = '';
+        }
+
+        function renderTratamientosEnFactura() {
+            const lista = document.getElementById('tratamientosLista');
+            lista.innerHTML = '';
+
+            let totalPrecio = 0, totalHonorario = 0;
+
+            app.facturaEnEdicion.tratamientos.forEach((item, idx) => {
+                totalPrecio += item.precio;
+                totalHonorario += item.honorario;
+
+                lista.innerHTML += `
+                    <div class="item-row">
+                        <div class="item-text"><strong>${item.nombre}</strong></div>
+                        <div class="item-value">$${item.precio.toLocaleString('es-MX')}</div>
+                        <div class="item-value">Honorario: $${item.honorario.toLocaleString('es-MX')}</div>
+                        <div></div>
+                        <button class="btn btn-small btn-danger" onclick="eliminarTratamientoDeFactura(${idx})">✕</button>
+                    </div>
+                `;
+            });
+
+            document.getElementById('resumenTotal').textContent = '$' + totalPrecio.toLocaleString('es-MX');
+            document.getElementById('resumenHonorarios').textContent = '$' + totalHonorario.toLocaleString('es-MX');
+            document.getElementById('resumenTotalCobrar').textContent = '$' + totalPrecio.toLocaleString('es-MX');
+        }
+
+        function eliminarTratamientoDeFactura(idx) {
+            app.facturaEnEdicion.tratamientos.splice(idx, 1);
+            renderTratamientosEnFactura();
         }
 
         function crearFactura() {
-            const pacienteId = parseInt(document.getElementById('factPacienteSelect').value);
-            const odontologoId = parseInt(document.getElementById('factOdontoSelect').value);
-            const tratamientoId = parseInt(document.getElementById('factTratamientoSelect').value);
-            const monto = parseFloat(document.getElementById('factMonto').value);
+            if (!app.facturaEnEdicion.pacienteId || !app.facturaEnEdicion.odontologoId || app.facturaEnEdicion.tratamientos.length === 0) {
+                alert('Completa: Paciente, Odontólogo y al menos 1 tratamiento');
+                return;
+            }
+
+            const paciente = app.pacientes.find(p => p.id === app.facturaEnEdicion.pacienteId);
+            const odonto = app.odontos.find(o => o.id === app.facturaEnEdicion.odontologoId);
+            
+            const totalPrecio = app.facturaEnEdicion.tratamientos.reduce((sum, t) => sum + t.precio, 0);
+            const totalHonorario = app.facturaEnEdicion.tratamientos.reduce((sum, t) => sum + t.honorario, 0);
+            const montoPago = parseFloat(document.getElementById('factMontoPago').value) || 0;
             const metodoPago = document.getElementById('factMetodoPago').value;
             const notas = document.getElementById('factNotas').value;
 
-            if (!pacienteId || !odontologoId || !tratamientoId || !monto) {
-                alert('Por favor completa todos los campos requeridos');
-                return;
-            }
-
-            const paciente = appState.pacientes.find(p => p.id === pacienteId);
-            const odonto = appState.odontos.find(o => o.id === odontologoId);
-            const tratamiento = appState.tratamientos.find(t => t.id === tratamientoId);
-
-            const nuevaFactura = {
-                id: ++appState.ultimoIdFactura,
-                pacienteId: pacienteId,
+            const factura = {
+                id: ++app.ultimoId.factura,
+                pacienteId: app.facturaEnEdicion.pacienteId,
                 pacienteNombre: paciente.nombre,
-                odontologoId: odontologoId,
+                odontologoId: app.facturaEnEdicion.odontologoId,
                 odontologoNombre: odonto.nombre,
-                tratamientoId: tratamientoId,
-                tratamientoNombre: tratamiento.nombre,
-                monto: monto,
-                metodoPago: metodoPago,
+                items: [...app.facturaEnEdicion.tratamientos],
+                total: totalPrecio,
+                honorarioTotal: totalHonorario,
+                pagado: montoPago,
+                deuda: totalPrecio - montoPago,
+                metodo: metodoPago,
                 fecha: new Date().toISOString().split('T')[0],
-                estado: 'pendiente',
                 notas: notas
             };
 
-            appState.facturas.push(nuevaFactura);
-            sincronizarFacturaConOdonto(nuevaFactura);
-            sincronizarFacturaConPaciente(nuevaFactura);
+            app.facturas.push(factura);
+            paciente.facturas.push(factura.id);
+            paciente.cobrado += montoPago;
+            paciente.deuda += factura.deuda;
 
-            alert('✅ Factura creada exitosamente\n\nID: ' + nuevaFactura.id + '\nOdontólogo: ' + odonto.nombre + '\nPendiente de cobro: $' + (monto * odonto.comision / 100).toFixed(2));
-            limpiarFormoFactura();
+            odonto.facturas.push(factura.id);
+            odonto.porCobrar += totalHonorario;
+
+            // Registrar pago automático en caja
+            if (montoPago > 0) {
+                const movimiento = {
+                    id: ++app.ultimoId.caja,
+                    tipo: 'ingreso',
+                    facturaId: factura.id,
+                    descripcion: `Pago ${paciente.nombre} - ${factura.items.map(i => i.nombre).join(', ')}`,
+                    monto: montoPago,
+                    metodo: metodoPago,
+                    fecha: factura.fecha,
+                    usuario: app.currentUser
+                };
+                app.caja.push(movimiento);
+            }
+
+            alert('✅ Factura creada:\n\nID: ' + factura.id + '\nTotal: $' + totalPrecio.toLocaleString('es-MX') + '\nPagado: $' + montoPago.toLocaleString('es-MX') + '\nDeuda: $' + factura.deuda.toLocaleString('es-MX') + '\n\nHonorarios a Dr. ' + odonto.nombre + ': $' + totalHonorario.toLocaleString('es-MX'));
+
+            limpiarFormularioFactura();
             renderFacturas();
+            renderSelects();
             updateDashboard();
         }
 
-        function limpiarFormoFactura() {
-            document.getElementById('factPacienteSelect').value = '';
-            document.getElementById('factOdontoSelect').value = '';
-            document.getElementById('factTratamientoSelect').value = '';
-            document.getElementById('factMonto').value = '';
-            document.getElementById('factMetodoPago').value = 'efectivo';
+        function limpiarFormularioFactura() {
+            document.getElementById('factPaciente').value = '';
+            document.getElementById('factOdonto').value = '';
+            document.getElementById('factTratamiento').innerHTML = '<option value="">Seleccionar tratamiento...</option>';
+            document.getElementById('factMontoPago').value = '';
             document.getElementById('factNotas').value = '';
+            document.getElementById('tratamientosLista').innerHTML = '';
+            document.getElementById('resumenTotal').textContent = '$0';
+            document.getElementById('resumenHonorarios').textContent = '$0';
+            document.getElementById('resumenTotalCobrar').textContent = '$0';
+            app.facturaEnEdicion = { tratamientos: [] };
         }
 
         function renderFacturas() {
-            const tbody = document.getElementById('facturacionLista');
+            const tbody = document.getElementById('facturaLista');
             tbody.innerHTML = '';
-
-            appState.facturas.forEach(factura => {
-                const row = `
+            app.facturas.forEach(f => {
+                const estadoBadge = f.deuda > 0 ? `<span class="badge badge-warning">DEUDA: $${f.deuda.toLocaleString('es-MX')}</span>` : `<span class="badge badge-success">PAGADA</span>`;
+                tbody.innerHTML += `
                     <tr>
-                        <td>${factura.id}</td>
-                        <td>${factura.pacienteNombre}</td>
-                        <td>${factura.odontologoNombre}</td>
-                        <td>${factura.tratamientoNombre}</td>
-                        <td>$${factura.monto.toLocaleString('es-MX')}</td>
-                        <td>${factura.fecha}</td>
-                        <td><span class="badge badge-${factura.estado === 'pagado' ? 'success' : 'warning'}">${factura.estado}</span></td>
-                        <td>
-                            <button class="btn btn-small btn-primary" onclick="marcarFacturaPagada(${factura.id})">Marcar Pagada</button>
-                        </td>
+                        <td>#${f.id}</td>
+                        <td>${f.pacienteNombre}</td>
+                        <td>${f.odontologoNombre}</td>
+                        <td>$${f.total.toLocaleString('es-MX')}</td>
+                        <td>$${f.pagado.toLocaleString('es-MX')}</td>
+                        <td>$${f.deuda.toLocaleString('es-MX')}</td>
+                        <td>${f.metodo}</td>
+                        <td>${f.fecha}</td>
+                        <td><button class="btn btn-small btn-primary" onclick="verFactura(${f.id})">Ver</button></td>
                     </tr>
                 `;
-                tbody.innerHTML += row;
             });
-
-            renderSelectOptions();
         }
 
-        function marcarFacturaPagada(facturaId) {
-            const factura = appState.facturas.find(f => f.id === facturaId);
-            if (factura) {
-                factura.estado = 'pagado';
-                registrarPagoPaciente(factura.pacienteId, factura.monto);
-                alert('✅ Factura marcada como pagada');
-                renderFacturas();
-                updateDashboard();
-            }
+        function verFactura(facturaId) {
+            const factura = app.facturas.find(f => f.id === facturaId);
+            if (!factura) return;
+            let msg = `\n=== FACTURA #${factura.id} ===\n\n`;
+            msg += `Paciente: ${factura.pacienteNombre}\n`;
+            msg += `Odontólogo: ${factura.odontologoNombre}\n`;
+            msg += `Fecha: ${factura.fecha}\n\n`;
+            msg += `TRATAMIENTOS:\n`;
+            factura.items.forEach(item => {
+                msg += `  • ${item.nombre}\n    Precio: $${item.precio.toLocaleString('es-MX')}\n    Honorario: $${item.honorario.toLocaleString('es-MX')}\n`;
+            });
+            msg += `\nTOTAL: $${factura.total.toLocaleString('es-MX')}\n`;
+            msg += `PAGADO: $${factura.pagado.toLocaleString('es-MX')}\n`;
+            msg += `DEUDA: $${factura.deuda.toLocaleString('es-MX')}\n`;
+            msg += `\nMétodo: ${factura.metodo}\n`;
+            if (factura.notas) msg += `Notas: ${factura.notas}\n`;
+            alert(msg);
         }
 
-        // ============ CAJA MODULE ============
-        function onChangeIngresoTipo() {
-            const tipo = document.getElementById('ingresoTipo').value;
-            const pacienteField = document.getElementById('ingrePacienteField');
-            pacienteField.style.display = tipo === 'pago_paciente' ? 'block' : 'none';
-        }
-
-        function onChangeEgresoTipo() {
-            const tipo = document.getElementById('egresoTipo').value;
-            const odontoField = document.getElementById('egresoOdontoField');
-            odontoField.style.display = (tipo === 'pago_odonto' || tipo === 'pago_empleado') ? 'block' : 'none';
-        }
-
-        function registrarIngreso() {
-            const tipo = document.getElementById('ingresoTipo').value;
-            const pacienteId = tipo === 'pago_paciente' ? parseInt(document.getElementById('ingresoPacienteSelect').value) : null;
-            const monto = parseFloat(document.getElementById('ingresoMonto').value);
-            const metodo = document.getElementById('ingresoMetodo').value;
-            const descripcion = document.getElementById('ingresoDesc').value;
-
-            if (!monto || (tipo === 'pago_paciente' && !pacienteId)) {
-                alert('Por favor completa los campos requeridos');
-                return;
-            }
-
-            const paciente = pacienteId ? appState.pacientes.find(p => p.id === pacienteId) : null;
-
-            const movimiento = {
-                id: appState.caja.length + 1,
-                tipo: 'ingreso',
-                categoria: tipo,
-                descripcion: descripcion || (paciente ? 'Pago de ' + paciente.nombre : 'Ingreso'),
-                monto: monto,
-                metodo: metodo,
-                fecha: new Date().toISOString().split('T')[0],
-                pacienteId: pacienteId,
-                nota: '',
-                usuario: appState.currentUser
-            };
-
-            appState.caja.push(movimiento);
-
-            if (pacienteId) {
-                registrarPagoPaciente(pacienteId, monto);
-            }
-
-            alert('✅ Ingreso registrado exitosamente');
-            document.getElementById('ingresoMonto').value = '';
-            document.getElementById('ingresoDesc').value = '';
-            renderCaja();
-            updateDashboard();
-        }
-
+        // CAJA
         function registrarEgreso() {
-            const tipo = document.getElementById('egresoTipo').value;
-            const odontologoId = (tipo === 'pago_odonto' || tipo === 'pago_empleado') ? parseInt(document.getElementById('egresoOdontoSelect').value) : null;
+            const odontologoId = parseInt(document.getElementById('egresoOdonto').value);
             const monto = parseFloat(document.getElementById('egresoMonto').value);
             const metodo = document.getElementById('egresoMetodo').value;
-            const descripcion = document.getElementById('egresoDesc').value;
+            const desc = document.getElementById('egresoDesc').value;
 
-            if (!monto || ((tipo === 'pago_odonto' || tipo === 'pago_empleado') && !odontologoId)) {
-                alert('Por favor completa los campos requeridos');
+            if (!odontologoId || !monto) {
+                alert('Selecciona odontólogo y monto');
                 return;
             }
 
-            const odonto = odontologoId ? appState.odontos.find(o => o.id === odontologoId) : null;
-
+            const odonto = app.odontos.find(o => o.id === odontologoId);
             const movimiento = {
-                id: appState.caja.length + 1,
+                id: ++app.ultimoId.caja,
                 tipo: 'egreso',
-                categoria: tipo,
-                descripcion: descripcion || (odonto ? 'Pago a ' + odonto.nombre : 'Egreso'),
+                odontologoId: odontologoId,
+                descripcion: desc || 'Pago ' + odonto.nombre,
                 monto: monto,
                 metodo: metodo,
                 fecha: new Date().toISOString().split('T')[0],
-                odontologoId: odontologoId,
-                nota: '',
-                usuario: appState.currentUser
+                usuario: app.currentUser
             };
 
-            appState.caja.push(movimiento);
+            app.caja.push(movimiento);
+            odonto.porCobrar -= monto;
+            odonto.cobradoMes += monto;
 
-            if (odontologoId) {
-                registrarPagoOdonto(odontologoId, monto);
-            }
-
-            alert('✅ Egreso registrado exitosamente');
+            alert('✅ Egreso registrado: $' + monto.toLocaleString('es-MX'));
             document.getElementById('egresoMonto').value = '';
             document.getElementById('egresoDesc').value = '';
             renderCaja();
@@ -1336,8 +1215,8 @@
         }
 
         function renderCaja() {
-            const ingresos = appState.caja.filter(c => c.tipo === 'ingreso').reduce((sum, c) => sum + c.monto, 0);
-            const egresos = appState.caja.filter(c => c.tipo === 'egreso').reduce((sum, c) => sum + c.monto, 0);
+            const ingresos = app.caja.filter(c => c.tipo === 'ingreso').reduce((s, c) => s + c.monto, 0);
+            const egresos = app.caja.filter(c => c.tipo === 'egreso').reduce((s, c) => s + c.monto, 0);
 
             document.getElementById('cajaTotalIngresos').textContent = '$' + ingresos.toLocaleString('es-MX');
             document.getElementById('cajaTotalEgresos').textContent = '$' + egresos.toLocaleString('es-MX');
@@ -1345,292 +1224,204 @@
 
             const tbody = document.getElementById('cajaHistorial');
             tbody.innerHTML = '';
-            appState.caja.forEach(movimiento => {
-                const row = `
+            app.caja.forEach(c => {
+                tbody.innerHTML += `
                     <tr>
-                        <td>${movimiento.fecha}</td>
-                        <td><span class="badge badge-${movimiento.tipo === 'ingreso' ? 'success' : 'danger'}">${movimiento.tipo.toUpperCase()}</span></td>
-                        <td>${movimiento.descripcion}</td>
-                        <td class="text-${movimiento.tipo === 'ingreso' ? 'success' : 'danger'} font-bold">$${movimiento.monto.toLocaleString('es-MX')}</td>
-                        <td>${movimiento.metodo}</td>
+                        <td>${c.fecha}</td>
+                        <td><span class="badge badge-${c.tipo === 'ingreso' ? 'success' : 'danger'}">${c.tipo.toUpperCase()}</span></td>
+                        <td>${c.descripcion}</td>
+                        <td class="text-right font-bold">$${c.monto.toLocaleString('es-MX')}</td>
+                        <td>${c.metodo}</td>
                     </tr>
                 `;
-                tbody.innerHTML += row;
             });
 
-            renderSelectOptions();
+            renderSelects();
         }
 
-        // ============ PACIENTES MODULE ============
+        // PACIENTES
         function renderPacientes() {
             const tbody = document.getElementById('pacientesLista');
             tbody.innerHTML = '';
-
-            appState.pacientes.forEach(paciente => {
-                const row = `
+            app.pacientes.forEach(p => {
+                tbody.innerHTML += `
                     <tr>
-                        <td>${paciente.nombre}</td>
-                        <td>${paciente.telefono}</td>
-                        <td>${paciente.tratamientosRealizados.length}</td>
-                        <td>$${paciente.cobrado.toLocaleString('es-MX')}</td>
-                        <td><span class="badge badge-${paciente.porCobrar > 0 ? 'warning' : 'success'}">$${paciente.porCobrar.toLocaleString('es-MX')}</span></td>
-                        <td><button class="btn btn-small btn-primary" onclick="verDetallesPaciente(${paciente.id})">Ver Detalles</button></td>
+                        <td>${p.nombre}</td>
+                        <td>${p.telefono}</td>
+                        <td>${p.email}</td>
+                        <td>${p.facturas.length}</td>
+                        <td>$${p.cobrado.toLocaleString('es-MX')}</td>
+                        <td><span class="badge badge-${p.deuda > 0 ? 'warning' : 'success'}">$${p.deuda.toLocaleString('es-MX')}</span></td>
+                        <td><button class="btn btn-small btn-primary" onclick="verPaciente(${p.id})">Detalles</button></td>
                     </tr>
                 `;
-                tbody.innerHTML += row;
             });
-
-            renderSelectOptions();
         }
 
-        function verDetallesPaciente(pacienteId) {
-            const paciente = appState.pacientes.find(p => p.id === pacienteId);
-            if (paciente) {
-                let detalles = `\n=== PACIENTE: ${paciente.nombre} ===\n\n`;
-                detalles += `Teléfono: ${paciente.telefono}\n`;
-                detalles += `Email: ${paciente.email}\n`;
-                detalles += `Cobrado Total: $${paciente.cobrado.toLocaleString('es-MX')}\n`;
-                detalles += `Por Cobrar: $${paciente.porCobrar.toLocaleString('es-MX')}\n`;
-                detalles += `Tratamientos: ${paciente.tratamientosRealizados.length}\n\n`;
-
-                if (paciente.tratamientosRealizados.length > 0) {
-                    detalles += 'TRATAMIENTOS REALIZADOS:\n';
-                    paciente.tratamientosRealizados.forEach((t, i) => {
-                        detalles += `${i + 1}. ${t.tratamientoNombre} - $${t.monto.toLocaleString('es-MX')} (${t.estado})\n`;
-                    });
-                }
-
-                alert(detalles);
-            }
+        function verPaciente(pacienteId) {
+            const p = app.pacientes.find(x => x.id === pacienteId);
+            if (!p) return;
+            let msg = `\n${p.nombre}\nTel: ${p.telefono}\nEmail: ${p.email}\n\nFacturas: ${p.facturas.length}\nCobrado: $${p.cobrado.toLocaleString('es-MX')}\nDeuda: $${p.deuda.toLocaleString('es-MX')}\n`;
+            alert(msg);
         }
 
         function agregarNuevoPaciente() {
             const nombre = document.getElementById('nuevoPacienteNombre').value;
             const telefono = document.getElementById('nuevoPacienteTelefono').value;
             const email = document.getElementById('nuevoPacienteEmail').value;
-            const notas = document.getElementById('nuevoPacienteNotas').value;
 
             if (!nombre) {
                 alert('El nombre es obligatorio');
                 return;
             }
 
-            const nuevoPaciente = {
-                id: ++appState.ultimoIdPaciente,
+            const p = {
+                id: ++app.ultimoId.paciente,
                 nombre: nombre,
                 telefono: telefono,
                 email: email,
+                facturas: [],
                 cobrado: 0,
-                porCobrar: 0,
-                tratamientosRealizados: [],
-                pagosRegistrados: [],
-                notas: notas
+                deuda: 0
             };
 
-            appState.pacientes.push(nuevoPaciente);
-            alert('✅ Paciente agregado exitosamente');
+            app.pacientes.push(p);
+            alert('✅ Paciente agregado');
             document.getElementById('nuevoPacienteNombre').value = '';
             document.getElementById('nuevoPacienteTelefono').value = '';
             document.getElementById('nuevoPacienteEmail').value = '';
-            document.getElementById('nuevoPacienteNotas').value = '';
             renderPacientes();
-            renderSelectOptions();
+            renderSelects();
         }
 
-        // ============ ODONTÓLOGOS MODULE ============
+        // ODONTÓLOGOS
         function renderOdontos() {
-            const tbody = document.getElementById('odontosLista');
-            tbody.innerHTML = '';
-
-            appState.odontos.forEach(odonto => {
-                const row = `
-                    <tr>
-                        <td>${odonto.nombre}</td>
-                        <td>${odonto.especialidad}</td>
-                        <td>${odonto.celular}</td>
-                        <td>${odonto.comision}%</td>
-                        <td><span class="badge badge-warning">$${odonto.porCobrar.toLocaleString('es-MX')}</span></td>
-                        <td>$${odonto.cobradoMes.toLocaleString('es-MX')}</td>
-                        <td><button class="btn btn-small btn-primary" onclick="verDetallesOdonto(${odonto.id})">Ver Detalles</button></td>
-                    </tr>
+            const div = document.getElementById('odontosDetalles');
+            div.innerHTML = '';
+            app.odontos.forEach(o => {
+                div.innerHTML += `
+                    <div class="form-container">
+                        <h4>${o.nombre}</h4>
+                        <p><strong>Especialidad:</strong> ${o.especialidad}</p>
+                        <p><strong>Celular:</strong> ${o.celular}</p>
+                        <p><strong>Por Cobrar:</strong> <span class="font-bold" style="color: #ef4444;">$${o.porCobrar.toLocaleString('es-MX')}</span></p>
+                        <p><strong>Cobrado (Mes):</strong> <span class="font-bold" style="color: #10b981;">$${o.cobradoMes.toLocaleString('es-MX')}</span></p>
+                        
+                        <h5 style="margin-top: 15px; margin-bottom: 10px;">Aranceles (Honorarios Fijos):</h5>
+                        <table style="font-size: 12px; width: 100%; margin-bottom: 15px;">
+                            <thead>
+                                <tr style="background: #f0f0f0;">
+                                    <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Tratamiento</th>
+                                    <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Honorario</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                 `;
-                tbody.innerHTML += row;
+                
+                app.tratamientos.forEach(t => {
+                    const honorario = o.honorarios[t.id] || 0;
+                    div.innerHTML += `
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${t.nombre}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">$${honorario.toLocaleString('es-MX')}</td>
+                        </tr>
+                    `;
+                });
+
+                div.innerHTML += `
+                            </tbody>
+                        </table>
+                        <p style="font-size: 12px; color: #666;">Facturas: ${o.facturas.length}</p>
+                    </div>
+                `;
             });
-
-            // Renderizar pendiente de cobro
-            const pendienteHtml = appState.odontos.map(odonto => {
-                let html = `<div class="form-container" style="margin-bottom: 20px;">
-                    <h3 style="margin-bottom: 10px;">${odonto.nombre}</h3>
-                    <p style="margin-bottom: 10px;">
-                        <strong>Por Cobrar:</strong> $${odonto.porCobrar.toLocaleString('es-MX')}<br>
-                        <strong>Comisión:</strong> ${odonto.comision}%
-                    </p>`;
-                
-                if (odonto.tratamientosRealizados.length > 0) {
-                    html += `<table style="width: 100%; font-size: 12px; margin-bottom: 10px;">
-                        <thead>
-                            <tr style="background: #f0f0f0;">
-                                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Paciente</th>
-                                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Tratamiento</th>
-                                <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Comisión</th>
-                                <th style="padding: 8px; text-align: center; border: 1px solid #ddd;">Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
-                    
-                    odonto.tratamientosRealizados.forEach(t => {
-                        html += `<tr>
-                            <td style="padding: 8px; border: 1px solid #ddd;">${t.pacienteNombre}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">${t.tratamientoNombre}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">$${t.comisionMonto.toLocaleString('es-MX')}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
-                                <span class="badge badge-${t.estado === 'pagado' ? 'success' : 'warning'}">${t.estado}</span>
-                            </td>
-                        </tr>`;
-                    });
-                    html += `</tbody></table>`;
-                } else {
-                    html += `<p style="color: #999; font-style: italic;">Sin tratamientos pendientes</p>`;
-                }
-                
-                html += `</div>`;
-                return html;
-            }).join('');
-
-            document.getElementById('odontoPendienteLista').innerHTML = pendienteHtml;
-            renderSelectOptions();
-        }
-
-        function verDetallesOdonto(odontologoId) {
-            const odonto = appState.odontos.find(o => o.id === odontologoId);
-            if (odonto) {
-                let detalles = `\n=== ODONTÓLOGO: ${odonto.nombre} ===\n\n`;
-                detalles += `Especialidad: ${odonto.especialidad}\n`;
-                detalles += `Celular: ${odonto.celular}\n`;
-                detalles += `Comisión: ${odonto.comision}%\n`;
-                detalles += `Por Cobrar: $${odonto.porCobrar.toLocaleString('es-MX')}\n`;
-                detalles += `Cobrado (Mes): $${odonto.cobradoMes.toLocaleString('es-MX')}\n`;
-                detalles += `Tratamientos Realizados: ${odonto.tratamientosRealizados.length}\n\n`;
-
-                if (odonto.tratamientosRealizados.length > 0) {
-                    detalles += 'TRATAMIENTOS:\n';
-                    odonto.tratamientosRealizados.forEach((t, i) => {
-                        detalles += `${i + 1}. ${t.pacienteNombre} - ${t.tratamientoNombre}\n   Comisión: $${t.comisionMonto.toLocaleString('es-MX')} (${t.estado})\n`;
-                    });
-                }
-
-                alert(detalles);
-            }
         }
 
         function agregarNuevoOdonto() {
             const nombre = document.getElementById('nuevoOdontoNombre').value;
             const especialidad = document.getElementById('nuevoOdontoEspecialidad').value;
             const celular = document.getElementById('nuevoOdontoCelular').value;
-            const comision = parseFloat(document.getElementById('nuevoOdontoComision').value);
 
             if (!nombre) {
                 alert('El nombre es obligatorio');
                 return;
             }
 
-            const nuevoOdonto = {
-                id: ++appState.ultimoIdOdonto,
+            const honorarios = {};
+            app.tratamientos.forEach(t => honorarios[t.id] = 0);
+
+            const o = {
+                id: ++app.ultimoId.odonto,
                 nombre: nombre,
                 especialidad: especialidad,
                 celular: celular,
-                comision: comision || 30,
+                honorarios: honorarios,
                 porCobrar: 0,
                 cobradoMes: 0,
-                tratamientosRealizados: [],
-                pagosRecibidos: []
+                facturas: []
             };
 
-            appState.odontos.push(nuevoOdonto);
-            alert('✅ Odontólogo agregado exitosamente');
+            app.odontos.push(o);
+            alert('✅ Odontólogo agregado. Configura sus aranceles en la próxima versión.');
             document.getElementById('nuevoOdontoNombre').value = '';
             document.getElementById('nuevoOdontoEspecialidad').value = '';
             document.getElementById('nuevoOdontoCelular').value = '';
-            document.getElementById('nuevoOdontoComision').value = '';
             renderOdontos();
-            renderSelectOptions();
+            renderSelects();
         }
 
-        // ============ DASHBOARD ============
+        // DASHBOARD
         function updateDashboard() {
-            const ingresos = appState.caja.filter(c => c.tipo === 'ingreso').reduce((sum, c) => sum + c.monto, 0);
-            const porCobrar = appState.pacientes.reduce((sum, p) => sum + p.porCobrar, 0);
-            const pagosOdontos = appState.odontos.reduce((sum, o) => sum + o.porCobrar, 0);
+            const ingresos = app.caja.filter(c => c.tipo === 'ingreso').reduce((s, c) => s + c.monto, 0);
+            const porCobrar = app.pacientes.reduce((s, p) => s + p.deuda, 0);
+            const honorarios = app.odontos.reduce((s, o) => s + o.porCobrar, 0);
 
             document.getElementById('kpiIngresoHoy').textContent = '$' + ingresos.toLocaleString('es-MX');
-            document.getElementById('kpiGananciaHoy').textContent = '$' + (ingresos * 0.7).toLocaleString('es-MX');
             document.getElementById('kpiPorCobrar').textContent = '$' + porCobrar.toLocaleString('es-MX');
-            document.getElementById('kpiPagosOdontos').textContent = '$' + pagosOdontos.toLocaleString('es-MX');
+            document.getElementById('kpiHonorariosPendientes').textContent = '$' + honorarios.toLocaleString('es-MX');
 
             const tbody = document.getElementById('dashboardFacturas');
             tbody.innerHTML = '';
-            appState.facturas.slice(-5).reverse().forEach(factura => {
-                const row = `
+            app.facturas.slice(-5).reverse().forEach(f => {
+                tbody.innerHTML += `
                     <tr>
-                        <td>Factura #${factura.id}</td>
-                        <td>${factura.pacienteNombre}</td>
-                        <td>$${factura.monto.toLocaleString('es-MX')}</td>
-                        <td><span class="badge badge-${factura.estado === 'pagado' ? 'success' : 'warning'}">${factura.estado}</span></td>
+                        <td>Factura #${f.id}</td>
+                        <td>${f.pacienteNombre}</td>
+                        <td>$${f.total.toLocaleString('es-MX')}</td>
+                        <td>$${f.pagado.toLocaleString('es-MX')}</td>
+                        <td><span class="badge badge-${f.deuda > 0 ? 'warning' : 'success'}">$${f.deuda.toLocaleString('es-MX')}</span></td>
+                        <td>${f.deuda > 0 ? 'Pendiente' : 'Pagada'}</td>
                     </tr>
                 `;
-                tbody.innerHTML += row;
             });
         }
 
-        // ============ SELECT OPTIONS RENDERING ============
-        function renderSelectOptions() {
+        // RENDER SELECTS
+        function renderSelects() {
             // Pacientes
-            const pacientesSelect = [
-                document.getElementById('factPacienteSelect'),
-                document.getElementById('ingresoPacienteSelect')
-            ];
-            pacientesSelect.forEach(select => {
-                if (select) {
-                    const currentValue = select.value;
-                    select.innerHTML = '<option value="">Seleccionar paciente...</option>';
-                    appState.pacientes.forEach(p => {
-                        select.innerHTML += `<option value="${p.id}">${p.nombre}</option>`;
-                    });
-                    select.value = currentValue;
+            [document.getElementById('factPaciente')].forEach(s => {
+                if (s) {
+                    const val = s.value;
+                    s.innerHTML = '<option value="">Seleccionar paciente...</option>';
+                    app.pacientes.forEach(p => s.innerHTML += `<option value="${p.id}">${p.nombre}</option>`);
+                    s.value = val;
                 }
             });
 
             // Odontólogos
-            const odontosSelect = [
-                document.getElementById('factOdontoSelect'),
-                document.getElementById('egresoOdontoSelect')
-            ];
-            odontosSelect.forEach(select => {
-                if (select) {
-                    const currentValue = select.value;
-                    select.innerHTML = '<option value="">Seleccionar odontólogo...</option>';
-                    appState.odontos.forEach(o => {
-                        select.innerHTML += `<option value="${o.id}">${o.nombre}</option>`;
-                    });
-                    select.value = currentValue;
+            [document.getElementById('factOdonto'), document.getElementById('egresoOdonto')].forEach(s => {
+                if (s) {
+                    const val = s.value;
+                    s.innerHTML = '<option value="">Seleccionar odontólogo...</option>';
+                    app.odontos.forEach(o => s.innerHTML += `<option value="${o.id}">${o.nombre}</option>`);
+                    s.value = val;
                 }
             });
-
-            // Tratamientos
-            const tratamientosSelect = document.getElementById('factTratamientoSelect');
-            if (tratamientosSelect) {
-                const currentValue = tratamientosSelect.value;
-                tratamientosSelect.innerHTML = '<option value="">Seleccionar tratamiento...</option>';
-                appState.tratamientos.forEach(t => {
-                    tratamientosSelect.innerHTML += `<option value="${t.id}">${t.nombre} - $${t.precio.toLocaleString('es-MX')}</option>`;
-                });
-                tratamientosSelect.value = currentValue;
-            }
         }
 
-        // ============ INIT ============
-        document.addEventListener('DOMContentLoaded', function() {
-            loadSampleData();
+        // INIT
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
         });
     </script>
 </body>
