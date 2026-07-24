@@ -600,7 +600,7 @@
                                 <div class="form-row">
                                     <div class="form-field">
                                         <label>Tratamiento *</label>
-                                        <select id="factTratamiento">
+                                        <select id="factTratamiento" onchange="onTratamientoChange()">
                                             <option value="">Seleccionar tratamiento...</option>
                                         </select>
                                     </div>
@@ -984,29 +984,41 @@
             const odontologoId = app.facturaEnEdicion.odontologoId;
             const odonto = app.odontos.find(o => o.id === odontologoId);
             const select = document.getElementById('factTratamiento');
+            
+            if (!odonto) {
+                select.innerHTML = '<option value="">Seleccionar odontólogo primero...</option>';
+                return;
+            }
+            
             select.innerHTML = '<option value="">Seleccionar tratamiento...</option>';
 
             app.tratamientos.forEach(t => {
                 const honorario = odonto.honorarios[t.id] || 0;
-                select.innerHTML += `<option value="${t.id}" data-honorario="${honorario}" data-precio="${t.precio}">${t.nombre}</option>`;
+                select.innerHTML += `<option value="${t.id}" data-honorario="${honorario}" data-precio="${t.precio}">${t.nombre} (Precio: $${t.precio.toLocaleString('es-MX')})</option>`;
             });
         }
 
         function onTratamientoChange() {
             const select = document.getElementById('factTratamiento');
+            
             if (!select.value) {
                 document.getElementById('factHonorario').value = '';
                 document.getElementById('factPrecio').value = '';
                 return;
             }
+            
+            if (!app.facturaEnEdicion.odontologoId) {
+                alert('Por favor selecciona un odontólogo primero');
+                select.value = '';
+                return;
+            }
+            
             const option = select.options[select.selectedIndex];
             document.getElementById('factHonorario').value = option.dataset.honorario;
             document.getElementById('factPrecio').value = option.dataset.precio;
         }
 
-        document.addEventListener('change', function(e) {
-            if (e.target.id === 'factTratamiento') onTratamientoChange();
-        });
+
 
         function agregarTratamientoAFactura() {
             const tratamientoId = document.getElementById('factTratamiento').value;
