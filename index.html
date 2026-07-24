@@ -541,47 +541,30 @@
             const select = document.getElementById('egresoOdonto');
             if (!select) return;
             
-            // Limpiar y empezar fresh
-            select.innerHTML = '';
+            // Construir HTML directamente como string
+            let html = '<option value="">-- Seleccionar odontólogo --</option>';
             
-            let agregados = 0;
-            
-            // Recorrer cada odontólogo
             for (let i = 0; i < app.odontos.length; i++) {
                 const o = app.odontos[i];
                 
-                // Calcular deuda
                 let totalGanancia = 0;
                 let totalCobrado = 0;
                 
-                if (o.historialGanancias) {
+                if (o.historialGanancias && o.historialGanancias.length > 0) {
                     for (let j = 0; j < o.historialGanancias.length; j++) {
-                        const h = o.historialGanancias[j];
-                        totalGanancia += (h.ganancia || 0);
-                        totalCobrado += (h.cobrado || 0);
+                        totalGanancia += o.historialGanancias[j].ganancia || 0;
+                        totalCobrado += o.historialGanancias[j].cobrado || 0;
                     }
                 }
                 
                 const deuda = totalGanancia - totalCobrado;
                 
-                // Si hay deuda, agregar al select
                 if (deuda > 0) {
-                    const opt = document.createElement('option');
-                    opt.value = o.id;
-                    opt.dataset.deuda = deuda;
-                    opt.innerHTML = o.nombre + ' - DEUDA: $' + deuda;
-                    select.appendChild(opt);
-                    agregados++;
+                    html += '<option value="' + o.id + '" data-deuda="' + deuda + '">' + o.nombre + ' - Deuda: $' + deuda + '</option>';
                 }
             }
             
-            // Si no hay nadie con deuda
-            if (agregados === 0) {
-                const opt = document.createElement('option');
-                opt.innerHTML = '✅ Sin deuda pendiente';
-                opt.disabled = true;
-                select.appendChild(opt);
-            }
+            select.innerHTML = html;
         }
 
         function cargarMontoOdonto() {
