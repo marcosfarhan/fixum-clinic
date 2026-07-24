@@ -239,7 +239,7 @@
                 <!-- TRATAMIENTOS -->
                 <div id="tratamientosModule" class="module-content">
                     <div class="form-container">
-                        <h3>Agregar Tratamiento</h3>
+                        <h3 id="tratFormTitle">Agregar Tratamiento</h3>
                         <div class="form-row">
                             <div class="form-field">
                                 <label>Nombre</label>
@@ -259,7 +259,8 @@
                             </div>
                         </div>
                         <div class="button-group">
-                            <button class="btn btn-primary" onclick="agregarTratamiento()">Agregar</button>
+                            <button class="btn btn-primary" onclick="guardarTratamiento()" id="tratBtnSave">Agregar</button>
+                            <button class="btn btn-secondary" onclick="cancelarEdicion()" id="tratBtnCancel" style="display:none;">Cancelar</button>
                         </div>
                     </div>
                     <h3 style="margin: 30px 0 20px 0;">Lista de Tratamientos</h3>
@@ -273,6 +274,7 @@
                                     <th>Ganancia Odontólogo</th>
                                     <th>Ganancia Clínica</th>
                                     <th>Margen %</th>
+                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="tratamientosLista"></tbody>
@@ -444,19 +446,70 @@
             updateDashboard();
         }
 
-        function agregarTratamiento() {
+        let editandoTratId = null;
+
+        function guardarTratamiento() {
             const nombre = document.getElementById('tratNombre').value;
             const costo = parseFloat(document.getElementById('tratCosto').value);
             const precio = parseFloat(document.getElementById('tratPrecio').value);
             const honorario = parseFloat(document.getElementById('tratHonorario').value);
             if (!nombre || !costo || !precio || !honorario) { alert('Completa todos los campos'); return; }
 
-            app.tratamientos.push({id:++app.ultimoId.trat,nombre,costo,precio,honorario});
-            alert('✅ Tratamiento agregado');
+            if (editandoTratId !== null) {
+                const trat = app.tratamientos.find(t => t.id === editandoTratId);
+                if (trat) {
+                    trat.nombre = nombre;
+                    trat.costo = costo;
+                    trat.precio = precio;
+                    trat.honorario = honorario;
+                    alert('✅ Tratamiento actualizado');
+                    editandoTratId = null;
+                }
+            } else {
+                app.tratamientos.push({id:++app.ultimoId.trat,nombre,costo,precio,honorario});
+                alert('✅ Tratamiento agregado');
+            }
+
             document.getElementById('tratNombre').value = '';
             document.getElementById('tratCosto').value = '';
             document.getElementById('tratPrecio').value = '';
             document.getElementById('tratHonorario').value = '';
+            document.getElementById('tratFormTitle').textContent = 'Agregar Tratamiento';
+            document.getElementById('tratBtnSave').textContent = 'Agregar';
+            document.getElementById('tratBtnCancel').style.display = 'none';
+            renderTratamientos();
+            cargarTratamientos();
+        }
+
+        function editarTratamiento(id) {
+            const trat = app.tratamientos.find(t => t.id === id);
+            if (!trat) return;
+            editandoTratId = id;
+            document.getElementById('tratNombre').value = trat.nombre;
+            document.getElementById('tratCosto').value = trat.costo;
+            document.getElementById('tratPrecio').value = trat.precio;
+            document.getElementById('tratHonorario').value = trat.honorario;
+            document.getElementById('tratFormTitle').textContent = 'Editar Tratamiento';
+            document.getElementById('tratBtnSave').textContent = 'Guardar Cambios';
+            document.getElementById('tratBtnCancel').style.display = 'inline-block';
+            window.scrollTo(0, 0);
+        }
+
+        function cancelarEdicion() {
+            editandoTratId = null;
+            document.getElementById('tratNombre').value = '';
+            document.getElementById('tratCosto').value = '';
+            document.getElementById('tratPrecio').value = '';
+            document.getElementById('tratHonorario').value = '';
+            document.getElementById('tratFormTitle').textContent = 'Agregar Tratamiento';
+            document.getElementById('tratBtnSave').textContent = 'Agregar';
+            document.getElementById('tratBtnCancel').style.display = 'none';
+        }
+
+        function eliminarTratamiento(id) {
+            if (!confirm('¿Borrar este tratamiento?')) return;
+            app.tratamientos = app.tratamientos.filter(t => t.id !== id);
+            alert('✅ Tratamiento eliminado');
             renderTratamientos();
             cargarTratamientos();
         }
@@ -465,7 +518,7 @@
             const html = app.tratamientos.map(t => {
                 const ganancia = t.precio - t.honorario;
                 const margen = ((ganancia / t.precio) * 100).toFixed(1);
-                return `<tr><td>${t.nombre}</td><td>$${t.costo}</td><td>$${t.precio}</td><td>$${t.honorario}</td><td>$${ganancia}</td><td>${margen}%</td></tr>`;
+                return `<tr><td>${t.nombre}</td><td>$${t.costo}</td><td>$${t.precio}</td><td>$${t.honorario}</td><td>$${ganancia}</td><td>${margen}%</td><td><button class="btn btn-primary btn-small" onclick="editarTratamiento(${t.id})">✏️ Editar</button> <button class="btn btn-danger btn-small" onclick="eliminarTratamiento(${t.id})">🗑️ Borrar</button></td></tr>`;
             }).join('');
             document.getElementById('tratamientosLista').innerHTML = html;
         }
