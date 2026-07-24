@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fixum Clinic - Gestión Integrada v3</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -124,6 +125,7 @@
                 <div class="nav-item" onclick="switchModule('tratamientos')">🦷 Tratamientos</div>
                 <div class="nav-item" onclick="switchModule('pacientes')">👥 Pacientes</div>
                 <div class="nav-item" onclick="switchModule('odontos')">👨‍⚕️ Odontólogos</div>
+                <div class="nav-item" onclick="switchModule('reportes')">📄 Reportes</div>
             </nav>
             <div class="user-info">
                 <div><strong id="currentUser">Admin</strong></div>
@@ -398,6 +400,33 @@
                             </div>
                         </div>
                         <div id="detalleOdontoContent"></div>
+                    </div>
+                </div>
+
+                <!-- MÓDULO REPORTES -->
+                <div id="reportesModule" class="module-content">
+                    <div class="form-container">
+                        <h3>Generar Reportes en PDF</h3>
+                        <p style="margin-bottom: 20px; color: var(--text-light); font-size: 13px;">Selecciona el período de tiempo y el tipo de reporte</p>
+                        
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Desde (Fecha)</label>
+                                <input type="date" id="reportDesde">
+                            </div>
+                            <div class="form-field">
+                                <label>Hasta (Fecha)</label>
+                                <input type="date" id="reportHasta">
+                            </div>
+                        </div>
+
+                        <div class="button-group" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 20px;">
+                            <button class="btn btn-primary" onclick="generarReporteFacturas()">📋 Reporte de Facturas</button>
+                            <button class="btn btn-primary" onclick="generarReporteCaja()">💰 Reporte de Caja</button>
+                            <button class="btn btn-primary" onclick="generarReporteOdontos()">👨‍⚕️ Reporte Odontólogos</button>
+                            <button class="btn btn-primary" onclick="generarReportePacientes()">👥 Reporte de Pacientes</button>
+                            <button class="btn btn-primary" onclick="generarReporteTratamientos()">🦷 Reporte de Tratamientos</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -943,6 +972,311 @@
         window.addEventListener('DOMContentLoaded', () => {
             updateDashboard();
         });
+
+        // ===== MÓDULO REPORTES PDF =====
+        
+        function obtenerRangoFechas() {
+            const desde = document.getElementById('reportDesde').value;
+            const hasta = document.getElementById('reportHasta').value;
+            
+            if (!desde || !hasta) {
+                alert('⚠️ Debes seleccionar DESDE y HASTA fecha');
+                return null;
+            }
+            
+            if (desde > hasta) {
+                alert('⚠️ La fecha DESDE no puede ser mayor que HASTA');
+                return null;
+            }
+            
+            return { desde, hasta };
+        }
+
+        function estaEnRango(fecha, desde, hasta) {
+            if (!fecha) return false;
+            return fecha >= desde && fecha <= hasta;
+        }
+
+        function generarReporteFacturas() {
+            const rango = obtenerRangoFechas();
+            if (!rango) return;
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(16);
+            doc.text('REPORTE DE FACTURAS', 20, 20);
+            
+            doc.setFontSize(10);
+            doc.text('Período: ' + rango.desde + ' a ' + rango.hasta, 20, 30);
+            doc.text('Fecha de generación: ' + new Date().toLocaleDateString('es-MX'), 20, 36);
+            
+            let y = 50;
+            doc.setFontSize(11);
+            doc.text('FACTURAS EMITIDAS', 20, y);
+            y += 10;
+            
+            const facturasEnRango = app.facturas.filter(f => estaEnRango(f.fecha, rango.desde, rango.hasta));
+            
+            if (facturasEnRango.length === 0) {
+                doc.setFontSize(10);
+                doc.text('No hay facturas en el período seleccionado', 20, y);
+                doc.save('Reporte_Facturas_' + rango.desde + '_a_' + rango.hasta + '.pdf');
+                alert('✅ Reporte de Facturas descargado (sin datos en el período)');
+                return;
+            }
+            
+            doc.setFontSize(9);
+            doc.setTextColor(100);
+            doc.text('ID', 20, y);
+            doc.text('Fecha', 30, y);
+            doc.text('Paciente', 55, y);
+            doc.text('Total', 100, y);
+            doc.text('Pagado', 130, y);
+            doc.text('Deuda', 160, y);
+            y += 8;
+            
+            doc.setTextColor(0);
+            facturasEnRango.forEach(f => {
+                const pac = app.pacientes.find(p => p.id === f.pacienteId);
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                }
+                doc.text('#' + f.id, 20, y);
+                doc.text(f.fecha, 30, y);
+                doc.text(pac.nombre.substring(0, 18), 55, y);
+                doc.text('$' + f.total, 100, y);
+                doc.text('$' + f.pagado, 130, y);
+                doc.text('$' + f.deuda, 160, y);
+                y += 8;
+            });
+            
+            y += 5;
+            doc.setTextColor(100);
+            const totalFacturas = facturasEnRango.reduce((s, f) => s + f.total, 0);
+            const totalPagado = facturasEnRango.reduce((s, f) => s + f.pagado, 0);
+            const totalDeuda = facturasEnRango.reduce((s, f) => s + f.deuda, 0);
+            
+            doc.text('TOTALES:', 20, y);
+            doc.text('$' + totalFacturas, 100, y);
+            doc.text('$' + totalPagado, 130, y);
+            doc.text('$' + totalDeuda, 160, y);
+            
+            doc.save('Reporte_Facturas_' + rango.desde + '_a_' + rango.hasta + '.pdf');
+            alert('✅ Reporte de Facturas descargado');
+        }
+
+        function generarReporteCaja() {
+            const rango = obtenerRangoFechas();
+            if (!rango) return;
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(16);
+            doc.text('REPORTE DE CAJA', 20, 20);
+            
+            doc.setFontSize(10);
+            doc.text('Período: ' + rango.desde + ' a ' + rango.hasta, 20, 30);
+            doc.text('Fecha de generación: ' + new Date().toLocaleDateString('es-MX'), 20, 36);
+            
+            const cajaEnRango = app.caja.filter(c => estaEnRango(c.fecha, rango.desde, rango.hasta));
+            const ingresos = cajaEnRango.filter(c => c.tipo === 'ingreso').reduce((s, c) => s + c.monto, 0);
+            const egresos = cajaEnRango.filter(c => c.tipo === 'egreso').reduce((s, c) => s + c.monto, 0);
+            const balance = ingresos - egresos;
+            
+            let y = 50;
+            doc.setFontSize(11);
+            doc.setTextColor(0, 128, 0);
+            doc.text('INGRESOS: $' + ingresos, 20, y);
+            doc.setTextColor(255, 0, 0);
+            y += 8;
+            doc.text('EGRESOS: $' + egresos, 20, y);
+            doc.setTextColor(0, 0, 255);
+            y += 8;
+            doc.text('BALANCE: $' + balance, 20, y);
+            
+            if (cajaEnRango.length === 0) {
+                doc.setFontSize(10);
+                doc.setTextColor(0);
+                doc.text('No hay movimientos en el período seleccionado', 20, y + 15);
+                doc.save('Reporte_Caja_' + rango.desde + '_a_' + rango.hasta + '.pdf');
+                alert('✅ Reporte de Caja descargado (sin datos en el período)');
+                return;
+            }
+            
+            y += 15;
+            doc.setTextColor(0);
+            doc.setFontSize(10);
+            doc.text('MOVIMIENTOS DE CAJA', 20, y);
+            y += 10;
+            
+            doc.setFontSize(9);
+            doc.setTextColor(100);
+            doc.text('Fecha', 20, y);
+            doc.text('Tipo', 40, y);
+            doc.text('Descripción', 55, y);
+            doc.text('Monto', 120, y);
+            doc.text('Método', 150, y);
+            y += 8;
+            
+            doc.setTextColor(0);
+            cajaEnRango.forEach(c => {
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                }
+                doc.text(c.fecha || '-', 20, y);
+                doc.text(c.tipo === 'ingreso' ? 'ING' : 'EGR', 40, y);
+                doc.text(c.desc.substring(0, 25), 55, y);
+                doc.text('$' + c.monto, 120, y);
+                doc.text(c.metodo || '-', 150, y);
+                y += 8;
+            });
+            
+            doc.save('Reporte_Caja_' + rango.desde + '_a_' + rango.hasta + '.pdf');
+            alert('✅ Reporte de Caja descargado');
+        }
+
+        function generarReporteOdontos() {
+            const rango = obtenerRangoFechas();
+            if (!rango) return;
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(16);
+            doc.text('REPORTE DE ODONTÓLOGOS', 20, 20);
+            
+            doc.setFontSize(10);
+            doc.text('Período: ' + rango.desde + ' a ' + rango.hasta, 20, 30);
+            doc.text('Fecha de generación: ' + new Date().toLocaleDateString('es-MX'), 20, 36);
+            
+            let y = 50;
+            doc.setFontSize(9);
+            doc.setTextColor(100);
+            doc.text('Nombre', 20, y);
+            doc.text('Especialidad', 70, y);
+            doc.text('Ganancia', 120, y);
+            doc.text('Cobrado', 150, y);
+            doc.text('Adeudado', 180, y);
+            y += 8;
+            
+            doc.setTextColor(0);
+            app.odontos.forEach(o => {
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                }
+                // Filtrar historial por rango de fechas
+                const historialEnRango = o.historialGanancias.filter(h => estaEnRango(h.fecha, rango.desde, rango.hasta));
+                const totalGanancia = historialEnRango.reduce((s, h) => s + h.ganancia, 0);
+                const totalCobrado = historialEnRango.reduce((s, h) => s + h.cobrado, 0);
+                const totalAdeudado = totalGanancia - totalCobrado;
+                
+                doc.text(o.nombre.substring(0, 20), 20, y);
+                doc.text(o.especialidad.substring(0, 15), 70, y);
+                doc.text('$' + totalGanancia, 120, y);
+                doc.text('$' + totalCobrado, 150, y);
+                doc.text('$' + totalAdeudado, 180, y);
+                y += 8;
+            });
+            
+            doc.save('Reporte_Odontos_' + rango.desde + '_a_' + rango.hasta + '.pdf');
+            alert('✅ Reporte de Odontólogos descargado');
+        }
+
+        function generarReportePacientes() {
+            const rango = obtenerRangoFechas();
+            if (!rango) return;
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(16);
+            doc.text('REPORTE DE PACIENTES', 20, 20);
+            
+            doc.setFontSize(10);
+            doc.text('Período: ' + rango.desde + ' a ' + rango.hasta, 20, 30);
+            doc.text('Fecha de generación: ' + new Date().toLocaleDateString('es-MX'), 20, 36);
+            
+            let y = 50;
+            doc.setFontSize(9);
+            doc.setTextColor(100);
+            doc.text('Nombre', 20, y);
+            doc.text('Teléfono', 80, y);
+            doc.text('Facturas', 120, y);
+            doc.text('Cobrado', 145, y);
+            doc.text('Deuda', 175, y);
+            y += 8;
+            
+            doc.setTextColor(0);
+            app.pacientes.forEach(p => {
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                }
+                // Facturas en rango
+                const facturasEnRango = app.facturas.filter(f => f.pacienteId === p.id && estaEnRango(f.fecha, rango.desde, rango.hasta));
+                const cobradoEnRango = facturasEnRango.reduce((s, f) => s + f.pagado, 0);
+                const deudaEnRango = facturasEnRango.reduce((s, f) => s + f.deuda, 0);
+                
+                doc.text(p.nombre.substring(0, 20), 20, y);
+                doc.text(p.telefono.substring(0, 20), 80, y);
+                doc.text(facturasEnRango.length.toString(), 120, y);
+                doc.text('$' + cobradoEnRango, 145, y);
+                doc.text('$' + deudaEnRango, 175, y);
+                y += 8;
+            });
+            
+            doc.save('Reporte_Pacientes_' + rango.desde + '_a_' + rango.hasta + '.pdf');
+            alert('✅ Reporte de Pacientes descargado');
+        }
+
+        function generarReporteTratamientos() {
+            const rango = obtenerRangoFechas();
+            if (!rango) return;
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(16);
+            doc.text('REPORTE DE TRATAMIENTOS', 20, 20);
+            
+            doc.setFontSize(10);
+            doc.text('Período: ' + rango.desde + ' a ' + rango.hasta, 20, 30);
+            doc.text('Fecha de generación: ' + new Date().toLocaleDateString('es-MX'), 20, 36);
+            doc.text('(Datos de catálogo, independientes del período)', 20, 42);
+            
+            let y = 55;
+            doc.setFontSize(9);
+            doc.setTextColor(100);
+            doc.text('Tratamiento', 20, y);
+            doc.text('Costo', 75, y);
+            doc.text('Precio', 105, y);
+            doc.text('Honorario', 135, y);
+            doc.text('Ganancia Clín.', 170, y);
+            y += 8;
+            
+            doc.setTextColor(0);
+            app.tratamientos.forEach(t => {
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                }
+                const gananciaClin = t.precio - t.honorario - t.costo;
+                doc.text(t.nombre.substring(0, 20), 20, y);
+                doc.text('$' + t.costo, 75, y);
+                doc.text('$' + t.precio, 105, y);
+                doc.text('$' + t.honorario, 135, y);
+                doc.text('$' + gananciaClin, 170, y);
+                y += 8;
+            });
+            
+            doc.save('Reporte_Tratamientos_' + rango.desde + '_a_' + rango.hasta + '.pdf');
+            alert('✅ Reporte de Tratamientos descargado');
+        }
     </script>
 </body>
 </html>
