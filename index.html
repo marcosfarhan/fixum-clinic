@@ -518,6 +518,7 @@
                 <div class="nav-item active" onclick="switchModule('dashboard', event)">📊 Dashboard</div>
                 <div class="nav-item" onclick="switchModule('facturacion', event)">💰 Facturación</div>
                 <div class="nav-item" onclick="switchModule('caja', event)">💵 Caja</div>
+                <div class="nav-item" onclick="switchModule('tratamientos', event)">🦷 Tratamientos</div>
                 <div class="nav-item" onclick="switchModule('pacientes', event)">👥 Pacientes</div>
                 <div class="nav-item" onclick="switchModule('odontos', event)">👨‍⚕️ Odontólogos</div>
             </nav>
@@ -880,6 +881,59 @@
                     </div>
                 </div>
 
+                <!-- TRATAMIENTOS -->
+                <div id="tratamientosModule" class="module-content">
+                    <div class="form-container" style="margin-bottom: 30px;">
+                        <h3 style="margin-bottom: 20px;">Agregar Nuevo Tratamiento</h3>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Nombre del Tratamiento *</label>
+                                <input type="text" id="nuevoTratNombre" placeholder="Ej: Implante Titanio">
+                            </div>
+                            <div class="form-field">
+                                <label>Categoría</label>
+                                <select id="nuevoTratCategoria">
+                                    <option value="implantes">Implantes</option>
+                                    <option value="coronas">Coronas</option>
+                                    <option value="limpiezas">Limpiezas</option>
+                                    <option value="consultas">Consultas</option>
+                                    <option value="otros">Otros</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Costo (Producción/Compra) *</label>
+                                <input type="number" id="nuevoTratCosto" min="0" placeholder="0.00">
+                            </div>
+                            <div class="form-field">
+                                <label>Precio de Venta *</label>
+                                <input type="number" id="nuevoTratPrecio" min="0" placeholder="0.00">
+                            </div>
+                            <div class="form-field">
+                                <label>Ganancia Odontólogo (Promedio) *</label>
+                                <input type="number" id="nuevoTratHonorario" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Duración (minutos)</label>
+                                <input type="number" id="nuevoTratDuracion" min="0">
+                            </div>
+                            <div class="form-field">
+                                <label>Descripción</label>
+                                <textarea id="nuevoTratDesc" rows="2" placeholder="Detalles del tratamiento..."></textarea>
+                            </div>
+                        </div>
+                        <div class="button-group">
+                            <button class="btn btn-primary" onclick="agregarNuevoTratamiento()">➕ Agregar Tratamiento</button>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 20px;">Listado de Tratamientos y Ganancias</h3>
+                    <div id="tratamientosDetalles"></div>
+                </div>
+
                 <!-- PACIENTES -->
                 <div id="pacientesModule" class="module-content">
                     <div class="form-container" style="margin-bottom: 30px;">
@@ -1002,6 +1056,7 @@
                 'dashboard': '📊 Dashboard',
                 'facturacion': '💰 Facturación',
                 'caja': '💵 Caja',
+                'tratamientos': '🦷 Tratamientos',
                 'pacientes': '👥 Pacientes',
                 'odontos': '👨‍⚕️ Odontólogos'
             };
@@ -1010,6 +1065,7 @@
             if (module === 'dashboard') updateDashboard();
             else if (module === 'facturacion') renderFacturas();
             else if (module === 'caja') renderCaja();
+            else if (module === 'tratamientos') renderTratamientos();
             else if (module === 'pacientes') renderPacientes();
             else if (module === 'odontos') renderOdontos();
         }
@@ -1030,12 +1086,12 @@
             app.ultimoId.paciente = 2;
 
             app.tratamientos = [
-                { id: 1, nombre: 'Implante Titanio', precio: 15000 },
-                { id: 2, nombre: 'Corona PMMA', precio: 3500 },
-                { id: 3, nombre: 'Corona Porcelana', precio: 6000 },
-                { id: 4, nombre: 'Corona Zirconio', precio: 8500 },
-                { id: 5, nombre: 'Limpieza Profesional', precio: 1500 },
-                { id: 6, nombre: 'Consulta Inicial', precio: 900 }
+                { id: 1, nombre: 'Implante Titanio', categoria: 'implantes', costo: 3500, precio: 15000, honorarioPromedio: 5000, duracion: 120, descripcion: 'Implante dental de última generación' },
+                { id: 2, nombre: 'Corona PMMA', categoria: 'coronas', costo: 500, precio: 3500, honorarioPromedio: 800, duracion: 90, descripcion: 'Corona de acrílico reforzado' },
+                { id: 3, nombre: 'Corona Porcelana', categoria: 'coronas', costo: 1000, precio: 6000, honorarioPromedio: 1400, duracion: 90, descripcion: 'Corona de porcelana' },
+                { id: 4, nombre: 'Corona Zirconio', categoria: 'coronas', costo: 1500, precio: 8500, honorarioPromedio: 2000, duracion: 90, descripcion: 'Corona de zirconio' },
+                { id: 5, nombre: 'Limpieza Profesional', categoria: 'limpiezas', costo: 200, precio: 1500, honorarioPromedio: 300, duracion: 45, descripcion: 'Limpieza profunda' },
+                { id: 6, nombre: 'Consulta Inicial', categoria: 'consultas', costo: 50, precio: 900, honorarioPromedio: 200, duracion: 30, descripcion: 'Evaluación inicial' }
             ];
 
             app.odontos = [
@@ -1474,6 +1530,122 @@
             });
 
             renderSelects();
+        }
+
+        // TRATAMIENTOS
+        function agregarNuevoTratamiento() {
+            const nombre = document.getElementById('nuevoTratNombre').value;
+            const categoria = document.getElementById('nuevoTratCategoria').value;
+            const costo = parseFloat(document.getElementById('nuevoTratCosto').value);
+            const precio = parseFloat(document.getElementById('nuevoTratPrecio').value);
+            const honorario = parseFloat(document.getElementById('nuevoTratHonorario').value);
+            const duracion = parseInt(document.getElementById('nuevoTratDuracion').value) || 0;
+            const descripcion = document.getElementById('nuevoTratDesc').value;
+
+            if (!nombre || !costo || !precio || !honorario) {
+                alert('Completa: Nombre, Costo, Precio y Ganancia Odontólogo');
+                return;
+            }
+
+            const gananciaClin = precio - honorario;
+
+            const tratamiento = {
+                id: app.tratamientos.length + 1,
+                nombre: nombre,
+                categoria: categoria,
+                costo: costo,
+                precio: precio,
+                honorarioPromedio: honorario,
+                gananciaClin: gananciaClin,
+                duracion: duracion,
+                descripcion: descripcion
+            };
+
+            app.tratamientos.push(tratamiento);
+            alert('✅ Tratamiento agregado:\n\n' + nombre + '\nPrecio: $' + precio.toLocaleString('es-MX') + '\nGanancia Clínica: $' + gananciaClin.toLocaleString('es-MX'));
+
+            document.getElementById('nuevoTratNombre').value = '';
+            document.getElementById('nuevoTratCosto').value = '';
+            document.getElementById('nuevoTratPrecio').value = '';
+            document.getElementById('nuevoTratHonorario').value = '';
+            document.getElementById('nuevoTratDuracion').value = '';
+            document.getElementById('nuevoTratDesc').value = '';
+            renderTratamientos();
+            renderSelects();
+        }
+
+        function renderTratamientos() {
+            const div = document.getElementById('tratamientosDetalles');
+            div.innerHTML = '';
+
+            const totalCosto = app.tratamientos.reduce((s, t) => s + t.costo, 0);
+            const totalPrecio = app.tratamientos.reduce((s, t) => s + t.precio, 0);
+            const totalHonorario = app.tratamientos.reduce((s, t) => s + t.honorarioPromedio, 0);
+            const totalGananciaClinica = totalPrecio - totalHonorario;
+
+            div.innerHTML += `
+                <div class="kpi-container" style="margin-bottom: 30px;">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Costo (Todos)</div>
+                        <div class="kpi-value">$${totalCosto.toLocaleString('es-MX')}</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Precio Venta (Todos)</div>
+                        <div class="kpi-value">$${totalPrecio.toLocaleString('es-MX')}</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Ganancia Odontólogo (Promedio)</div>
+                        <div class="kpi-value">$${totalHonorario.toLocaleString('es-MX')}</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Ganancia Clínica</div>
+                        <div class="kpi-value">$${totalGananciaClinica.toLocaleString('es-MX')}</div>
+                    </div>
+                </div>
+            `;
+
+            div.innerHTML += `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tratamiento</th>
+                                <th>Categoría</th>
+                                <th>Costo</th>
+                                <th>Precio Venta</th>
+                                <th>Ganancia Odontólogo</th>
+                                <th>Ganancia Clínica</th>
+                                <th>Margen %</th>
+                                <th>Duración (min)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            app.tratamientos.forEach(t => {
+                const gananciaClin = t.precio - t.honorarioPromedio;
+                const margen = ((gananciaClin / t.precio) * 100).toFixed(1);
+                const margenColor = margen > 50 ? '#10b981' : margen > 30 ? '#f59e0b' : '#ef4444';
+
+                div.innerHTML += `
+                    <tr>
+                        <td><strong>${t.nombre}</strong><br><span style="font-size: 11px; color: #666;">${t.descripcion}</span></td>
+                        <td>${t.categoria}</td>
+                        <td>$${t.costo.toLocaleString('es-MX')}</td>
+                        <td>$${t.precio.toLocaleString('es-MX')}</td>
+                        <td>$${t.honorarioPromedio.toLocaleString('es-MX')}</td>
+                        <td><strong style="color: #10b981;">$${gananciaClin.toLocaleString('es-MX')}</strong></td>
+                        <td><strong style="color: ${margenColor};">${margen}%</strong></td>
+                        <td>${t.duracion}</td>
+                    </tr>
+                `;
+            });
+
+            div.innerHTML += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
         }
 
         // PACIENTES
