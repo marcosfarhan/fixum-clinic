@@ -55,6 +55,7 @@
         .form-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
         .form-field { display: flex; flex-direction: column; }
+        .form-field.hidden { display: none; }
         .form-field label { font-size: 12px; font-weight: 600; margin-bottom: 5px; }
         .form-field input, .form-field select, .form-field textarea { padding: 10px; border: 1px solid var(--border); border-radius: 5px; font-size: 13px; }
         .table-container { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
@@ -211,7 +212,7 @@
                         <h3>Registrar Egreso</h3>
                         <div class="form-row">
                             <div class="form-field">
-                                <label>Tipo Egreso</label>
+                                <label>Tipo Egreso *</label>
                                 <select id="egresoTipo" onchange="mostrarCamposEgreso()">
                                     <option value="honorarios">Pago Honorarios</option>
                                     <option value="proveedores">Pago Proveedores</option>
@@ -222,22 +223,20 @@
                                 </select>
                             </div>
                             <div class="form-field" id="campoOdonto" style="display:none;">
-                                <label>Odontólogo</label>
-                                <select id="egresoOdonto" onchange="cargarMontoOdonto()">
-                                    <option value="">Seleccionar odontólogo...</option>
-                                </select>
+                                <label>Odontólogo *</label>
+                                <select id="egresoOdonto" onchange="cargarMontoOdonto()"></select>
                             </div>
-                            <div class="form-field" id="campoMonto">
-                                <label>Monto</label>
-                                <input type="number" id="egresoMonto" min="0">
+                            <div class="form-field" id="campoProveedorNombre" style="display:none;">
+                                <label>Nombre Proveedor</label>
+                                <input type="text" id="egresoProveedorNombre" placeholder="Nombre del proveedor">
                             </div>
                         </div>
                         <div class="form-row">
-                            <div class="form-field" id="campoProveedorNombre" style="display:none;">
-                                <label>Nombre Proveedor</label>
-                                <input type="text" id="egresoProveedorNombre">
+                            <div class="form-field">
+                                <label>Monto *</label>
+                                <input type="number" id="egresoMonto" min="0" placeholder="0.00">
                             </div>
-                            <div class="form-field" id="campoMetodo">
+                            <div class="form-field">
                                 <label>Método Pago</label>
                                 <select id="egresoMetodo">
                                     <option value="efectivo">Efectivo</option>
@@ -246,11 +245,9 @@
                                     <option value="cheque">Cheque</option>
                                 </select>
                             </div>
-                        </div>
-                        <div class="form-row">
                             <div class="form-field">
                                 <label>Descripción / Referencia</label>
-                                <input type="text" id="egresoDesc">
+                                <input type="text" id="egresoDesc" placeholder="Notas o referencia">
                             </div>
                         </div>
                         <div class="button-group">
@@ -491,53 +488,95 @@
 
         function mostrarCamposEgreso() {
             const tipo = document.getElementById('egresoTipo').value;
-            document.getElementById('campoOdonto').style.display = tipo === 'honorarios' ? 'flex' : 'none';
-            document.getElementById('campoProveedorNombre').style.display = tipo === 'proveedores' ? 'flex' : 'none';
+            const campoOdonto = document.getElementById('campoOdonto');
+            const campoProveedorNombre = document.getElementById('campoProveedorNombre');
+            
+            // Mostrar/ocultar campos según tipo
+            campoOdonto.style.display = tipo === 'honorarios' ? 'block' : 'none';
+            campoProveedorNombre.style.display = tipo === 'proveedores' ? 'block' : 'none';
+            
+            // Limpiar monto
             document.getElementById('egresoMonto').value = '';
-            if (tipo === 'honorarios') cargarOdontosConDeuda();
+            
+            // Si es honorarios, cargar odontólogos con deuda
+            if (tipo === 'honorarios') {
+                setTimeout(() => cargarOdontosConDeuda(), 100);
+            }
         }
 
         function cargarOdontosConDeuda() {
             const select = document.getElementById('egresoOdonto');
+            if (!select) return;
+            
             select.innerHTML = '<option value="">Seleccionar odontólogo...</option>';
+            
+            let hayOdontosConDeuda = false;
             app.odontos.forEach(o => {
-                const totalAdeudado = o.historialGanancias.reduce((s, h) => s + (h.adeudado || 0), 0);
-                const totalCobrado = o.historialGanancias.reduce((s, h) => s + h.cobrado, 0);
                 const totalGanancia = o.historialGanancias.reduce((s, h) => s + h.ganancia, 0);
+                const totalCobrado = o.historialGanancias.reduce((s, h) => s + h.cobrado, 0);
                 const pendiente = totalGanancia - totalCobrado;
+                
                 if (pendiente > 0) {
+                    hayOdontosConDeuda = true;
                     select.innerHTML += `<option value="${o.id}" data-pendiente="${pendiente}">${o.nombre} - Pendiente: $${pendiente.toLocaleString('es-MX')}</option>`;
                 }
             });
+            
+            if (!hayOdontosConDeuda) {
+                select.innerHTML += '<option value="">Sin odontólogos con deuda pendiente</option>';
+            }
         }
 
         function cargarMontoOdonto() {
             const select = document.getElementById('egresoOdonto');
+            const monto = document.getElementById('egresoMonto');
             const opt = select.options[select.selectedIndex];
-            document.getElementById('egresoMonto').value = opt.dataset.pendiente || '';
+            
+            if (opt && opt.dataset.pendiente) {
+                monto.value = parseFloat(opt.dataset.pendiente).toLocaleString('es-MX');
+                // Guardar valor numérico
+                monto.dataset.valor = opt.dataset.pendiente;
+            }
         }
 
         function registrarEgreso() {
             const tipo = document.getElementById('egresoTipo').value;
-            const monto = parseFloat(document.getElementById('egresoMonto').value);
+            let monto = parseFloat(document.getElementById('egresoMonto').value);
             const desc = document.getElementById('egresoDesc').value;
             const metodo = document.getElementById('egresoMetodo').value;
 
-            if (!monto || monto <= 0) { alert('Ingresa un monto válido'); return; }
+            if (!monto || monto <= 0) { 
+                alert('Ingresa un monto válido'); 
+                return; 
+            }
 
             if (tipo === 'honorarios') {
                 const odontId = parseInt(document.getElementById('egresoOdonto').value);
-                if (!odontId) { alert('Selecciona un odontólogo'); return; }
+                if (!odontId) { 
+                    alert('Selecciona un odontólogo'); 
+                    return; 
+                }
                 procesarPagoHonorarios(odontId, monto, metodo, desc);
             } else {
                 const descripcion = tipo === 'proveedores' ? (document.getElementById('egresoProveedorNombre').value || 'Proveedor') : desc;
-                app.caja.push({tipo:'egreso',desc:descripcion || tipo,monto:monto,metodo:metodo,tipoEgreso:tipo,fecha:new Date().toISOString().split('T')[0]});
+                app.caja.push({
+                    tipo:'egreso',
+                    desc:descripcion || tipo,
+                    monto:monto,
+                    metodo:metodo,
+                    tipoEgreso:tipo,
+                    fecha:new Date().toISOString().split('T')[0]
+                });
             }
 
-            alert('✅ Egreso registrado');
+            alert('✅ Egreso registrado correctamente');
+            
+            // Limpiar formulario
             document.getElementById('egresoMonto').value = '';
             document.getElementById('egresoDesc').value = '';
             document.getElementById('egresoProveedorNombre').value = '';
+            document.getElementById('egresoOdonto').value = '';
+            
             updateDashboard();
         }
 
