@@ -711,39 +711,156 @@
                             <div class="kpi-value" id="cajaTotalEgresos">$0</div>
                         </div>
                         <div class="kpi-card">
-                            <div class="kpi-label">Saldo Neto</div>
-                            <div class="kpi-value" id="cajaSaldoNeto">$0</div>
+                            <div class="kpi-label">Honorarios Pendientes</div>
+                            <div class="kpi-value" id="cajaHonorariosPendientes">$0</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Ganancia Neta</div>
+                            <div class="kpi-value" id="cajaGananciaNeta">$0</div>
                         </div>
                     </div>
 
                     <div class="form-container" style="margin-top: 20px;">
-                        <h3 style="margin-bottom: 20px;">Registrar Egreso (Pago a Odontólogo)</h3>
+                        <h3 style="margin-bottom: 20px;">Registrar Egreso</h3>
                         <div class="form-row">
                             <div class="form-field">
-                                <label>Odontólogo</label>
-                                <select id="egresoOdonto"></select>
+                                <label>Tipo de Egreso *</label>
+                                <select id="egresoTipo" onchange="onChangeEgresoTipo()">
+                                    <option value="pago_honorarios">Pago Honorarios Odontólogo</option>
+                                    <option value="pago_proveedores">Pago Proveedores</option>
+                                    <option value="renta">Renta Oficina</option>
+                                    <option value="servicios">Servicios (Agua, Luz, Internet)</option>
+                                    <option value="nomina">Nómina / Salarios</option>
+                                    <option value="varios">Varios / Gastos Operativos</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- PAGO HONORARIOS -->
+                        <div id="egresoHonorarioSection" style="display: block;">
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>Seleccionar Odontólogo</label>
+                                    <select id="egresoOdonto" onchange="onSelectOdontoEgreso()"></select>
+                                </div>
+                                <div class="form-field">
+                                    <label>Pendiente a Pagar</label>
+                                    <input type="number" id="egresoOdontoPendiente" readonly style="background: #f0f0f0;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PAGO PROVEEDORES -->
+                        <div id="egresoProveedorSection" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>Nombre del Proveedor *</label>
+                                    <input type="text" id="egresoProveedorNombre" placeholder="Ej: Fixum Direct, Proveedor X...">
+                                </div>
+                                <div class="form-field">
+                                    <label>Tipo de Compra</label>
+                                    <select id="egresoProveedorTipo">
+                                        <option value="materiales">Materiales Dental</option>
+                                        <option value="implantes">Implantes</option>
+                                        <option value="equipos">Equipos</option>
+                                        <option value="insumos">Insumos</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- RENTA -->
+                        <div id="egresoRentaSection" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>Descripción (Mes, Propiedad, etc)</label>
+                                    <input type="text" id="egresoRentaDesc" placeholder="Ej: Renta Julio 2026 - World Trade Center">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SERVICIOS -->
+                        <div id="egresoServiciosSection" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>Tipo de Servicio</label>
+                                    <select id="egresoServicioTipo">
+                                        <option value="agua">Agua</option>
+                                        <option value="luz">Luz / Electricidad</option>
+                                        <option value="internet">Internet / Telefonía</option>
+                                        <option value="mantenimiento">Mantenimiento</option>
+                                        <option value="limpieza">Limpieza</option>
+                                        <option value="otros">Otros Servicios</option>
+                                    </select>
+                                </div>
+                                <div class="form-field">
+                                    <label>Periodo (Mes)</label>
+                                    <input type="month" id="egresoServicioPeriodo">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- NÓMINA -->
+                        <div id="egresoNominaSection" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>Empleado / Concepto</label>
+                                    <input type="text" id="egresoNominaEmpleado" placeholder="Ej: María - Asistente, Nómina General">
+                                </div>
+                                <div class="form-field">
+                                    <label>Periodo (Mes)</label>
+                                    <input type="month" id="egresoNominaPeriodo">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- VARIOS -->
+                        <div id="egresoVariosSection" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>Concepto / Descripción</label>
+                                    <input type="text" id="egresoVariosDesc" placeholder="Descripción del gasto...">
+                                </div>
+                                <div class="form-field">
+                                    <label>Categoría</label>
+                                    <select id="egresoVariosCategoria">
+                                        <option value="transporte">Transporte</option>
+                                        <option value="capacitacion">Capacitación / Conferencias</option>
+                                        <option value="publicidad">Publicidad / Marketing</option>
+                                        <option value="seguros">Seguros</option>
+                                        <option value="legal">Asesoría Legal / Contable</option>
+                                        <option value="otros">Otros</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- COMÚN A TODOS -->
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Monto a Pagar *</label>
+                                <input type="number" id="egresoMonto" min="0" placeholder="0.00">
                             </div>
                             <div class="form-field">
-                                <label>Monto a Pagar</label>
-                                <input type="number" id="egresoMonto" min="0">
-                            </div>
-                            <div class="form-field">
-                                <label>Método</label>
+                                <label>Método de Pago</label>
                                 <select id="egresoMetodo">
                                     <option value="efectivo">Efectivo</option>
                                     <option value="tarjeta">Tarjeta</option>
                                     <option value="transferencia">Transferencia</option>
+                                    <option value="cheque">Cheque</option>
                                 </select>
                             </div>
                         </div>
+
                         <div class="form-row">
                             <div class="form-field">
-                                <label>Descripción</label>
-                                <textarea id="egresoDesc" rows="2"></textarea>
+                                <label>Nota / Referencia (Comprobante, Factura)</label>
+                                <input type="text" id="egresoNota" placeholder="Ej: Factura #12345, Comprobante...">
                             </div>
                         </div>
+
                         <div class="button-group">
-                            <button class="btn btn-danger" onclick="registrarEgreso()">Registrar Egreso</button>
+                            <button class="btn btn-danger" onclick="registrarEgresoCompleto()">💳 Registrar Egreso</button>
                         </div>
                     </div>
 
@@ -1191,37 +1308,139 @@
             alert(msg);
         }
 
-        // CAJA
-        function registrarEgreso() {
+        // CAJA - EGRESOS MEJORADOS
+        function onChangeEgresoTipo() {
+            const tipo = document.getElementById('egresoTipo').value;
+            
+            document.getElementById('egresoHonorarioSection').style.display = 'none';
+            document.getElementById('egresoProveedorSection').style.display = 'none';
+            document.getElementById('egresoRentaSection').style.display = 'none';
+            document.getElementById('egresoServiciosSection').style.display = 'none';
+            document.getElementById('egresoNominaSection').style.display = 'none';
+            document.getElementById('egresoVariosSection').style.display = 'none';
+
+            if (tipo === 'pago_honorarios') {
+                document.getElementById('egresoHonorarioSection').style.display = 'block';
+            } else if (tipo === 'pago_proveedores') {
+                document.getElementById('egresoProveedorSection').style.display = 'block';
+            } else if (tipo === 'renta') {
+                document.getElementById('egresoRentaSection').style.display = 'block';
+            } else if (tipo === 'servicios') {
+                document.getElementById('egresoServiciosSection').style.display = 'block';
+            } else if (tipo === 'nomina') {
+                document.getElementById('egresoNominaSection').style.display = 'block';
+            } else if (tipo === 'varios') {
+                document.getElementById('egresoVariosSection').style.display = 'block';
+            }
+        }
+
+        function onSelectOdontoEgreso() {
             const odontologoId = parseInt(document.getElementById('egresoOdonto').value);
+            const odonto = app.odontos.find(o => o.id === odontologoId);
+            
+            if (odonto) {
+                document.getElementById('egresoOdontoPendiente').value = odonto.porCobrar;
+                document.getElementById('egresoMonto').value = '';
+            }
+        }
+
+        function registrarEgresoCompleto() {
+            const tipo = document.getElementById('egresoTipo').value;
             const monto = parseFloat(document.getElementById('egresoMonto').value);
             const metodo = document.getElementById('egresoMetodo').value;
-            const desc = document.getElementById('egresoDesc').value;
+            const nota = document.getElementById('egresoNota').value;
 
-            if (!odontologoId || !monto) {
-                alert('Selecciona odontólogo y monto');
+            if (!monto || monto <= 0) {
+                alert('Ingresa un monto válido');
                 return;
             }
 
-            const odonto = app.odontos.find(o => o.id === odontologoId);
+            let descripcion = '';
+            let categoria = tipo;
+            let detalles = {};
+
+            if (tipo === 'pago_honorarios') {
+                const odontologoId = parseInt(document.getElementById('egresoOdonto').value);
+                if (!odontologoId) {
+                    alert('Selecciona un odontólogo');
+                    return;
+                }
+                const odonto = app.odontos.find(o => o.id === odontologoId);
+                descripcion = `Pago Honorarios - ${odonto.nombre}`;
+                detalles.odontologoId = odontologoId;
+                detalles.odontologoNombre = odonto.nombre;
+                
+                // Sincronizar con odontólogo
+                odonto.porCobrar -= monto;
+                odonto.cobradoMes += monto;
+            } else if (tipo === 'pago_proveedores') {
+                const proveedor = document.getElementById('egresoProveedorNombre').value;
+                const compraType = document.getElementById('egresoProveedorTipo').value;
+                if (!proveedor) {
+                    alert('Ingresa nombre del proveedor');
+                    return;
+                }
+                descripcion = `Pago Proveedor - ${proveedor}`;
+                detalles.proveedor = proveedor;
+                detalles.tipoCompra = compraType;
+            } else if (tipo === 'renta') {
+                const desc = document.getElementById('egresoRentaDesc').value || 'Renta Oficina';
+                descripcion = desc;
+                detalles.concepto = desc;
+            } else if (tipo === 'servicios') {
+                const servicio = document.getElementById('egresoServicioTipo').value;
+                const periodo = document.getElementById('egresoServicioPeriodo').value;
+                descripcion = `Servicio ${servicio.charAt(0).toUpperCase() + servicio.slice(1)}${periodo ? ' - ' + periodo : ''}`;
+                detalles.tipoServicio = servicio;
+                detalles.periodo = periodo;
+            } else if (tipo === 'nomina') {
+                const empleado = document.getElementById('egresoNominaEmpleado').value;
+                const periodo = document.getElementById('egresoNominaPeriodo').value;
+                if (!empleado) {
+                    alert('Ingresa nombre del empleado o concepto');
+                    return;
+                }
+                descripcion = `Nómina - ${empleado}${periodo ? ' - ' + periodo : ''}`;
+                detalles.empleado = empleado;
+                detalles.periodo = periodo;
+            } else if (tipo === 'varios') {
+                const concepto = document.getElementById('egresoVariosDesc').value;
+                const categoriaVarios = document.getElementById('egresoVariosCategoria').value;
+                if (!concepto) {
+                    alert('Ingresa descripción del gasto');
+                    return;
+                }
+                descripcion = concepto;
+                categoria = categoriaVarios;
+                detalles.concepto = concepto;
+            }
+
             const movimiento = {
                 id: ++app.ultimoId.caja,
                 tipo: 'egreso',
-                odontologoId: odontologoId,
-                descripcion: desc || 'Pago ' + odonto.nombre,
+                categoria: categoria,
+                tipoEgreso: tipo,
+                descripcion: descripcion,
                 monto: monto,
                 metodo: metodo,
                 fecha: new Date().toISOString().split('T')[0],
+                nota: nota,
+                detalles: detalles,
                 usuario: app.currentUser
             };
 
             app.caja.push(movimiento);
-            odonto.porCobrar -= monto;
-            odonto.cobradoMes += monto;
+            alert('✅ Egreso registrado: ' + descripcion + '\n$' + monto.toLocaleString('es-MX'));
 
-            alert('✅ Egreso registrado: $' + monto.toLocaleString('es-MX'));
+            // Limpiar formulario
             document.getElementById('egresoMonto').value = '';
-            document.getElementById('egresoDesc').value = '';
+            document.getElementById('egresoNota').value = '';
+            document.getElementById('egresoOdonto').value = '';
+            document.getElementById('egresoProveedorNombre').value = '';
+            document.getElementById('egresoRentaDesc').value = '';
+            document.getElementById('egresoNominaEmpleado').value = '';
+            document.getElementById('egresoVariosDesc').value = '';
+
             renderCaja();
             updateDashboard();
         }
@@ -1229,20 +1448,26 @@
         function renderCaja() {
             const ingresos = app.caja.filter(c => c.tipo === 'ingreso').reduce((s, c) => s + c.monto, 0);
             const egresos = app.caja.filter(c => c.tipo === 'egreso').reduce((s, c) => s + c.monto, 0);
+            const honorariosPendientes = app.odontos.reduce((s, o) => s + o.porCobrar, 0);
+            const ganancia = ingresos - egresos - honorariosPendientes;
 
             document.getElementById('cajaTotalIngresos').textContent = '$' + ingresos.toLocaleString('es-MX');
             document.getElementById('cajaTotalEgresos').textContent = '$' + egresos.toLocaleString('es-MX');
-            document.getElementById('cajaSaldoNeto').textContent = '$' + (ingresos - egresos).toLocaleString('es-MX');
+            document.getElementById('cajaHonorariosPendientes').textContent = '$' + honorariosPendientes.toLocaleString('es-MX');
+            document.getElementById('cajaGananciaNeta').textContent = '$' + ganancia.toLocaleString('es-MX');
 
             const tbody = document.getElementById('cajaHistorial');
             tbody.innerHTML = '';
             app.caja.forEach(c => {
+                let detalles = c.descripcion;
+                if (c.nota) detalles += ` (${c.nota})`;
+                
                 tbody.innerHTML += `
                     <tr>
                         <td>${c.fecha}</td>
                         <td><span class="badge badge-${c.tipo === 'ingreso' ? 'success' : 'danger'}">${c.tipo.toUpperCase()}</span></td>
-                        <td>${c.descripcion}</td>
-                        <td class="text-right font-bold">$${c.monto.toLocaleString('es-MX')}</td>
+                        <td>${detalles}</td>
+                        <td class="text-right font-bold" style="color: ${c.tipo === 'ingreso' ? '#10b981' : '#ef4444'};">$${c.monto.toLocaleString('es-MX')}</td>
                         <td>${c.metodo}</td>
                     </tr>
                 `;
@@ -1420,15 +1645,26 @@
                 }
             });
 
-            // Odontólogos
-            [document.getElementById('factOdonto'), document.getElementById('egresoOdonto')].forEach(s => {
-                if (s) {
-                    const val = s.value;
-                    s.innerHTML = '<option value="">Seleccionar odontólogo...</option>';
-                    app.odontos.forEach(o => s.innerHTML += `<option value="${o.id}">${o.nombre}</option>`);
-                    s.value = val;
-                }
-            });
+            // Odontólogos - Facturación
+            const factOdonto = document.getElementById('factOdonto');
+            if (factOdonto) {
+                const val = factOdonto.value;
+                factOdonto.innerHTML = '<option value="">Seleccionar odontólogo...</option>';
+                app.odontos.forEach(o => factOdonto.innerHTML += `<option value="${o.id}">${o.nombre}</option>`);
+                factOdonto.value = val;
+            }
+
+            // Odontólogos - Egresos
+            const egresoOdonto = document.getElementById('egresoOdonto');
+            if (egresoOdonto) {
+                const val = egresoOdonto.value;
+                egresoOdonto.innerHTML = '<option value="">Seleccionar odontólogo...</option>';
+                app.odontos.forEach(o => {
+                    const pendiente = o.porCobrar > 0 ? ` (Pendiente: $${o.porCobrar.toLocaleString('es-MX')})` : '';
+                    egresoOdonto.innerHTML += `<option value="${o.id}">${o.nombre}${pendiente}</option>`;
+                });
+                egresoOdonto.value = val;
+            }
         }
 
         // INIT
