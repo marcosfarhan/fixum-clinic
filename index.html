@@ -363,6 +363,27 @@
                                 <tbody id="odontosLista"></tbody>
                             </table>
                         </div>
+
+                        <div class="form-container" style="margin-top: 30px;">
+                            <h3>Registrar Deuda de Odontólogo</h3>
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>Odontólogo</label>
+                                    <select id="odontoDeudaNombre"></select>
+                                </div>
+                                <div class="form-field">
+                                    <label>Ganancia Generada</label>
+                                    <input type="number" id="odontoDeudaGanancia" min="0" placeholder="0.00">
+                                </div>
+                                <div class="form-field">
+                                    <label>Cobrado</label>
+                                    <input type="number" id="odontoDeudaCobrado" min="0" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="button-group">
+                                <button class="btn btn-success" onclick="registrarDeudaOdonto()">Registrar Deuda</button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- TAB: DETALLE -->
@@ -388,13 +409,14 @@
             user: null,
             pacientes: [{id:1,nombre:'María García',telefono:'+52 555 123',facturas:[],cobrado:0,deuda:0},{id:2,nombre:'Juan López',telefono:'+52 555 987',facturas:[],cobrado:0,deuda:0}],
             odontos: [
-                {id:1,nombre:'Dr. Alberto',especialidad:'Implantología',celular:'+52 111',porCobrar:5000,cobradoMes:8200,facturas:[],historialGanancias:[{fecha:'2026-07-24',ganancia:5000,cobrado:0,adeudado:5000},{fecha:'2026-07-15',ganancia:5000,cobrado:5000,adeudado:0},{fecha:'2026-07-10',ganancia:3200,cobrado:3200,adeudado:0}]},
-                {id:2,nombre:'Dra. Ana',especialidad:'Prostodoncia',celular:'+52 222',porCobrar:0,cobradoMes:2800,facturas:[],historialGanancias:[{fecha:'2026-07-14',ganancia:2800,cobrado:2800,adeudado:0}]}
+                {id:1,nombre:'Dr. Alberto Rivera',especialidad:'Implantología',celular:'+52 55 1234',porCobrar:5000,cobradoMes:8200,facturas:[],historialGanancias:[{fecha:'2026-07-24',ganancia:5000,cobrado:0,adeudado:5000},{fecha:'2026-07-22',ganancia:5000,cobrado:5000,adeudado:0},{fecha:'2026-07-20',ganancia:3200,cobrado:3200,adeudado:0}]},
+                {id:2,nombre:'Dra. Ana Martínez',especialidad:'Prostodoncia',celular:'+52 55 5678',porCobrar:2000,cobradoMes:2800,facturas:[],historialGanancias:[{fecha:'2026-07-23',ganancia:2000,cobrado:0,adeudado:2000},{fecha:'2026-07-14',ganancia:2800,cobrado:2800,adeudado:0}]},
+                {id:3,nombre:'Dr. Carlos López',especialidad:'Periodoncia',celular:'+52 55 9999',porCobrar:0,cobradoMes:1500,facturas:[],historialGanancias:[{fecha:'2026-07-15',ganancia:1500,cobrado:1500,adeudado:0}]}
             ],
             tratamientos: [{id:1,nombre:'Implante Titanio',costo:3500,precio:15000,honorario:5000},{id:2,nombre:'Corona PMMA',costo:500,precio:3500,honorario:800},{id:3,nombre:'Corona Porcelana',costo:1000,precio:6000,honorario:1400},{id:4,nombre:'Limpieza',costo:200,precio:1500,honorario:300},{id:5,nombre:'Consulta',costo:50,precio:900,honorario:200}],
             facturas: [{id:1,pacienteId:1,odontologoId:1,tratamientoId:1,total:15000,pagado:15000,deuda:0,fecha:'2026-07-20'},{id:2,pacienteId:2,odontologoId:2,tratamientoId:3,total:6000,pagado:2000,deuda:4000,fecha:'2026-07-19'}],
             caja: [{tipo:'ingreso',desc:'Pago María García',monto:15000},{tipo:'ingreso',desc:'Pago Juan López Parcial',monto:2000}],
-            ultimoId: {paciente:2,odonto:2,trat:5,fact:2}
+            ultimoId: {paciente:2,odonto:3,trat:5,fact:2}
         };
 
         function handleLogin(e) {
@@ -407,6 +429,7 @@
                 document.getElementById('currentUser').textContent = user;
                 cargarSelects();
                 cargarOdontosConDeuda();
+                cargarSelectOdontosDeuda();
                 renderTratamientos();
                 updateDashboard();
             }
@@ -434,6 +457,8 @@
             document.getElementById('factPaciente').innerHTML = '<option value="">Seleccionar...</option>' + document.getElementById('factPaciente').innerHTML;
             document.getElementById('factOdonto').innerHTML = '<option value="">Seleccionar...</option>' + document.getElementById('factOdonto').innerHTML;
             cargarOdontosConDeuda();
+            cargarSelectOdontosDeuda();
+            actualizarSelectOdontosDetalle();
         }
 
         function cargarTratamientos() {
@@ -519,36 +544,50 @@
                 return;
             }
             
-            select.innerHTML = '<option value="">Seleccionar odontólogo...</option>';
+            console.log('=== CARGAR ODONTÓLOGOS ===');
+            console.log('Total odontólogos:', app.odontos.length);
             
-            console.log('Odontólogos disponibles:', app.odontos.length);
+            select.innerHTML = '<option value="">-- Seleccionar odontólogo --</option>';
             
-            let hayOdontosConDeuda = false;
+            let odontoConDeuda = 0;
             
+            // Iterar sobre odontólogos
             app.odontos.forEach(o => {
-                // Calcular ganancia total y cobrado total
-                const totalGanancia = o.historialGanancias.reduce((s, h) => s + (h.ganancia || 0), 0);
-                const totalCobrado = o.historialGanancias.reduce((s, h) => s + (h.cobrado || 0), 0);
+                // Calcular pendiente = ganancia total - cobrado total
+                let totalGanancia = 0;
+                let totalCobrado = 0;
+                
+                if (o.historialGanancias && o.historialGanancias.length > 0) {
+                    o.historialGanancias.forEach(h => {
+                        totalGanancia += (h.ganancia || 0);
+                        totalCobrado += (h.cobrado || 0);
+                    });
+                }
+                
                 const pendiente = totalGanancia - totalCobrado;
                 
-                console.log(`${o.nombre}: Ganancia=$${totalGanancia}, Cobrado=$${totalCobrado}, Pendiente=$${pendiente}`);
+                console.log(`${o.nombre}: ganancia=$${totalGanancia}, cobrado=$${totalCobrado}, pendiente=$${pendiente}`);
                 
+                // Si hay pendiente, agregar a opciones
                 if (pendiente > 0) {
-                    hayOdontosConDeuda = true;
                     const option = document.createElement('option');
                     option.value = o.id;
                     option.dataset.pendiente = pendiente;
-                    option.textContent = `${o.nombre} - Pendiente: $${pendiente.toLocaleString('es-MX')}`;
+                    option.text = `${o.nombre} - Deuda: $${pendiente.toLocaleString('es-MX')}`;
                     select.appendChild(option);
+                    odontoConDeuda++;
+                    console.log(`✅ Agregado: ${o.nombre} con $${pendiente}`);
                 }
             });
             
-            if (!hayOdontosConDeuda) {
+            if (odontoConDeuda === 0) {
+                console.warn('⚠️ No hay odontólogos con deuda');
                 const option = document.createElement('option');
-                option.textContent = 'Sin odontólogos con deuda pendiente';
                 option.disabled = true;
+                option.text = '❌ Sin odontólogos con deuda pendiente';
                 select.appendChild(option);
-                console.warn('No hay odontólogos con deuda pendiente');
+            } else {
+                console.log(`✅ Cargados ${odontoConDeuda} odontólogos con deuda`);
             }
         }
 
@@ -747,11 +786,66 @@
                 return `<tr><td>${o.nombre}</td><td>${o.especialidad}</td><td>${o.celular}</td><td>$${totalGanancia}</td><td>$${totalCobrado}</td><td>$${totalAdeudado}</td><td><button class="btn btn-primary btn-small" onclick="verDetalleOdonto(${o.id})">Ver Detalle</button></td></tr>`;
             }).join('');
             document.getElementById('odontosLista').innerHTML = html;
+            cargarSelectOdontosDeuda();
+        }
+
+        function cargarSelectOdontosDeuda() {
+            const select = document.getElementById('odontoDeudaNombre');
+            if (!select) return;
+            select.innerHTML = '<option value="">-- Seleccionar odontólogo --</option>';
+            app.odontos.forEach(o => {
+                const option = document.createElement('option');
+                option.value = o.id;
+                option.text = o.nombre;
+                select.appendChild(option);
+            });
         }
 
         function actualizarSelectOdontosDetalle() {
             const select = document.getElementById('odontoDetalleSelect');
-            select.innerHTML = '<option value="">Seleccionar odontólogo...</option>' + app.odontos.map(o => `<option value="${o.id}">${o.nombre}</option>`).join('');
+            if (!select) return;
+            select.innerHTML = '<option value="">Seleccionar odontólogo...</option>';
+            app.odontos.forEach(o => {
+                const option = document.createElement('option');
+                option.value = o.id;
+                option.text = o.nombre;
+                select.appendChild(option);
+            });
+        }
+
+        function registrarDeudaOdonto() {
+            const odontId = parseInt(document.getElementById('odontoDeudaNombre').value);
+            const ganancia = parseFloat(document.getElementById('odontoDeudaGanancia').value);
+            const cobrado = parseFloat(document.getElementById('odontoDeudaCobrado').value);
+
+            if (!odontId || !ganancia || ganancia <= 0) {
+                alert('Completa: Odontólogo y Ganancia Generada');
+                return;
+            }
+
+            const odonto = app.odontos.find(o => o.id === odontId);
+            if (!odonto) return;
+
+            const cobradoVal = isNaN(cobrado) ? 0 : cobrado;
+            const adeudado = ganancia - cobradoVal;
+            const fecha = new Date().toISOString().split('T')[0];
+
+            odonto.historialGanancias.push({
+                fecha: fecha,
+                ganancia: ganancia,
+                cobrado: cobradoVal,
+                adeudado: adeudado
+            });
+
+            alert(`✅ Deuda registrada para ${odonto.nombre}\nGanancia: $${ganancia}\nCobrado: $${cobradoVal}\nAdeudado: $${adeudado}`);
+
+            document.getElementById('odontoDeudaNombre').value = '';
+            document.getElementById('odontoDeudaGanancia').value = '';
+            document.getElementById('odontoDeudaCobrado').value = '';
+
+            renderOdontos();
+            cargarOdontosConDeuda();
+            actualizarSelectOdontosDetalle();
         }
 
         function switchOdontoTab(tab) {
