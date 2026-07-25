@@ -463,11 +463,15 @@
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('appContainer').classList.remove('hidden');
                 document.getElementById('currentUser').textContent = user;
-                cargarSelects();
-                cargarOdontosConDeuda();
-                cargarSelectOdontosDeuda();
-                renderTratamientos();
-                updateDashboard();
+                
+                // Cargar datos de Google Sheets
+                cargarDatosDeGoogleSheets().then(() => {
+                    cargarSelects();
+                    cargarOdontosConDeuda();
+                    cargarSelectOdontosDeuda();
+                    renderTratamientos();
+                    updateDashboard();
+                });
             }
         }
 
@@ -544,6 +548,16 @@
             }
 
             alert('✅ Factura creada');
+            
+            // Guardar en Google Sheets
+            guardarFacturaEnGoogleSheets(factura);
+            if (monto > 0) {
+                const movimiento = app.caja[app.caja.length - 1];
+                guardarCajaEnGoogleSheets(movimiento);
+            }
+            guardarPacienteEnGoogleSheets(pac);
+            guardarOdontoEnGoogleSheets(odonto);
+            
             renderFacturas();
             cargarSelects();
             updateDashboard();
@@ -647,14 +661,16 @@
                 procesarPagoHonorarios(odontId, monto, metodo, desc);
             } else {
                 const descripcion = tipo === 'proveedores' ? (document.getElementById('egresoProveedorNombre').value || 'Proveedor') : desc;
-                app.caja.push({
+                const movimiento = {
                     tipo:'egreso',
                     desc:descripcion || tipo,
                     monto:monto,
                     metodo:metodo,
                     tipoEgreso:tipo,
                     fecha:new Date().toISOString().split('T')[0]
-                });
+                };
+                app.caja.push(movimiento);
+                guardarCajaEnGoogleSheets(movimiento);
             }
 
             alert('✅ Egreso registrado correctamente');
@@ -673,7 +689,9 @@
             if (!odont) return;
 
             // Registrar egreso
-            app.caja.push({tipo:'egreso',desc:`Pago Honorarios ${odont.nombre}`,monto:monto,metodo:metodo,tipoEgreso:'honorarios',fecha:new Date().toISOString().split('T')[0]});
+            const movimiento = {tipo:'egreso',desc:`Pago Honorarios ${odont.nombre}`,monto:monto,metodo:metodo,tipoEgreso:'honorarios',fecha:new Date().toISOString().split('T')[0]};
+            app.caja.push(movimiento);
+            guardarCajaEnGoogleSheets(movimiento);
 
             // Distribuir el pago entre las entradas adeudadas del historial
             let montoPendiente = monto;
@@ -688,6 +706,7 @@
                 }
             }
 
+            guardarOdontoEnGoogleSheets(odont);
             alert('✅ Pago registrado en historial del odontólogo');
         }
 
@@ -707,11 +726,14 @@
                     trat.costo = costo;
                     trat.precio = precio;
                     trat.honorario = honorario;
+                    guardarTratamientoEnGoogleSheets(trat);
                     alert('✅ Tratamiento actualizado');
                     editandoTratId = null;
                 }
             } else {
-                app.tratamientos.push({id:++app.ultimoId.trat,nombre,costo,precio,honorario});
+                const trat = {id:++app.ultimoId.trat,nombre,costo,precio,honorario};
+                app.tratamientos.push(trat);
+                guardarTratamientoEnGoogleSheets(trat);
                 alert('✅ Tratamiento agregado');
             }
 
@@ -958,6 +980,85 @@
             `;
 
             document.getElementById('detalleOdontoContent').innerHTML = html;
+        }
+
+        // ===== GOOGLE SHEETS INTEGRATION =====
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyMMtCMoEYEDN2Nh52dxEdzJr_o5PjY1zHLVi-QXrqVLHgL-zqoIqRHavcCi84Jz8G-Sw/exec';
+
+        async function cargarDatosDeGoogleSheets() {
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ accion: 'obtenerTodo' })
+                });
+                const datos = await response.json();
+                
+                if (datos.pacientes) app.pacientes = datos.pacientes;
+                if (datos.odontos) app.odontos = datos.odontos;
+                if (datos.tratamientos) app.tratamientos = datos.tratamientos;
+                if (datos.facturas) app.facturas = datos.facturas;
+                if (datos.caja) app.caja = datos.caja;
+                
+                console.log('✅ Datos cargados de Google Sheets');
+                updateDashboard();
+            } catch(err) {
+                console.log('⚠️ Error al cargar de Google Sheets:', err);
+            }
+        }
+
+        async function guardarPacienteEnGoogleSheets(paciente) {
+            try {
+                await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ accion: 'guardarPaciente', paciente: paciente })
+                });
+            } catch(err) {
+                console.log('⚠️ Error al guardar paciente:', err);
+            }
+        }
+
+        async function guardarOdontoEnGoogleSheets(odonto) {
+            try {
+                await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ accion: 'guardarOdonto', odonto: odonto })
+                });
+            } catch(err) {
+                console.log('⚠️ Error al guardar odontólogo:', err);
+            }
+        }
+
+        async function guardarTratamientoEnGoogleSheets(tratamiento) {
+            try {
+                await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ accion: 'guardarTratamiento', tratamiento: tratamiento })
+                });
+            } catch(err) {
+                console.log('⚠️ Error al guardar tratamiento:', err);
+            }
+        }
+
+        async function guardarFacturaEnGoogleSheets(factura) {
+            try {
+                await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ accion: 'guardarFactura', factura: factura })
+                });
+            } catch(err) {
+                console.log('⚠️ Error al guardar factura:', err);
+            }
+        }
+
+        async function guardarCajaEnGoogleSheets(movimiento) {
+            try {
+                await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ accion: 'guardarCaja', movimiento: movimiento })
+                });
+            } catch(err) {
+                console.log('⚠️ Error al guardar en caja:', err);
+            }
         }
 
         function registrarGananciaOdonto(odontId, ganancia, cobrado, adeudado) {
