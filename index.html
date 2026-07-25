@@ -209,6 +209,13 @@
                     <div class="kpi-container">
                         <div class="kpi-card"><div class="kpi-label">Total Ingresos</div><div class="kpi-value" id="cajaIngresos">$0</div></div>
                         <div class="kpi-card"><div class="kpi-label">Total Egresos</div><div class="kpi-value" id="cajaEgresos">$0</div></div>
+                        <div class="kpi-card"><div class="kpi-label">Saldo Actual</div><div class="kpi-value" id="cajaSaldo" style="color: #10b981;">$0</div></div>
+                    </div>
+
+                    <div class="kpi-container">
+                        <div class="kpi-card" style="border-left-color: #10b981;"><div class="kpi-label">💵 Saldo Efectivo</div><div class="kpi-value" id="cajaSaldoEfectivo">$0</div></div>
+                        <div class="kpi-card" style="border-left-color: #f59e0b;"><div class="kpi-label">💳 Saldo Tarjeta</div><div class="kpi-value" id="cajaSaldoTarjeta">$0</div></div>
+                        <div class="kpi-card" style="border-left-color: #3b82f6;"><div class="kpi-label">🏦 Saldo Transferencia</div><div class="kpi-value" id="cajaSaldoTransferencia">$0</div></div>
                     </div>
                     <div class="form-container">
                         <h3>Registrar Egreso</h3>
@@ -444,7 +451,7 @@
             ],
             tratamientos: [{id:1,nombre:'Implante Titanio',costo:3500,precio:15000,honorario:5000},{id:2,nombre:'Corona PMMA',costo:500,precio:3500,honorario:800},{id:3,nombre:'Corona Porcelana',costo:1000,precio:6000,honorario:1400},{id:4,nombre:'Limpieza',costo:200,precio:1500,honorario:300},{id:5,nombre:'Consulta',costo:50,precio:900,honorario:200}],
             facturas: [{id:1,pacienteId:1,odontologoId:1,tratamientoId:1,total:15000,pagado:15000,deuda:0,fecha:'2026-07-20'},{id:2,pacienteId:2,odontologoId:2,tratamientoId:3,total:6000,pagado:2000,deuda:4000,fecha:'2026-07-19'}],
-            caja: [{tipo:'ingreso',desc:'Pago María García',monto:15000},{tipo:'ingreso',desc:'Pago Juan López Parcial',monto:2000}],
+            caja: [{tipo:'ingreso',desc:'Pago María García',monto:15000,metodo:'efectivo'},{tipo:'ingreso',desc:'Pago Juan López Parcial',monto:2000,metodo:'tarjeta'}],
             ultimoId: {paciente:2,odonto:3,trat:5,fact:2}
         };
 
@@ -525,7 +532,16 @@
             // Registrar ganancia del odontólogo
             registrarGananciaOdonto(parseInt(odontId), honorario, monto > 0 ? monto : 0, monto > 0 ? (precio - monto) : precio);
 
-            if (monto > 0) app.caja.push({tipo:'ingreso',desc:`Pago ${pac.nombre}`,monto:monto});
+            if (monto > 0) {
+                const metodo = document.getElementById('factMetodo').value;
+                app.caja.push({
+                    tipo:'ingreso',
+                    desc:`Pago ${pac.nombre}`,
+                    monto:monto,
+                    metodo:metodo,
+                    fecha:new Date().toISOString().split('T')[0]
+                });
+            }
 
             alert('✅ Factura creada');
             renderFacturas();
@@ -963,6 +979,24 @@
             document.getElementById('kpiGanancia').textContent = '$' + (ingresos - egresos - honorarios);
             document.getElementById('cajaIngresos').textContent = '$' + ingresos;
             document.getElementById('cajaEgresos').textContent = '$' + egresos;
+            document.getElementById('cajaSaldo').textContent = '$' + (ingresos - egresos);
+            
+            // Calcular saldos por método de pago
+            const ingresosEfectivo = app.caja.filter(c => c.tipo === 'ingreso' && c.metodo === 'efectivo').reduce((s,c) => s + c.monto, 0);
+            const egresosEfectivo = app.caja.filter(c => c.tipo === 'egreso' && c.metodo === 'efectivo').reduce((s,c) => s + c.monto, 0);
+            const saldoEfectivo = ingresosEfectivo - egresosEfectivo;
+            
+            const ingresosTarjeta = app.caja.filter(c => c.tipo === 'ingreso' && c.metodo === 'tarjeta').reduce((s,c) => s + c.monto, 0);
+            const egresosTarjeta = app.caja.filter(c => c.tipo === 'egreso' && c.metodo === 'tarjeta').reduce((s,c) => s + c.monto, 0);
+            const saldoTarjeta = ingresosTarjeta - egresosTarjeta;
+            
+            const ingresosTransferencia = app.caja.filter(c => c.tipo === 'ingreso' && c.metodo === 'transferencia').reduce((s,c) => s + c.monto, 0);
+            const egresosTransferencia = app.caja.filter(c => c.tipo === 'egreso' && c.metodo === 'transferencia').reduce((s,c) => s + c.monto, 0);
+            const saldoTransferencia = ingresosTransferencia - egresosTransferencia;
+            
+            document.getElementById('cajaSaldoEfectivo').textContent = '$' + saldoEfectivo;
+            document.getElementById('cajaSaldoTarjeta').textContent = '$' + saldoTarjeta;
+            document.getElementById('cajaSaldoTransferencia').textContent = '$' + saldoTransferencia;
             renderFacturas();
             renderPacientes();
             renderOdontos();
