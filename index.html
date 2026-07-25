@@ -983,34 +983,34 @@
         }
 
         // ===== GOOGLE SHEETS INTEGRATION =====
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx8FqLS6NEdY09BB3E7Fpy24dqNZCF2vauFNkqi8qAAT98xjeHc_sFBqDRM5iA9qQRVCQ/exec';
-        const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
+        // URL del backend en Vercel (actualiza esto con tu URL real)
+        const BACKEND_URL = 'https://fixum-clinic-backend.vercel.app/api/proxy';
 
-        async function hacerFetchConCORS(url, opciones) {
+        async function hacerFetch(url, opciones) {
             try {
-                const response = await fetch(CORS_PROXY + url, {
-                    ...opciones,
+                const response = await fetch(BACKEND_URL, {
+                    method: 'POST',
                     headers: {
-                        ...opciones.headers,
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    body: opciones.body
                 });
                 return response;
             } catch(err) {
-                console.log('Intentando sin proxy...');
-                return fetch(url, opciones);
+                console.log('⚠️ Error de conexión:', err.message);
+                throw err;
             }
         }
 
         async function cargarDatosDeGoogleSheets() {
             try {
-                const response = await hacerFetchConCORS(APPS_SCRIPT_URL, {
+                const response = await hacerFetch(BACKEND_URL, {
                     method: 'POST',
                     body: JSON.stringify({ accion: 'obtenerTodo' })
                 });
                 
                 if (!response.ok) {
-                    console.log('⚠️ Apps Script no responde. Usando datos locales.');
+                    console.log('⚠️ Backend no responde. Usando datos locales.');
                     return;
                 }
                 
@@ -1031,7 +1031,7 @@
 
         async function guardarPacienteEnGoogleSheets(paciente) {
             try {
-                await hacerFetchConCORS(APPS_SCRIPT_URL, {
+                await hacerFetch(BACKEND_URL, {
                     method: 'POST',
                     body: JSON.stringify({ accion: 'guardarPaciente', paciente: paciente })
                 });
@@ -1043,7 +1043,7 @@
 
         async function guardarOdontoEnGoogleSheets(odonto) {
             try {
-                await hacerFetchConCORS(APPS_SCRIPT_URL, {
+                await hacerFetch(BACKEND_URL, {
                     method: 'POST',
                     body: JSON.stringify({ accion: 'guardarOdonto', odonto: odonto })
                 });
@@ -1055,7 +1055,7 @@
 
         async function guardarTratamientoEnGoogleSheets(tratamiento) {
             try {
-                await hacerFetchConCORS(APPS_SCRIPT_URL, {
+                await hacerFetch(BACKEND_URL, {
                     method: 'POST',
                     body: JSON.stringify({ accion: 'guardarTratamiento', tratamiento: tratamiento })
                 });
@@ -1067,7 +1067,7 @@
 
         async function guardarFacturaEnGoogleSheets(factura) {
             try {
-                await hacerFetchConCORS(APPS_SCRIPT_URL, {
+                await hacerFetch(BACKEND_URL, {
                     method: 'POST',
                     body: JSON.stringify({ accion: 'guardarFactura', factura: factura })
                 });
@@ -1079,7 +1079,7 @@
 
         async function guardarCajaEnGoogleSheets(movimiento) {
             try {
-                await hacerFetchConCORS(APPS_SCRIPT_URL, {
+                await hacerFetch(BACKEND_URL, {
                     method: 'POST',
                     body: JSON.stringify({ accion: 'guardarCaja', movimiento: movimiento })
                 });
@@ -1088,7 +1088,6 @@
                 console.log('⚠️ Error sincronizando caja:', err.message);
             }
         }
-
         function registrarGananciaOdonto(odontId, ganancia, cobrado, adeudado) {
             const odont = app.odontos.find(o => o.id === odontId);
             if (odont) {
