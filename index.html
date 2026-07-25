@@ -563,6 +563,21 @@
             updateDashboard();
         }
 
+        function registrarGananciaOdonto(odontId, ganancia, cobrado, adeudado) {
+            const odont = app.odontos.find(o => o.id === odontId);
+            if (odont) {
+                if (!odont.historialGanancias) {
+                    odont.historialGanancias = [];
+                }
+                odont.historialGanancias.push({
+                    ganancia: ganancia,
+                    cobrado: cobrado,
+                    adeudado: adeudado,
+                    fecha: new Date().toISOString().split('T')[0]
+                });
+            }
+        }
+
         function renderFacturas() {
             const html = app.facturas.map(f => {
                 const pac = app.pacientes.find(p => p.id === f.pacienteId);
@@ -984,7 +999,7 @@
 
         // ===== GOOGLE SHEETS INTEGRATION =====
         // URL del backend en Vercel (actualiza esto con tu URL real)
-       
+        const BACKEND_URL = 'https://fixum-clinic-backend.vercel.app/api/proxy';
         // ===== GOOGLE SHEETS INTEGRATION =====
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0LVM9rATNpjhbUdNatEdSl48VCebBcSaWoBkZdWbAgXKpDWXCsc6XVcR0vNegEckx/exec';
 
