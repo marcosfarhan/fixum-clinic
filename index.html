@@ -985,114 +985,69 @@
         // ===== GOOGLE SHEETS INTEGRATION =====
         // URL del backend en Vercel (actualiza esto con tu URL real)
         const BACKEND_URL = 'https://fixum-clinic-backend.vercel.app/api/proxy';
+        // ===== GOOGLE SHEETS INTEGRATION =====
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0LVM9rATNpjhbUdNatEdSl48VCebBcSaWoBkZdWbAgXKpDWXCsc6XVcR0vNegEckx/exec';
 
-        async function hacerFetch(url, opciones) {
+        async function hacerFetch(datos) {
             try {
-                const response = await fetch(BACKEND_URL, {
+                const response = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: opciones.body
+                    body: JSON.stringify(datos)
                 });
-                return response;
+                const resultado = await response.json();
+                return resultado;
             } catch(err) {
-                console.log('⚠️ Error de conexión:', err.message);
+                console.log('⚠️ Error:', err.message);
                 throw err;
             }
         }
 
         async function cargarDatosDeGoogleSheets() {
-            try {
-                const response = await hacerFetch(BACKEND_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ accion: 'obtenerTodo' })
-                });
-                
-                if (!response.ok) {
-                    console.log('⚠️ Backend no responde. Usando datos locales.');
-                    return;
-                }
-                
-                const datos = await response.json();
-                
-                if (datos.pacientes) app.pacientes = datos.pacientes;
-                if (datos.odontos) app.odontos = datos.odontos;
-                if (datos.tratamientos) app.tratamientos = datos.tratamientos;
-                if (datos.facturas) app.facturas = datos.facturas;
-                if (datos.caja) app.caja = datos.caja;
-                
-                console.log('✅ Datos sincronizados desde Google Sheets');
-                updateDashboard();
-            } catch(err) {
-                console.log('⚠️ No se pudo conectar a Google Sheets:', err.message);
-            }
+            console.log('📥 Cargando datos...');
         }
 
         async function guardarPacienteEnGoogleSheets(paciente) {
             try {
-                await hacerFetch(BACKEND_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ accion: 'guardarPaciente', paciente: paciente })
-                });
+                await hacerFetch({ accion: 'guardarPaciente', paciente: paciente });
                 console.log('✅ Paciente sincronizado');
             } catch(err) {
-                console.log('⚠️ Error sincronizando paciente:', err.message);
+                console.log('⚠️ Error');
             }
         }
 
         async function guardarOdontoEnGoogleSheets(odonto) {
             try {
-                await hacerFetch(BACKEND_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ accion: 'guardarOdonto', odonto: odonto })
-                });
+                await hacerFetch({ accion: 'guardarOdonto', odonto: odonto });
                 console.log('✅ Odontólogo sincronizado');
             } catch(err) {
-                console.log('⚠️ Error sincronizando odontólogo:', err.message);
+                console.log('⚠️ Error');
             }
         }
 
         async function guardarTratamientoEnGoogleSheets(tratamiento) {
             try {
-                await hacerFetch(BACKEND_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ accion: 'guardarTratamiento', tratamiento: tratamiento })
-                });
+                await hacerFetch({ accion: 'guardarTratamiento', tratamiento: tratamiento });
                 console.log('✅ Tratamiento sincronizado');
             } catch(err) {
-                console.log('⚠️ Error sincronizando tratamiento:', err.message);
+                console.log('⚠️ Error');
             }
         }
 
         async function guardarFacturaEnGoogleSheets(factura) {
             try {
-                await hacerFetch(BACKEND_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ accion: 'guardarFactura', factura: factura })
-                });
+                await hacerFetch({ accion: 'guardarFactura', factura: factura });
                 console.log('✅ Factura sincronizada');
             } catch(err) {
-                console.log('⚠️ Error sincronizando factura:', err.message);
+                console.log('⚠️ Error');
             }
         }
 
         async function guardarCajaEnGoogleSheets(movimiento) {
             try {
-                await hacerFetch(BACKEND_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ accion: 'guardarCaja', movimiento: movimiento })
-                });
+                await hacerFetch({ accion: 'guardarCaja', movimiento: movimiento });
                 console.log('✅ Movimiento de caja sincronizado');
             } catch(err) {
-                console.log('⚠️ Error sincronizando caja:', err.message);
-            }
-        }
-        function registrarGananciaOdonto(odontId, ganancia, cobrado, adeudado) {
-            const odont = app.odontos.find(o => o.id === odontId);
-            if (odont) {
-                const fecha = new Date().toISOString().split('T')[0];
-                odont.historialGanancias.push({fecha, ganancia, cobrado, adeudado});
+                console.log('⚠️ Error');
             }
         }
 
