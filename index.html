@@ -983,14 +983,24 @@
         }
 
         // ===== GOOGLE SHEETS INTEGRATION =====
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyMMtCMoEYEDN2Nh52dxEdzJr_o5PjY1zHLVi-QXrqVLHgL-zqoIqRHavcCi84Jz8G-Sw/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx8FqLS6NEdY09BB3E7Fpy24dqNZCF2vauFNkqi8qAAT98xjeHc_sFBqDRM5iA9qQRVCQ/exec';
 
         async function cargarDatosDeGoogleSheets() {
             try {
                 const response = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({ accion: 'obtenerTodo' })
                 });
+                
+                if (!response.ok) {
+                    console.log('⚠️ Apps Script no responde correctamente. Usando datos locales.');
+                    return;
+                }
+                
                 const datos = await response.json();
                 
                 if (datos.pacientes) app.pacientes = datos.pacientes;
@@ -1002,7 +1012,8 @@
                 console.log('✅ Datos cargados de Google Sheets');
                 updateDashboard();
             } catch(err) {
-                console.log('⚠️ Error al cargar de Google Sheets:', err);
+                console.log('⚠️ No se pudo conectar a Google Sheets:', err.message);
+                console.log('La app funcionará con datos locales.');
             }
         }
 
@@ -1010,10 +1021,15 @@
             try {
                 await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({ accion: 'guardarPaciente', paciente: paciente })
                 });
+                console.log('✅ Paciente sincronizado con Google Sheets');
             } catch(err) {
-                console.log('⚠️ Error al guardar paciente:', err);
+                console.log('⚠️ Error al guardar paciente en Sheets:', err.message);
             }
         }
 
@@ -1021,10 +1037,15 @@
             try {
                 await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({ accion: 'guardarOdonto', odonto: odonto })
                 });
+                console.log('✅ Odontólogo sincronizado con Google Sheets');
             } catch(err) {
-                console.log('⚠️ Error al guardar odontólogo:', err);
+                console.log('⚠️ Error al guardar odontólogo en Sheets:', err.message);
             }
         }
 
@@ -1032,10 +1053,15 @@
             try {
                 await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({ accion: 'guardarTratamiento', tratamiento: tratamiento })
                 });
+                console.log('✅ Tratamiento sincronizado con Google Sheets');
             } catch(err) {
-                console.log('⚠️ Error al guardar tratamiento:', err);
+                console.log('⚠️ Error al guardar tratamiento en Sheets:', err.message);
             }
         }
 
@@ -1043,10 +1069,15 @@
             try {
                 await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({ accion: 'guardarFactura', factura: factura })
                 });
+                console.log('✅ Factura sincronizada con Google Sheets');
             } catch(err) {
-                console.log('⚠️ Error al guardar factura:', err);
+                console.log('⚠️ Error al guardar factura en Sheets:', err.message);
             }
         }
 
@@ -1054,10 +1085,15 @@
             try {
                 await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({ accion: 'guardarCaja', movimiento: movimiento })
                 });
+                console.log('✅ Movimiento de caja sincronizado con Google Sheets');
             } catch(err) {
-                console.log('⚠️ Error al guardar en caja:', err);
+                console.log('⚠️ Error al guardar en caja en Sheets:', err.message);
             }
         }
 
