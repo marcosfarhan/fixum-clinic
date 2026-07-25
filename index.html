@@ -984,20 +984,33 @@
 
         // ===== GOOGLE SHEETS INTEGRATION =====
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx8FqLS6NEdY09BB3E7Fpy24dqNZCF2vauFNkqi8qAAT98xjeHc_sFBqDRM5iA9qQRVCQ/exec';
+        const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
+
+        async function hacerFetchConCORS(url, opciones) {
+            try {
+                const response = await fetch(CORS_PROXY + url, {
+                    ...opciones,
+                    headers: {
+                        ...opciones.headers,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                return response;
+            } catch(err) {
+                console.log('Intentando sin proxy...');
+                return fetch(url, opciones);
+            }
+        }
 
         async function cargarDatosDeGoogleSheets() {
             try {
-                const response = await fetch(APPS_SCRIPT_URL, {
+                const response = await hacerFetchConCORS(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'cors',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
                     body: JSON.stringify({ accion: 'obtenerTodo' })
                 });
                 
                 if (!response.ok) {
-                    console.log('⚠️ Apps Script no responde correctamente. Usando datos locales.');
+                    console.log('⚠️ Apps Script no responde. Usando datos locales.');
                     return;
                 }
                 
@@ -1009,91 +1022,70 @@
                 if (datos.facturas) app.facturas = datos.facturas;
                 if (datos.caja) app.caja = datos.caja;
                 
-                console.log('✅ Datos cargados de Google Sheets');
+                console.log('✅ Datos sincronizados desde Google Sheets');
                 updateDashboard();
             } catch(err) {
                 console.log('⚠️ No se pudo conectar a Google Sheets:', err.message);
-                console.log('La app funcionará con datos locales.');
             }
         }
 
         async function guardarPacienteEnGoogleSheets(paciente) {
             try {
-                await fetch(APPS_SCRIPT_URL, {
+                await hacerFetchConCORS(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'cors',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
                     body: JSON.stringify({ accion: 'guardarPaciente', paciente: paciente })
                 });
-                console.log('✅ Paciente sincronizado con Google Sheets');
+                console.log('✅ Paciente sincronizado');
             } catch(err) {
-                console.log('⚠️ Error al guardar paciente en Sheets:', err.message);
+                console.log('⚠️ Error sincronizando paciente:', err.message);
             }
         }
 
         async function guardarOdontoEnGoogleSheets(odonto) {
             try {
-                await fetch(APPS_SCRIPT_URL, {
+                await hacerFetchConCORS(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'cors',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
                     body: JSON.stringify({ accion: 'guardarOdonto', odonto: odonto })
                 });
-                console.log('✅ Odontólogo sincronizado con Google Sheets');
+                console.log('✅ Odontólogo sincronizado');
             } catch(err) {
-                console.log('⚠️ Error al guardar odontólogo en Sheets:', err.message);
+                console.log('⚠️ Error sincronizando odontólogo:', err.message);
             }
         }
 
         async function guardarTratamientoEnGoogleSheets(tratamiento) {
             try {
-                await fetch(APPS_SCRIPT_URL, {
+                await hacerFetchConCORS(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'cors',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
                     body: JSON.stringify({ accion: 'guardarTratamiento', tratamiento: tratamiento })
                 });
-                console.log('✅ Tratamiento sincronizado con Google Sheets');
+                console.log('✅ Tratamiento sincronizado');
             } catch(err) {
-                console.log('⚠️ Error al guardar tratamiento en Sheets:', err.message);
+                console.log('⚠️ Error sincronizando tratamiento:', err.message);
             }
         }
 
         async function guardarFacturaEnGoogleSheets(factura) {
             try {
-                await fetch(APPS_SCRIPT_URL, {
+                await hacerFetchConCORS(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'cors',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
                     body: JSON.stringify({ accion: 'guardarFactura', factura: factura })
                 });
-                console.log('✅ Factura sincronizada con Google Sheets');
+                console.log('✅ Factura sincronizada');
             } catch(err) {
-                console.log('⚠️ Error al guardar factura en Sheets:', err.message);
+                console.log('⚠️ Error sincronizando factura:', err.message);
             }
         }
 
         async function guardarCajaEnGoogleSheets(movimiento) {
             try {
-                await fetch(APPS_SCRIPT_URL, {
+                await hacerFetchConCORS(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'cors',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
                     body: JSON.stringify({ accion: 'guardarCaja', movimiento: movimiento })
                 });
-                console.log('✅ Movimiento de caja sincronizado con Google Sheets');
+                console.log('✅ Movimiento de caja sincronizado');
             } catch(err) {
-                console.log('⚠️ Error al guardar en caja en Sheets:', err.message);
+                console.log('⚠️ Error sincronizando caja:', err.message);
             }
         }
 
