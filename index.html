@@ -1880,23 +1880,25 @@
                             app.facturas.push({
                                 id: f.id,
                                 pacienteNombre: f.descripcion || 'N/A',
+                                odontologoNombre: 'N/A',
                                 total: parseFloat(f.monto) || 0,
                                 pagado: parseFloat(f.monto) || 0,
                                 deuda: 0,
+                                metodo: 'N/A',
                                 fecha: f.fecha,
-                                usuario: f.usuario
+                                usuario: f.usuario,
+                                items: []
                             });
                         }
                     });
                     
-                    // Renderizar tabla si existe
-                    const tbody = document.getElementById('facturaLista');
-                    if (tbody) {
-                        renderFacturas();
-                    }
+                    // Forzar renderizado
+                    renderFacturas();
+                    updateDashboard();
+                    console.log(`✅ Tabla actualizada con ${app.facturas.length} facturas totales`);
                 }
             } catch(e) {
-                console.log('⚠️ No se pudo cargar facturas de Supabase');
+                console.log('⚠️ Error cargando facturas:', e.message);
             }
         }
 
