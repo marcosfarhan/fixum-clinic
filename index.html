@@ -1134,6 +1134,9 @@
 
             renderSelects();
             updateDashboard();
+            
+            // Cargar facturas de Supabase al final
+            cargarFacturasDeSupabase();
         }
 
         // FACTURACIÓN
@@ -1909,9 +1912,6 @@
         // INIT
         document.addEventListener('DOMContentLoaded', () => {
             loadData();
-            setTimeout(() => {
-                cargarFacturasDeSupabase();
-            }, 500);
         });
     </script>
 </body>
