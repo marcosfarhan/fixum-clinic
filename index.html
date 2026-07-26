@@ -1846,24 +1846,71 @@
             'sb_publishable_QTrjuK7dgOr7Gq-RBa341w_V5cUSO2I'
         );
 
+        async function cargarFacturasDesdeSupabase() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('facturas')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    console.error('❌ Error cargando facturas:', error.message);
+                    return;
+                }
+                
+                if (data && data.length > 0) {
+                    console.log(`✅ ${data.length} facturas cargadas desde Supabase`);
+                }
+            } catch(e) {
+                console.error('⚠️ Error Supabase:', e.message);
+            }
+        }
+
         async function guardarFacturaEnSupabase(factura) {
             try {
-                const usuarioNombre = app.currentUser && app.currentUser.name ? app.currentUser.name : (app.currentUser || 'admin');
-                await supabaseClient.from('facturas').insert([{
-                    descripcion: factura.items ? factura.items.map(i => i.nombre).join(', ') : 'Factura',
-                    monto: factura.total || 0,
-                    fecha: factura.fecha || new Date().toISOString().split('T')[0],
-                    usuario: usuarioNombre
-                }]);
-                console.log('✅ Factura guardada en Supabase:', usuarioNombre);
+                // Validar y convertir monto a número
+                const monto = parseFloat(factura.total) || 0;
+                if (monto <= 0) {
+                    console.warn('⚠️ Monto debe ser mayor a 0');
+                    return false;
+                }
+
+                const fecha = new Date().toISOString().split('T')[0];
+                const usuario = app.currentUser ? app.currentUser.name : 'admin';
+                const descripcion = factura.concepto || `Factura #${factura.id}`;
+
+                const { data, error } = await supabaseClient
+                    .from('facturas')
+                    .insert([{
+                        descripcion: descripcion,
+                        monto: monto,
+                        fecha: fecha,
+                        usuario: usuario
+                    }])
+                    .select();
+
+                if (error) {
+                    console.error('❌ Error Supabase:', error.message);
+                    console.error('Código:', error.code);
+                    console.error('Detalles:', error.details);
+                    return false;
+                }
+
+                console.log('✅ Factura guardada en Supabase (ID:', data[0]?.id, ')');
+                return true;
             } catch(e) {
-                console.log('⚠️ Supabase error:', e.message);
+                console.error('⚠️ Exception Supabase:', e.message);
+                return false;
             }
         }
 
         // INIT
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             loadData();
+            // Cargar facturas desde Supabase después de cargar datos locales
+            setTimeout(() => {
+                cargarFacturasDesdeSupabase();
+            }, 500);
         });
     </script>
 </body>
