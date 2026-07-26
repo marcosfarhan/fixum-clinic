@@ -4,16 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fixum Clinic - Firebase</title>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: Arial, sans-serif;
             background: #f3f4f6;
             color: #1f2937;
         }
-        .login-container {
+        .login {
             max-width: 400px;
             margin: 100px auto;
             background: white;
@@ -21,375 +19,182 @@
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .login-container h2 { margin-bottom: 20px; text-align: center; }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
-        .form-group input, .form-group select {
+        .login h2 { margin-bottom: 20px; text-align: center; }
+        input, select {
             width: 100%;
             padding: 10px;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             font-size: 14px;
-            box-sizing: border-box;
         }
-        .btn {
+        button {
             width: 100%;
+            padding: 12px;
             background: #2864f0;
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: bold;
         }
-        .btn:hover { opacity: 0.9; }
+        button:hover { opacity: 0.9; }
+        .app { display: none; }
         .navbar {
             background: #2864f0;
             color: white;
             padding: 20px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-        .navbar h1 { font-size: 24px; }
-        .logout-btn {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
         }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .success-msg {
-            background: #d1fae5;
-            color: #065f46;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-        }
         table {
             width: 100%;
             border-collapse: collapse;
             background: white;
             margin: 20px 0;
-            border-radius: 8px;
-            overflow: hidden;
         }
-        th {
-            background: #f3f4f6;
+        th, td {
             padding: 12px;
             text-align: left;
-            font-weight: 600;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid #ddd;
         }
-        td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
-        .form-card {
+        th { background: #f3f4f6; font-weight: bold; }
+        .form {
             background: white;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
         }
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
+        .form h3 { margin-bottom: 15px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .msg { 
+            padding: 10px; 
+            background: #d1fae5; 
+            color: #065f46; 
+            border-radius: 4px; 
             margin-bottom: 15px;
+            display: none;
         }
-        #appContainer { display: none; }
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-        .tab {
-            padding: 12px 20px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            color: #6b7280;
-        }
-        .tab.active {
-            border-bottom-color: #2864f0;
-            color: #2864f0;
-            font-weight: 600;
-        }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .msg.show { display: block; }
     </style>
 </head>
 <body>
-    <div id="loginContainer" class="login-container">
+    <div class="login">
         <h2>Fixum Clinic</h2>
-        <div class="form-group">
-            <label>Usuario</label>
-            <input type="text" id="loginUsername" placeholder="admin">
-        </div>
-        <div class="form-group">
-            <label>Rol</label>
-            <select id="loginRole">
-                <option value="admin">Admin</option>
-                <option value="operario">Operario</option>
-            </select>
-        </div>
-        <button class="btn" onclick="handleLogin()">Ingresar</button>
+        <input type="text" id="user" placeholder="Usuario" value="admin">
+        <select id="role">
+            <option value="admin">Admin</option>
+            <option value="operario">Operario</option>
+        </select>
+        <button onclick="login()">Ingresar</button>
     </div>
 
-    <div id="appContainer">
+    <div class="app">
         <div class="navbar">
             <h1>Fixum Clinic</h1>
-            <button class="logout-btn" onclick="handleLogout()">Cerrar sesión</button>
+            <button onclick="logout()" style="width: 150px;">Cerrar sesión</button>
         </div>
-
+        
         <div class="container">
-            <div id="successMsg"></div>
+            <div id="msg" class="msg"></div>
 
-            <div class="tabs">
-                <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
-                <button class="tab" onclick="switchTab('facturas')">Facturas</button>
-                <button class="tab" onclick="switchTab('pacientes')">Pacientes</button>
-            </div>
-
-            <!-- DASHBOARD -->
-            <div id="dashboard" class="tab-content active">
-                <h2>Dashboard</h2>
-                <div style="background: white; padding: 20px; border-radius: 8px;">
-                    <p>Total Facturas: <strong id="totalFacturas">0</strong></p>
-                    <p>Total Monto: <strong id="totalMonto">$0</strong></p>
+            <div class="form">
+                <h3>Nueva Factura</h3>
+                <div class="form-row">
+                    <input type="text" id="desc" placeholder="Descripción">
+                    <input type="number" id="monto" placeholder="Monto">
                 </div>
+                <button onclick="addFactura()">Crear Factura</button>
             </div>
 
-            <!-- FACTURAS -->
-            <div id="facturas" class="tab-content">
-                <h2>Facturas</h2>
-                <div class="form-card">
-                    <h3>Nueva Factura</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Descripción</label>
-                            <input type="text" id="facturaDesc" placeholder="Descripción">
-                        </div>
-                        <div class="form-group">
-                            <label>Monto</label>
-                            <input type="number" id="facturaMonto" placeholder="Monto">
-                        </div>
-                    </div>
-                    <button class="btn" onclick="crearFactura()">Crear Factura</button>
-                </div>
-                <div id="facturasTable"></div>
-            </div>
-
-            <!-- PACIENTES -->
-            <div id="pacientes" class="tab-content">
-                <h2>Pacientes</h2>
-                <div class="form-card">
-                    <h3>Nuevo Paciente</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Nombre</label>
-                            <input type="text" id="pacienteNombre" placeholder="Nombre">
-                        </div>
-                        <div class="form-group">
-                            <label>Teléfono</label>
-                            <input type="text" id="pacienteTelefono" placeholder="Teléfono">
-                        </div>
-                    </div>
-                    <button class="btn" onclick="crearPaciente()">Agregar Paciente</button>
-                </div>
-                <div id="pacientesTable"></div>
-            </div>
+            <h3>Facturas</h3>
+            <table id="table">
+                <tr>
+                    <th>Descripción</th>
+                    <th>Monto</th>
+                    <th>Fecha</th>
+                    <th>Usuario</th>
+                </tr>
+            </table>
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
+
     <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-          apiKey: "AIzaSyBNmLPfeNdm7cB0IeQJFheY0-vr9Ast97Y",
-          authDomain: "fixum-clinic-base.firebaseapp.com",
-          projectId: "fixum-clinic-base",
-          storageBucket: "fixum-clinic-base.firebasestorage.app",
-          messagingSenderId: "912287785369",
-          appId: "1:912287785369:web:1c12df07e713ea5833f308",
-          measurementId: "G-QZL859SYSH"
+        let db, user;
+
+        // Firebase init
+        const config = {
+            apiKey: "AIzaSyBNmLPfeNdm7cB0IeQJFheY0-vr9Ast97Y",
+            authDomain: "fixum-clinic-base.firebaseapp.com",
+            projectId: "fixum-clinic-base",
+            storageBucket: "fixum-clinic-base.firebasestorage.app",
+            messagingSenderId: "912287785369",
+            appId: "1:912287785369:web:1c12df07e713ea5833f308"
         };
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        firebase.initializeApp(config);
+        db = firebase.firestore();
 
-        // APP STATE
-        const app = {
-            currentUser: null,
-            pacientes: [],
-            facturas: []
-        };
-
-        // LOGIN
-        function handleLogin() {
-            const user = document.getElementById('loginUsername').value;
-            if (!user) {
-                alert('Por favor ingresa un usuario');
-                return;
-            }
-            app.currentUser = {
-                name: user,
-                role: document.getElementById('loginRole').value
-            };
-            document.getElementById('loginContainer').style.display = 'none';
-            document.getElementById('appContainer').style.display = 'block';
-            cargarDatos();
-            console.log('✅ Login exitoso:', user);
+        function login() {
+            const u = document.getElementById('user').value;
+            if (!u) return alert('Ingresa usuario');
+            user = u;
+            document.querySelector('.login').style.display = 'none';
+            document.querySelector('.app').style.display = 'block';
+            loadFacturas();
         }
 
-        function handleLogout() {
-            app.currentUser = null;
-            document.getElementById('loginContainer').style.display = 'block';
-            document.getElementById('appContainer').style.display = 'none';
-            document.getElementById('loginUsername').value = '';
+        function logout() {
+            user = null;
+            document.querySelector('.login').style.display = 'block';
+            document.querySelector('.app').style.display = 'none';
         }
 
-        // CARGAR DATOS DESDE FIRESTORE
-        async function cargarDatos() {
+        async function loadFacturas() {
             try {
-                // Cargar facturas
-                const facturasSnap = await db.collection('facturas').get();
-                app.facturas = [];
-                facturasSnap.forEach(doc => {
-                    app.facturas.push({ id: doc.id, ...doc.data() });
+                const snap = await db.collection('facturas').get();
+                let html = '<tr><th>Descripción</th><th>Monto</th><th>Fecha</th><th>Usuario</th></tr>';
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    html += `<tr><td>${d.desc}</td><td>$${d.monto}</td><td>${d.fecha}</td><td>${d.user}</td></tr>`;
                 });
-                console.log('✅ Facturas cargadas:', app.facturas.length);
+                document.getElementById('table').innerHTML = html;
+            } catch(e) {
+                showMsg('Error: ' + e.message);
+            }
+        }
 
-                // Cargar pacientes
-                const pacientesSnap = await db.collection('pacientes').get();
-                app.pacientes = [];
-                pacientesSnap.forEach(doc => {
-                    app.pacientes.push({ id: doc.id, ...doc.data() });
+        async function addFactura() {
+            const desc = document.getElementById('desc').value;
+            const monto = parseFloat(document.getElementById('monto').value);
+            if (!desc || !monto) return alert('Completa los campos');
+
+            try {
+                await db.collection('facturas').add({
+                    desc: desc,
+                    monto: monto,
+                    fecha: new Date().toISOString().split('T')[0],
+                    user: user
                 });
-                console.log('✅ Pacientes cargados:', app.pacientes.length);
-
-                updateDashboard();
-                renderTables();
-            } catch(err) {
-                console.log('⚠️ Error cargando datos:', err);
-                showMessage('Error cargando datos de Firestore');
+                showMsg('✅ Factura creada');
+                document.getElementById('desc').value = '';
+                document.getElementById('monto').value = '';
+                loadFacturas();
+            } catch(e) {
+                showMsg('❌ Error: ' + e.message);
             }
         }
 
-        // CREAR FACTURA
-        async function crearFactura() {
-            const desc = document.getElementById('facturaDesc').value;
-            const monto = parseFloat(document.getElementById('facturaMonto').value);
-
-            if (!desc || !monto) {
-                alert('Por favor completa los campos');
-                return;
-            }
-
-            const factura = {
-                descripcion: desc,
-                monto: monto,
-                fecha: new Date().toISOString().split('T')[0],
-                usuario: app.currentUser.name
-            };
-
-            try {
-                await db.collection('facturas').add(factura);
-                console.log('✅ Factura guardada en Firestore');
-                showMessage('✅ Factura creada exitosamente');
-                document.getElementById('facturaDesc').value = '';
-                document.getElementById('facturaMonto').value = '';
-                cargarDatos();
-            } catch(err) {
-                console.log('❌ Error:', err);
-                showMessage('❌ Error guardando factura');
-            }
-        }
-
-        // CREAR PACIENTE
-        async function crearPaciente() {
-            const nombre = document.getElementById('pacienteNombre').value;
-            const telefono = document.getElementById('pacienteTelefono').value;
-
-            if (!nombre) {
-                alert('Por favor ingresa un nombre');
-                return;
-            }
-
-            const paciente = {
-                nombre: nombre,
-                telefono: telefono,
-                fecha: new Date().toISOString().split('T')[0]
-            };
-
-            try {
-                await db.collection('pacientes').add(paciente);
-                console.log('✅ Paciente guardado en Firestore');
-                showMessage('✅ Paciente creado exitosamente');
-                document.getElementById('pacienteNombre').value = '';
-                document.getElementById('pacienteTelefono').value = '';
-                cargarDatos();
-            } catch(err) {
-                console.log('❌ Error:', err);
-                showMessage('❌ Error guardando paciente');
-            }
-        }
-
-        // UPDATE DASHBOARD
-        function updateDashboard() {
-            const totalMonto = app.facturas.reduce((s, f) => s + (f.monto || 0), 0);
-            document.getElementById('totalFacturas').textContent = app.facturas.length;
-            document.getElementById('totalMonto').textContent = '$' + totalMonto.toLocaleString('es-MX');
-        }
-
-        // RENDER TABLES
-        function renderTables() {
-            // Facturas
-            const facturasHtml = app.facturas.length ? `
-                <table>
-                    <tr><th>Descripción</th><th>Monto</th><th>Fecha</th><th>Usuario</th></tr>
-                    ${app.facturas.map(f => `<tr>
-                        <td>${f.descripcion || 'N/A'}</td>
-                        <td>$${f.monto}</td>
-                        <td>${f.fecha}</td>
-                        <td>${f.usuario || 'N/A'}</td>
-                    </tr>`).join('')}
-                </table>
-            ` : '<p>Sin facturas</p>';
-            document.getElementById('facturasTable').innerHTML = facturasHtml;
-
-            // Pacientes
-            const pacientesHtml = app.pacientes.length ? `
-                <table>
-                    <tr><th>Nombre</th><th>Teléfono</th><th>Fecha</th></tr>
-                    ${app.pacientes.map(p => `<tr>
-                        <td>${p.nombre}</td>
-                        <td>${p.telefono || 'N/A'}</td>
-                        <td>${p.fecha}</td>
-                    </tr>`).join('')}
-                </table>
-            ` : '<p>Sin pacientes</p>';
-            document.getElementById('pacientesTable').innerHTML = pacientesHtml;
-        }
-
-        // TABS
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById(tab).classList.add('active');
-        }
-
-        // SHOW MESSAGE
-        function showMessage(msg) {
-            const div = document.getElementById('successMsg');
-            div.innerHTML = `<div class="success-msg">${msg}</div>`;
-            setTimeout(() => { div.innerHTML = ''; }, 3000);
+        function showMsg(text) {
+            const m = document.getElementById('msg');
+            m.textContent = text;
+            m.classList.add('show');
+            setTimeout(() => m.classList.remove('show'), 3000);
         }
     </script>
 </body>
