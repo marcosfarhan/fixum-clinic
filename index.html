@@ -84,6 +84,7 @@
     <div class="login">
         <h2>Fixum Clinic</h2>
         <input type="text" id="user" placeholder="Usuario" value="admin">
+        <input type="password" id="pass" placeholder="Contraseña" value="admin">
         <select id="role">
             <option value="admin">Admin</option>
             <option value="operario">Operario</option>
@@ -142,7 +143,9 @@
 
         function login() {
             const u = document.getElementById('user').value;
-            if (!u) return alert('Ingresa usuario');
+            const p = document.getElementById('pass').value;
+            if (!u || !p) return alert('Ingresa usuario y contraseña');
+            if (u !== 'admin' || p !== 'admin') return alert('Usuario o contraseña incorrectos');
             user = u;
             document.querySelector('.login').style.display = 'none';
             document.querySelector('.app').style.display = 'block';
