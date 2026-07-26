@@ -3,47 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fixum Clinic - Gestión Integrada con Firebase</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <title>Fixum Clinic - Firebase</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #2864f0;
-            --secondary: #f0c800;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --text-dark: #1f2937;
-            --text-light: #6b7280;
-            --bg-light: #f9fafb;
-            --bg-white: #ffffff;
-            --border: #e5e7eb;
-        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--bg-light);
-            color: var(--text-dark);
-        }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        .navbar {
-            background: var(--primary);
-            color: white;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-        .navbar h1 { font-size: 24px; }
-        .logout-btn {
-            background: var(--danger);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f3f4f6;
+            color: #1f2937;
         }
         .login-container {
             max-width: 400px;
@@ -56,18 +24,19 @@
         .login-container h2 { margin-bottom: 20px; text-align: center; }
         .form-group {
             margin-bottom: 15px;
-            display: flex;
-            flex-direction: column;
         }
-        .form-group label { margin-bottom: 5px; font-weight: 500; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
         .form-group input, .form-group select {
+            width: 100%;
             padding: 10px;
-            border: 1px solid var(--border);
+            border: 1px solid #e5e7eb;
             border-radius: 6px;
             font-size: 14px;
+            box-sizing: border-box;
         }
         .btn {
-            background: var(--primary);
+            width: 100%;
+            background: #2864f0;
             color: white;
             border: none;
             padding: 12px 20px;
@@ -77,75 +46,82 @@
             font-weight: 500;
         }
         .btn:hover { opacity: 0.9; }
-        .btn-danger { background: var(--danger); }
-        .btn-success { background: var(--success); }
+        .navbar {
+            background: #2864f0;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .navbar h1 { font-size: 24px; }
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .success-msg {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin: 20px 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th {
+            background: #f3f4f6;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+        .form-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        #appContainer { display: none; }
         .tabs {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
-            border-bottom: 2px solid var(--border);
+            border-bottom: 2px solid #e5e7eb;
         }
         .tab {
             padding: 12px 20px;
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 14px;
             border-bottom: 3px solid transparent;
-            color: var(--text-light);
+            color: #6b7280;
         }
         .tab.active {
-            border-bottom-color: var(--primary);
-            color: var(--primary);
+            border-bottom-color: #2864f0;
+            color: #2864f0;
             font-weight: 600;
         }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .kpi-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .kpi-card h3 { font-size: 12px; color: var(--text-light); margin-bottom: 10px; text-transform: uppercase; }
-        .kpi-card .value { font-size: 28px; font-weight: 700; color: var(--primary); }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin: 20px 0;
-        }
-        th {
-            background: var(--bg-light);
-            padding: 15px;
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-dark);
-            border-bottom: 2px solid var(--border);
-        }
-        td { padding: 15px; border-bottom: 1px solid var(--border); }
-        tr:hover { background: var(--bg-light); }
-        .form-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .form-card h3 { margin-bottom: 20px; }
-        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
-        .success { background: var(--success); }
-        .warning { background: var(--warning); }
-        .info { color: var(--primary); }
     </style>
 </head>
 <body>
@@ -153,68 +129,58 @@
         <h2>Fixum Clinic</h2>
         <div class="form-group">
             <label>Usuario</label>
-            <input type="text" id="loginUsername">
+            <input type="text" id="loginUsername" placeholder="admin">
         </div>
         <div class="form-group">
             <label>Rol</label>
             <select id="loginRole">
                 <option value="admin">Admin</option>
-                <option value="operator">Operario</option>
+                <option value="operario">Operario</option>
             </select>
         </div>
         <button class="btn" onclick="handleLogin()">Ingresar</button>
     </div>
 
-    <div id="appContainer" style="display: none;">
+    <div id="appContainer">
         <div class="navbar">
             <h1>Fixum Clinic</h1>
             <button class="logout-btn" onclick="handleLogout()">Cerrar sesión</button>
         </div>
 
         <div class="container">
+            <div id="successMsg"></div>
+
             <div class="tabs">
                 <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
                 <button class="tab" onclick="switchTab('facturas')">Facturas</button>
                 <button class="tab" onclick="switchTab('pacientes')">Pacientes</button>
-                <button class="tab" onclick="switchTab('odontologos')">Odontólogos</button>
-                <button class="tab" onclick="switchTab('tratamientos')">Tratamientos</button>
-                <button class="tab" onclick="switchTab('caja')">Caja</button>
             </div>
 
             <!-- DASHBOARD -->
             <div id="dashboard" class="tab-content active">
                 <h2>Dashboard</h2>
-                <div class="kpi-grid" id="kpiGrid"></div>
+                <div style="background: white; padding: 20px; border-radius: 8px;">
+                    <p>Total Facturas: <strong id="totalFacturas">0</strong></p>
+                    <p>Total Monto: <strong id="totalMonto">$0</strong></p>
+                </div>
             </div>
 
             <!-- FACTURAS -->
             <div id="facturas" class="tab-content">
-                <h2>Gestión de Facturas</h2>
+                <h2>Facturas</h2>
                 <div class="form-card">
                     <h3>Nueva Factura</h3>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Paciente</label>
-                            <select id="facturaPaciente"></select>
+                            <label>Descripción</label>
+                            <input type="text" id="facturaDesc" placeholder="Descripción">
                         </div>
                         <div class="form-group">
-                            <label>Odontólogo</label>
-                            <select id="facturaOdonto"></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Tratamiento</label>
-                            <select id="facturaTratamiento"></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Método de Pago</label>
-                            <select id="facturaMetodo">
-                                <option value="efectivo">Efectivo</option>
-                                <option value="tarjeta">Tarjeta</option>
-                                <option value="transferencia">Transferencia</option>
-                            </select>
+                            <label>Monto</label>
+                            <input type="number" id="facturaMonto" placeholder="Monto">
                         </div>
                     </div>
-                    <button class="btn btn-success" onclick="crearFactura()">Crear Factura</button>
+                    <button class="btn" onclick="crearFactura()">Crear Factura</button>
                 </div>
                 <div id="facturasTable"></div>
             </div>
@@ -227,95 +193,16 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Nombre</label>
-                            <input type="text" id="pacienteNombre">
+                            <input type="text" id="pacienteNombre" placeholder="Nombre">
                         </div>
                         <div class="form-group">
                             <label>Teléfono</label>
-                            <input type="text" id="pacienteTelefono">
+                            <input type="text" id="pacienteTelefono" placeholder="Teléfono">
                         </div>
                     </div>
-                    <button class="btn btn-success" onclick="crearPaciente()">Agregar Paciente</button>
+                    <button class="btn" onclick="crearPaciente()">Agregar Paciente</button>
                 </div>
                 <div id="pacientesTable"></div>
-            </div>
-
-            <!-- ODONTÓLOGOS -->
-            <div id="odontologos" class="tab-content">
-                <h2>Odontólogos</h2>
-                <div class="form-card">
-                    <h3>Nuevo Odontólogo</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Nombre</label>
-                            <input type="text" id="odontNombre">
-                        </div>
-                        <div class="form-group">
-                            <label>Especialidad</label>
-                            <input type="text" id="odontEspecialidad">
-                        </div>
-                    </div>
-                    <button class="btn btn-success" onclick="crearOdonto()">Agregar Odontólogo</button>
-                </div>
-                <div id="odontologosTable"></div>
-            </div>
-
-            <!-- TRATAMIENTOS -->
-            <div id="tratamientos" class="tab-content">
-                <h2>Tratamientos</h2>
-                <div class="form-card">
-                    <h3>Nuevo Tratamiento</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Nombre</label>
-                            <input type="text" id="tratNombre">
-                        </div>
-                        <div class="form-group">
-                            <label>Precio</label>
-                            <input type="number" id="tratPrecio">
-                        </div>
-                        <div class="form-group">
-                            <label>Honorario</label>
-                            <input type="number" id="tratHonorario">
-                        </div>
-                    </div>
-                    <button class="btn btn-success" onclick="crearTratamiento()">Agregar Tratamiento</button>
-                </div>
-                <div id="tratamientosTable"></div>
-            </div>
-
-            <!-- CAJA -->
-            <div id="caja" class="tab-content">
-                <h2>Control de Caja</h2>
-                <div class="form-card">
-                    <h3>Registrar Movimiento</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Tipo</label>
-                            <select id="cajaType">
-                                <option value="ingreso">Ingreso</option>
-                                <option value="egreso">Egreso</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Descripción</label>
-                            <input type="text" id="cajaDesc">
-                        </div>
-                        <div class="form-group">
-                            <label>Monto</label>
-                            <input type="number" id="cajaMonto">
-                        </div>
-                        <div class="form-group">
-                            <label>Método</label>
-                            <select id="cajaMetodo">
-                                <option value="efectivo">Efectivo</option>
-                                <option value="tarjeta">Tarjeta</option>
-                                <option value="transferencia">Transferencia</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button class="btn btn-success" onclick="registrarMovimientoCaja()">Registrar</button>
-                </div>
-                <div id="cajaTable"></div>
             </div>
         </div>
     </div>
@@ -340,191 +227,154 @@
         const app = {
             currentUser: null,
             pacientes: [],
-            odontos: [],
-            tratamientos: [],
-            facturas: [],
-            caja: [],
-            ultimoId: { paciente: 0, odonto: 0, trat: 0, fact: 0, caja: 0 }
+            facturas: []
         };
 
         // LOGIN
         function handleLogin() {
             const user = document.getElementById('loginUsername').value;
-            if (user) {
-                app.currentUser = { name: user, role: document.getElementById('loginRole').value };
-                document.getElementById('loginContainer').style.display = 'none';
-                document.getElementById('appContainer').style.display = 'block';
-                cargarDatos();
+            if (!user) {
+                alert('Por favor ingresa un usuario');
+                return;
             }
+            app.currentUser = {
+                name: user,
+                role: document.getElementById('loginRole').value
+            };
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+            cargarDatos();
+            console.log('✅ Login exitoso:', user);
         }
 
         function handleLogout() {
             app.currentUser = null;
             document.getElementById('loginContainer').style.display = 'block';
             document.getElementById('appContainer').style.display = 'none';
+            document.getElementById('loginUsername').value = '';
         }
 
         // CARGAR DATOS DESDE FIRESTORE
         async function cargarDatos() {
             try {
-                const snap = await db.collection('facturas').get();
-                app.facturas = snap.docs.map(doc => doc.data());
-                console.log('✅ Datos cargados desde Firestore');
+                // Cargar facturas
+                const facturasSnap = await db.collection('facturas').get();
+                app.facturas = [];
+                facturasSnap.forEach(doc => {
+                    app.facturas.push({ id: doc.id, ...doc.data() });
+                });
+                console.log('✅ Facturas cargadas:', app.facturas.length);
+
+                // Cargar pacientes
+                const pacientesSnap = await db.collection('pacientes').get();
+                app.pacientes = [];
+                pacientesSnap.forEach(doc => {
+                    app.pacientes.push({ id: doc.id, ...doc.data() });
+                });
+                console.log('✅ Pacientes cargados:', app.pacientes.length);
+
                 updateDashboard();
                 renderTables();
             } catch(err) {
                 console.log('⚠️ Error cargando datos:', err);
+                showMessage('Error cargando datos de Firestore');
             }
         }
 
         // CREAR FACTURA
         async function crearFactura() {
+            const desc = document.getElementById('facturaDesc').value;
+            const monto = parseFloat(document.getElementById('facturaMonto').value);
+
+            if (!desc || !monto) {
+                alert('Por favor completa los campos');
+                return;
+            }
+
             const factura = {
-                id: 'F' + Date.now(),
-                paciente: document.getElementById('facturaPaciente').value || 'N/A',
-                odonto: document.getElementById('facturaOdonto').value || 'N/A',
-                tratamiento: document.getElementById('facturaTratamiento').value || 'N/A',
-                total: 100, // TODO: calcular
-                metodo: document.getElementById('facturaMetodo').value,
+                descripcion: desc,
+                monto: monto,
+                fecha: new Date().toISOString().split('T')[0],
+                usuario: app.currentUser.name
+            };
+
+            try {
+                await db.collection('facturas').add(factura);
+                console.log('✅ Factura guardada en Firestore');
+                showMessage('✅ Factura creada exitosamente');
+                document.getElementById('facturaDesc').value = '';
+                document.getElementById('facturaMonto').value = '';
+                cargarDatos();
+            } catch(err) {
+                console.log('❌ Error:', err);
+                showMessage('❌ Error guardando factura');
+            }
+        }
+
+        // CREAR PACIENTE
+        async function crearPaciente() {
+            const nombre = document.getElementById('pacienteNombre').value;
+            const telefono = document.getElementById('pacienteTelefono').value;
+
+            if (!nombre) {
+                alert('Por favor ingresa un nombre');
+                return;
+            }
+
+            const paciente = {
+                nombre: nombre,
+                telefono: telefono,
                 fecha: new Date().toISOString().split('T')[0]
             };
 
             try {
-                await db.collection('facturas').doc(factura.id).set(factura);
-                console.log('✅ Factura guardada en Firestore');
-                app.facturas.push(factura);
-                updateDashboard();
-                renderTables();
-                limpiarFormas();
+                await db.collection('pacientes').add(paciente);
+                console.log('✅ Paciente guardado en Firestore');
+                showMessage('✅ Paciente creado exitosamente');
+                document.getElementById('pacienteNombre').value = '';
+                document.getElementById('pacienteTelefono').value = '';
+                cargarDatos();
             } catch(err) {
-                console.log('❌ Error guardando factura:', err);
+                console.log('❌ Error:', err);
+                showMessage('❌ Error guardando paciente');
             }
         }
 
-        function crearPaciente() {
-            const paciente = {
-                id: 'P' + Date.now(),
-                nombre: document.getElementById('pacienteNombre').value,
-                telefono: document.getElementById('pacienteTelefono').value
-            };
-            app.pacientes.push(paciente);
-            renderTables();
-            limpiarFormas();
-        }
-
-        function crearOdonto() {
-            const odonto = {
-                id: 'O' + Date.now(),
-                nombre: document.getElementById('odontNombre').value,
-                especialidad: document.getElementById('odontEspecialidad').value
-            };
-            app.odontos.push(odonto);
-            renderTables();
-            limpiarFormas();
-        }
-
-        function crearTratamiento() {
-            const trat = {
-                id: 'T' + Date.now(),
-                nombre: document.getElementById('tratNombre').value,
-                precio: parseFloat(document.getElementById('tratPrecio').value),
-                honorario: parseFloat(document.getElementById('tratHonorario').value)
-            };
-            app.tratamientos.push(trat);
-            renderTables();
-            limpiarFormas();
-        }
-
-        function registrarMovimientoCaja() {
-            const mov = {
-                tipo: document.getElementById('cajaType').value,
-                desc: document.getElementById('cajaDesc').value,
-                monto: parseFloat(document.getElementById('cajaMonto').value),
-                metodo: document.getElementById('cajaMetodo').value,
-                fecha: new Date().toISOString().split('T')[0]
-            };
-            app.caja.push(mov);
-            renderTables();
-            limpiarFormas();
-        }
-
-        // ACTUALIZAR DASHBOARD
+        // UPDATE DASHBOARD
         function updateDashboard() {
-            const totalIngresos = app.facturas.reduce((s, f) => s + (f.total || 0), 0);
-            const html = `
-                <div class="kpi-card">
-                    <h3>Total Ingresos</h3>
-                    <div class="value">$${totalIngresos.toLocaleString('es-MX')}</div>
-                </div>
-                <div class="kpi-card">
-                    <h3>Facturas</h3>
-                    <div class="value">${app.facturas.length}</div>
-                </div>
-                <div class="kpi-card">
-                    <h3>Pacientes</h3>
-                    <div class="value">${app.pacientes.length}</div>
-                </div>
-                <div class="kpi-card">
-                    <h3>Odontólogos</h3>
-                    <div class="value">${app.odontos.length}</div>
-                </div>
-            `;
-            document.getElementById('kpiGrid').innerHTML = html;
+            const totalMonto = app.facturas.reduce((s, f) => s + (f.monto || 0), 0);
+            document.getElementById('totalFacturas').textContent = app.facturas.length;
+            document.getElementById('totalMonto').textContent = '$' + totalMonto.toLocaleString('es-MX');
         }
 
-        // RENDERIZAR TABLAS
+        // RENDER TABLES
         function renderTables() {
             // Facturas
-            const facturasHtml = `
+            const facturasHtml = app.facturas.length ? `
                 <table>
-                    <tr><th>ID</th><th>Paciente</th><th>Odontólogo</th><th>Tratamiento</th><th>Total</th><th>Fecha</th></tr>
+                    <tr><th>Descripción</th><th>Monto</th><th>Fecha</th><th>Usuario</th></tr>
                     ${app.facturas.map(f => `<tr>
-                        <td>${f.id}</td>
-                        <td>${f.paciente}</td>
-                        <td>${f.odonto}</td>
-                        <td>${f.tratamiento}</td>
-                        <td>$${f.total}</td>
+                        <td>${f.descripcion || 'N/A'}</td>
+                        <td>$${f.monto}</td>
                         <td>${f.fecha}</td>
+                        <td>${f.usuario || 'N/A'}</td>
                     </tr>`).join('')}
                 </table>
-            `;
+            ` : '<p>Sin facturas</p>';
             document.getElementById('facturasTable').innerHTML = facturasHtml;
 
             // Pacientes
-            const pacientesHtml = `
+            const pacientesHtml = app.pacientes.length ? `
                 <table>
-                    <tr><th>ID</th><th>Nombre</th><th>Teléfono</th></tr>
-                    ${app.pacientes.map(p => `<tr><td>${p.id}</td><td>${p.nombre}</td><td>${p.telefono}</td></tr>`).join('')}
+                    <tr><th>Nombre</th><th>Teléfono</th><th>Fecha</th></tr>
+                    ${app.pacientes.map(p => `<tr>
+                        <td>${p.nombre}</td>
+                        <td>${p.telefono || 'N/A'}</td>
+                        <td>${p.fecha}</td>
+                    </tr>`).join('')}
                 </table>
-            `;
+            ` : '<p>Sin pacientes</p>';
             document.getElementById('pacientesTable').innerHTML = pacientesHtml;
-
-            // Odontólogos
-            const odontHtml = `
-                <table>
-                    <tr><th>ID</th><th>Nombre</th><th>Especialidad</th></tr>
-                    ${app.odontos.map(o => `<tr><td>${o.id}</td><td>${o.nombre}</td><td>${o.especialidad}</td></tr>`).join('')}
-                </table>
-            `;
-            document.getElementById('odontologosTable').innerHTML = odontHtml;
-
-            // Tratamientos
-            const tratHtml = `
-                <table>
-                    <tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Honorario</th></tr>
-                    ${app.tratamientos.map(t => `<tr><td>${t.id}</td><td>${t.nombre}</td><td>$${t.precio}</td><td>$${t.honorario}</td></tr>`).join('')}
-                </table>
-            `;
-            document.getElementById('tratamientosTable').innerHTML = tratHtml;
-
-            // Caja
-            const cajaHtml = `
-                <table>
-                    <tr><th>Tipo</th><th>Descripción</th><th>Monto</th><th>Método</th><th>Fecha</th></tr>
-                    ${app.caja.map(c => `<tr><td>${c.tipo}</td><td>${c.desc}</td><td>$${c.monto}</td><td>${c.metodo}</td><td>${c.fecha}</td></tr>`).join('')}
-                </table>
-            `;
-            document.getElementById('cajaTable').innerHTML = cajaHtml;
         }
 
         // TABS
@@ -535,8 +385,11 @@
             document.getElementById(tab).classList.add('active');
         }
 
-        function limpiarFormas() {
-            document.querySelectorAll('input[type="text"], input[type="number"]').forEach(i => i.value = '');
+        // SHOW MESSAGE
+        function showMessage(msg) {
+            const div = document.getElementById('successMsg');
+            div.innerHTML = `<div class="success-msg">${msg}</div>`;
+            setTimeout(() => { div.innerHTML = ''; }, 3000);
         }
     </script>
 </body>
