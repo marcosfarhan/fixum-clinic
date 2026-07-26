@@ -1849,14 +1849,14 @@
         async function guardarFacturaEnSupabase(factura) {
             try {
                 await supabaseClient.from('facturas').insert([{
-                    descripcion: factura.concepto || `Factura #${factura.id}`,
-                    monto: parseFloat(factura.total) || 0,
+                    descripcion: factura.concepto || 'Factura',
+                    monto: factura.total || 0,
                     fecha: new Date().toISOString().split('T')[0],
                     usuario: app.currentUser || 'admin'
                 }]);
                 console.log('✅ Factura guardada en Supabase');
             } catch(e) {
-                console.error('❌ Error Supabase:', e.message);
+                console.log('⚠️ Supabase:', e.message);
             }
         }
 
