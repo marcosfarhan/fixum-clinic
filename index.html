@@ -1853,10 +1853,12 @@
             body: JSON.stringify(datos)
         });
         
-        console.log('✅ Respuesta de Vercel:', response.status);
-        return response.json();
+        console.log('✅ Status Vercel:', response.status);
+        const json = await response.json();
+        console.log('📨 Respuesta Vercel:', json);
+        return json;
     } catch(err) {
-        console.log('❌ Error en hacerFetch:', err.message);
+        console.log('❌ Error:', err.message);
         throw err;
     }
 }
