@@ -1859,7 +1859,28 @@
                 }
                 
                 if (data && data.length > 0) {
-                    console.log(`✅ ${data.length} facturas cargadas desde Supabase`);
+                    console.log(`✅ ${data.length} facturas sincronizadas desde Supabase`);
+                    
+                    // Sincronizar con memoria: agregar facturas que no estén ya
+                    data.forEach(f => {
+                        const existe = app.facturas.some(fact => fact.id === f.id);
+                        if (!existe) {
+                            app.facturas.push({
+                                id: f.id,
+                                pacienteNombre: f.descripcion.split('#')[1]?.trim() || 'N/A',
+                                total: f.monto,
+                                pagado: f.monto,
+                                deuda: 0,
+                                fecha: f.fecha,
+                                usuario: f.usuario
+                            });
+                        }
+                    });
+                    
+                    // Renderizar tabla de facturas si existe
+                    if (document.getElementById('facturasLista')) {
+                        renderFacturas();
+                    }
                 }
             } catch(e) {
                 console.error('⚠️ Error Supabase:', e.message);
@@ -1907,9 +1928,10 @@
         // INIT
         document.addEventListener('DOMContentLoaded', async () => {
             loadData();
-            // Cargar facturas desde Supabase después de cargar datos locales
-            setTimeout(() => {
-                cargarFacturasDesdeSupabase();
+            // Cargar y sincronizar facturas desde Supabase después de cargar datos locales
+            setTimeout(async () => {
+                await cargarFacturasDesdeSupabase();
+                updateDashboard();
             }, 500);
         });
     </script>
