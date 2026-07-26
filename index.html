@@ -1850,8 +1850,7 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('facturas')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+                    .select('id, descripcion, monto, fecha, usuario');
                 
                 if (error) {
                     console.error('❌ Error cargando facturas:', error.message);
@@ -1859,31 +1858,33 @@
                 }
                 
                 if (data && data.length > 0) {
-                    console.log(`✅ ${data.length} facturas sincronizadas desde Supabase`);
+                    console.log(`✅ ${data.length} facturas cargadas desde Supabase`);
                     
-                    // Sincronizar con memoria: agregar facturas que no estén ya
+                    // Sincronizar: agregar solo facturas nuevas
                     data.forEach(f => {
                         const existe = app.facturas.some(fact => fact.id === f.id);
                         if (!existe) {
-                            app.facturas.push({
+                            // Crear objeto simple sin referencias complejas
+                            const facturaSimple = {
                                 id: f.id,
-                                pacienteNombre: f.descripcion.split('#')[1]?.trim() || 'N/A',
-                                total: f.monto,
-                                pagado: f.monto,
+                                pacienteNombre: f.descripcion || 'N/A',
+                                total: parseFloat(f.monto) || 0,
+                                pagado: parseFloat(f.monto) || 0,
                                 deuda: 0,
-                                fecha: f.fecha,
-                                usuario: f.usuario
-                            });
+                                fecha: f.fecha || new Date().toISOString().split('T')[0],
+                                usuario: f.usuario || 'admin'
+                            };
+                            app.facturas.push(facturaSimple);
                         }
                     });
                     
-                    // Renderizar tabla de facturas si existe
+                    // Renderizar
                     if (document.getElementById('facturasLista')) {
                         renderFacturas();
                     }
                 }
             } catch(e) {
-                console.error('⚠️ Error Supabase:', e.message);
+                console.error('⚠️ Error cargando facturas:', e.message);
             }
         }
 
