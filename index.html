@@ -1860,9 +1860,52 @@
             }
         }
 
+        async function cargarFacturasDeSupabase() {
+            try {
+                const response = await fetch('https://vmwdourgxzwesildzvjp.supabase.co/rest/v1/facturas?select=id,descripcion,monto,fecha,usuario', {
+                    headers: {
+                        'apikey': 'sb_publishable_QTrjuK7dgOr7Gq-RBa341w_V5cUSO2I',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    console.log(`✅ ${data.length} facturas cargadas desde Supabase`);
+                    
+                    data.forEach(f => {
+                        const existe = app.facturas.some(fact => fact.id === f.id);
+                        if (!existe) {
+                            app.facturas.push({
+                                id: f.id,
+                                pacienteNombre: f.descripcion || 'N/A',
+                                total: parseFloat(f.monto) || 0,
+                                pagado: parseFloat(f.monto) || 0,
+                                deuda: 0,
+                                fecha: f.fecha,
+                                usuario: f.usuario
+                            });
+                        }
+                    });
+                    
+                    // Renderizar tabla si existe
+                    const tbody = document.getElementById('facturaLista');
+                    if (tbody) {
+                        renderFacturas();
+                    }
+                }
+            } catch(e) {
+                console.log('⚠️ No se pudo cargar facturas de Supabase');
+            }
+        }
+
         // INIT
         document.addEventListener('DOMContentLoaded', () => {
             loadData();
+            setTimeout(() => {
+                cargarFacturasDeSupabase();
+            }, 500);
         });
     </script>
 </body>
