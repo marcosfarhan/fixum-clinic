@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fixum Clinic - Firebase</title>
+    <title>Fixum Clinic - Supabase</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f3f4f6;
             color: #1f2937;
         }
@@ -47,28 +48,11 @@
             padding: 20px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
+        .navbar h1 { font-size: 24px; }
+        .logout-btn { width: 150px; }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            margin: 20px 0;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th { background: #f3f4f6; font-weight: bold; }
-        .form {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        .form h3 { margin-bottom: 15px; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .msg { 
             padding: 10px; 
             background: #d1fae5; 
@@ -78,6 +62,27 @@
             display: none;
         }
         .msg.show { display: block; }
+        .form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .form h3 { margin-bottom: 15px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th { background: #f3f4f6; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -85,17 +90,13 @@
         <h2>Fixum Clinic</h2>
         <input type="text" id="user" placeholder="Usuario" value="admin">
         <input type="password" id="pass" placeholder="Contraseña" value="admin">
-        <select id="role">
-            <option value="admin">Admin</option>
-            <option value="operario">Operario</option>
-        </select>
         <button onclick="login()">Ingresar</button>
     </div>
 
     <div class="app">
         <div class="navbar">
-            <h1>Fixum Clinic</h1>
-            <button onclick="logout()" style="width: 150px;">Cerrar sesión</button>
+            <h1>Fixum Clinic - Cloud ☁️</h1>
+            <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
         </div>
         
         <div class="container">
@@ -110,7 +111,7 @@
                 <button onclick="addFactura()">Crear Factura</button>
             </div>
 
-            <h3>Facturas</h3>
+            <h3>Facturas desde Supabase ☁️</h3>
             <table id="table">
                 <tr>
                     <th>Descripción</th>
@@ -122,30 +123,21 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
-
     <script>
-        let db, user;
+        let supabase, user;
 
-        // Firebase init
-        const config = {
-            apiKey: "AIzaSyBNmLPfeNdm7cB0IeQJFheY0-vr9Ast97Y",
-            authDomain: "fixum-clinic-base.firebaseapp.com",
-            projectId: "fixum-clinic-base",
-            storageBucket: "fixum-clinic-base.firebasestorage.app",
-            messagingSenderId: "912287785369",
-            appId: "1:912287785369:web:1c12df07e713ea5833f308"
-        };
-
-        firebase.initializeApp(config);
-        db = firebase.firestore();
+        // Inicializar Supabase
+        const { createClient } = window.supabase;
+        supabase = createClient(
+            'https://vmwdourgxzwesildzvjp.supabase.co',
+            'sb_publishable_QTrjuK7dgOr7Gq-RBa341w_V5cUSO2I'
+        );
 
         function login() {
             const u = document.getElementById('user').value;
             const p = document.getElementById('pass').value;
             if (!u || !p) return alert('Ingresa usuario y contraseña');
-            if (u !== 'admin' || p !== 'admin') return alert('Usuario o contraseña incorrectos');
+            if (u !== 'admin' || p !== 'admin') return alert('Credenciales incorrectas');
             user = u;
             document.querySelector('.login').style.display = 'none';
             document.querySelector('.app').style.display = 'block';
@@ -160,13 +152,23 @@
 
         async function loadFacturas() {
             try {
-                const snap = await db.collection('facturas').get();
+                const { data, error } = await supabase
+                    .from('facturas')
+                    .select('*')
+                    .order('id', { ascending: false });
+
+                if (error) throw error;
+
                 let html = '<tr><th>Descripción</th><th>Monto</th><th>Fecha</th><th>Usuario</th></tr>';
-                snap.forEach(doc => {
-                    const d = doc.data();
-                    html += `<tr><td>${d.desc}</td><td>$${d.monto}</td><td>${d.fecha}</td><td>${d.user}</td></tr>`;
+                data.forEach(d => {
+                    html += `<tr>
+                        <td>${d.descripcion}</td>
+                        <td>$${d.monto}</td>
+                        <td>${d.fecha}</td>
+                        <td>${d.usuario}</td>
+                    </tr>`;
                 });
-                document.getElementById('table').innerHTML = html;
+                document.getElementById('table').innerHTML = html || '<tr><td colspan="4">Sin facturas</td></tr>';
             } catch(e) {
                 showMsg('Error: ' + e.message);
             }
@@ -178,13 +180,15 @@
             if (!desc || !monto) return alert('Completa los campos');
 
             try {
-                await db.collection('facturas').add({
-                    desc: desc,
+                const { error } = await supabase.from('facturas').insert([{
+                    descripcion: desc,
                     monto: monto,
                     fecha: new Date().toISOString().split('T')[0],
-                    user: user
-                });
-                showMsg('✅ Factura creada');
+                    usuario: user
+                }]);
+
+                if (error) throw error;
+                showMsg('✅ Factura creada en Supabase ☁️');
                 document.getElementById('desc').value = '';
                 document.getElementById('monto').value = '';
                 loadFacturas();
