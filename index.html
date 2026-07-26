@@ -1870,6 +1870,7 @@
                 });
                 
                 const data = await response.json();
+                console.log('Datos desde Supabase:', data);
                 
                 if (Array.isArray(data) && data.length > 0) {
                     console.log(`✅ ${data.length} facturas cargadas desde Supabase`);
@@ -1891,6 +1892,9 @@
                             });
                         }
                     });
+                    
+                    console.log('app.facturas ahora tiene:', app.facturas.length, 'facturas');
+                    console.log('Contenido:', app.facturas);
                     
                     // Forzar renderizado
                     renderFacturas();
