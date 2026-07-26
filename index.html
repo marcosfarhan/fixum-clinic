@@ -1876,7 +1876,7 @@
                 }
 
                 const fecha = new Date().toISOString().split('T')[0];
-                const usuario = app.currentUser ? app.currentUser.name : 'admin';
+                const usuario = app.currentUser || 'admin';
                 const descripcion = factura.concepto || `Factura #${factura.id}`;
 
                 const { data, error } = await supabaseClient
