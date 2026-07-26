@@ -1328,19 +1328,21 @@
 
         function renderFacturas() {
             const tbody = document.getElementById('facturaLista');
+            if (!tbody) return; // Si no existe la tabla, no hace nada
+            
             tbody.innerHTML = '';
             app.facturas.forEach(f => {
                 const estadoBadge = f.deuda > 0 ? `<span class="badge badge-warning">DEUDA: $${f.deuda.toLocaleString('es-MX')}</span>` : `<span class="badge badge-success">PAGADA</span>`;
                 tbody.innerHTML += `
                     <tr>
                         <td>#${f.id}</td>
-                        <td>${f.pacienteNombre}</td>
-                        <td>${f.odontologoNombre}</td>
-                        <td>$${f.total.toLocaleString('es-MX')}</td>
-                        <td>$${f.pagado.toLocaleString('es-MX')}</td>
-                        <td>$${f.deuda.toLocaleString('es-MX')}</td>
-                        <td>${f.metodo}</td>
-                        <td>${f.fecha}</td>
+                        <td>${f.pacienteNombre || 'N/A'}</td>
+                        <td>${f.odontologoNombre || 'N/A'}</td>
+                        <td>$${(f.total || 0).toLocaleString('es-MX')}</td>
+                        <td>$${(f.pagado || 0).toLocaleString('es-MX')}</td>
+                        <td>$${(f.deuda || 0).toLocaleString('es-MX')}</td>
+                        <td>${f.metodo || 'N/A'}</td>
+                        <td>${f.fecha || 'N/A'}</td>
                         <td><button class="btn btn-small btn-primary" onclick="verFactura(${f.id})">Ver</button></td>
                     </tr>
                 `;
@@ -1351,13 +1353,21 @@
             const factura = app.facturas.find(f => f.id === facturaId);
             if (!factura) return;
             let msg = `\n=== FACTURA #${factura.id} ===\n\n`;
-            msg += `Paciente: ${factura.pacienteNombre}\n`;
-            msg += `Odontólogo: ${factura.odontologoNombre}\n`;
-            msg += `Fecha: ${factura.fecha}\n\n`;
-            msg += `TRATAMIENTOS:\n`;
-            factura.items.forEach(item => {
-                msg += `  • ${item.nombre}\n    Precio: $${item.precio.toLocaleString('es-MX')}\n    Honorario: $${item.honorario.toLocaleString('es-MX')}\n`;
-            });
+            msg += `Paciente: ${factura.pacienteNombre || 'N/A'}\n`;
+            msg += `Odontólogo: ${factura.odontologoNombre || 'N/A'}\n`;
+            msg += `Fecha: ${factura.fecha || 'N/A'}\n`;
+            msg += `Total: $${(factura.total || 0).toLocaleString('es-MX')}\n`;
+            msg += `Pagado: $${(factura.pagado || 0).toLocaleString('es-MX')}\n`;
+            msg += `Deuda: $${(factura.deuda || 0).toLocaleString('es-MX')}\n`;
+            
+            if (factura.items && factura.items.length > 0) {
+                msg += `\nTRATAMIENTOS:\n`;
+                factura.items.forEach(item => {
+                    msg += `  • ${item.nombre}\n    Precio: $${item.precio.toLocaleString('es-MX')}\n    Honorario: $${item.honorario.toLocaleString('es-MX')}\n`;
+                });
+            }
+            alert(msg);
+        }
             msg += `\nTOTAL: $${factura.total.toLocaleString('es-MX')}\n`;
             msg += `PAGADO: $${factura.pagado.toLocaleString('es-MX')}\n`;
             msg += `DEUDA: $${factura.deuda.toLocaleString('es-MX')}\n`;
@@ -1879,7 +1889,7 @@
                     });
                     
                     // Renderizar
-                    if (document.getElementById('facturasLista')) {
+                    if (document.getElementById('facturaLista')) {
                         renderFacturas();
                     }
                 }
