@@ -1841,20 +1841,25 @@
             loadData();
         });
         // ===== GOOGLE SHEETS INTEGRATION =====
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkPXzmhkpFmmNSBZ54seHQN5wlGq9vhiHpH0QlvzL6LsdT8XmJVJ6z5sPR99KndWcW/exec';
+       
 
         async function hacerFetch(datos) {
-            try {
-                const response = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(datos)
-                });
-                return response.json();
-            } catch(err) {
-                console.log('⚠️ Error:', err.message);
-                throw err;
-            }
-        }
+    try {
+        console.log('📤 Enviando a Vercel:', datos);
+        
+        const response = await fetch('https://fixum-clinic-backend.vercel.app/api/proxy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datos)
+        });
+        
+        console.log('✅ Respuesta de Vercel:', response.status);
+        return response.json();
+    } catch(err) {
+        console.log('❌ Error en hacerFetch:', err.message);
+        throw err;
+    }
+}
 
         async function guardarFacturaEnGoogleSheets(factura) {
             try {
