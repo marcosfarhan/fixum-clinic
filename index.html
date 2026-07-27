@@ -493,8 +493,10 @@
                 <div class="form-group">
                     <label>Rol</label>
                     <select id="loginRole">
-                        <option value="admin">Administrador</option>
-                        <option value="user">Usuario</option>
+                        <option value="">-- Seleccionar rol --</option>
+                        <option value="ADMINISTRADOR">Administrador</option>
+                        <option value="OPERADOR">Operador</option>
+                        <option value="AUDITORIA">Auditoría</option>
                     </select>
                 </div>
                 <button type="submit" class="login-btn">Iniciar Sesión</button>
@@ -1017,6 +1019,7 @@
             tratamientos: [],
             facturas: [],
             caja: [],
+            auditoria: [],
             facturaEnEdicion: { tratamientos: [] },
             ultimoId: { paciente: 0, odonto: 0, factura: 0, caja: 0 }
         };
@@ -1025,15 +1028,79 @@
         function handleLogin() {
             const user = document.getElementById('loginUsername').value;
             const role = document.getElementById('loginRole').value;
-            if (user) {
-                app.currentUser = user;
+            if (user && role) {
+                app.currentUser = { name: user, role: role };
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('appContainer').classList.remove('hidden');
                 document.getElementById('currentUser').textContent = user;
-                document.getElementById('userRole').textContent = role === 'admin' ? 'Administrador' : 'Usuario';
+                document.getElementById('userRole').textContent = role;
+                
+                // Ocultar/mostrar elementos según rol
+                ocultarElementosPorRol(role);
+                
                 loadData();
                 updateDashboard();
+            } else {
+                alert('Por favor completa usuario y rol');
             }
+        }
+
+        function ocultarElementosPorRol(role) {
+            const esAdmin = role === 'ADMINISTRADOR';
+            const esOperador = role === 'OPERADOR';
+            const esAuditoria = role === 'AUDITORIA';
+            
+            // Ocultar botones de eliminar/agregar para AUDITORIA
+            document.querySelectorAll('[data-role-hide="auditoria"]').forEach(el => {
+                el.style.display = esAuditoria ? 'none' : '';
+            });
+            
+            // Ocultar campos de costo/ganancia para OPERADOR y AUDITORIA
+            document.querySelectorAll('[data-role-hide="costo"]').forEach(el => {
+                el.style.display = (esOperador || esAuditoria) ? 'none' : '';
+            });
+        }
+
+        function registrarAuditoria(operacion, descripcion, datos = {}) {
+            if (app.currentUser && app.currentUser.role === 'OPERADOR') {
+                app.auditoria.push({
+                    id: app.auditoria.length + 1,
+                    usuario: app.currentUser.name,
+                    operacion: operacion,
+                    descripcion: descripcion,
+                    datos: JSON.stringify(datos),
+                    fecha: new Date().toISOString().split('T')[0],
+                    hora: new Date().toTimeString().split(' ')[0]
+                });
+                guardarAuditoriaEnSupabase(app.auditoria[app.auditoria.length - 1]);
+            }
+        }
+
+        async function guardarAuditoriaEnSupabase(registro) {
+            try {
+                await supabaseClient.from('auditoria').insert([{
+                    usuario: registro.usuario,
+                    operacion: registro.operacion,
+                    descripcion: registro.descripcion,
+                    datos: registro.datos,
+                    fecha: registro.fecha,
+                    hora: registro.hora
+                }]);
+            } catch(e) {
+                console.log('⚠️ Error auditoría:', e.message);
+            }
+        }
+
+        function puedeEditar() {
+            return app.currentUser && (app.currentUser.role === 'ADMINISTRADOR' || app.currentUser.role === 'OPERADOR');
+        }
+
+        function puedeVerCostos() {
+            return app.currentUser && app.currentUser.role === 'ADMINISTRADOR';
+        }
+
+        function puedeEliminar() {
+            return app.currentUser && app.currentUser.role === 'ADMINISTRADOR';
         }
 
         function handleLogout() {
