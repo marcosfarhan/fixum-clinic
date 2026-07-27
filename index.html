@@ -566,7 +566,7 @@
                 <!-- FACTURACIÓN -->
                 <div id="facturacionModule" class="module-content">
                     <div class="tab-buttons">
-                        <button class="tab-btn active" onclick="switchTab(this, 'factura-nueva')">Nueva Factura</button>
+                        <button class="tab-btn active" onclick="switchTab(this, 'factura-nueva'); renderSelects();">Nueva Factura</button>
                         <button class="tab-btn" onclick="switchTab(this, 'factura-lista')">Lista de Facturas</button>
                     </div>
 
@@ -1225,11 +1225,12 @@
                 cargarCajaDesdeSupabase();
                 cargarStockDesdeSupabase();
                 cargarTratamientosDesdeSupabase();
-                // Actualizar dashboard después de cargas
+                // Actualizar DESPUÉS de cargar todo
                 setTimeout(() => {
                     console.log('🔄 Actualizando dashboard final');
+                    renderSelects();
                     updateDashboard();
-                }, 1000);
+                }, 3000);
             }, 2000);
             
             // Actualizar AHORA (con datos por defecto mientras cargan)
@@ -1695,6 +1696,12 @@
                     
                     renderSelects();
                     console.log(`✅ Total: ${app.tratamientos.length} tratamientos en memoria`);
+                    
+                    // Re-renderizar después de cargar para asegurar que se actualice el select
+                    setTimeout(() => {
+                        renderSelects();
+                        console.log('🔄 Re-renderizado de tratamientos completado');
+                    }, 100);
                 }
             } catch(e) {
                 console.log('⚠️ Error cargando tratamientos:', e.message);
