@@ -2087,7 +2087,7 @@
 
         async function cargarCajaDesdeSupabase() {
             try {
-                const response = await fetch('https://vmwdourgxzwesildzvjp.supabase.co/rest/v1/caja?select=id,tipo,descripcion,monto,metodo,fecha,usuario', {
+                const response = await fetch('https://vmwdourgxzwesildzvjp.supabase.co/rest/v1/caja?select=id,tipo,descripcion,monto,metodo,usuario', {
                     headers: {
                         'apikey': 'sb_publishable_QTrjuK7dgOr7Gq-RBa341w_V5cUSO2I',
                         'Content-Type': 'application/json'
@@ -2108,7 +2108,7 @@
                                 descripcion: c.descripcion,
                                 monto: parseFloat(c.monto) || 0,
                                 metodo: c.metodo,
-                                fecha: c.fecha,
+                                fecha: new Date().toISOString().split('T')[0],
                                 usuario: c.usuario
                             });
                         }
