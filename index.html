@@ -2064,6 +2064,17 @@
 
         // RENDER SELECTS
         function renderSelects() {
+            // Tratamientos - Facturación
+            const factTratamiento = document.getElementById('factTratamiento');
+            if (factTratamiento) {
+                const val = factTratamiento.value;
+                factTratamiento.innerHTML = '<option value="">Seleccionar tratamiento...</option>';
+                app.tratamientos.forEach(t => {
+                    factTratamiento.innerHTML += `<option value="${t.id}" data-precio="${t.precio}" data-honorario="${t.honorarioPromedio}">${t.nombre} (Precio: $${t.precio.toLocaleString('es-MX')})</option>`;
+                });
+                factTratamiento.value = val;
+            }
+
             // Pacientes
             [document.getElementById('factPaciente')].forEach(s => {
                 if (s) {
