@@ -1716,8 +1716,8 @@
             const mesActual = new Date().getMonth() + 1;
             const anoActual = new Date().getFullYear();
             
-            div.innerHTML = `
-                <div class="table-container">
+            let html = `
+                <div class="table-container" style="margin-top: 20px;">
                     <table>
                         <thead>
                             <tr>
@@ -1735,7 +1735,9 @@
                 // Calcular métricas del mes corriente
                 const facturasDelMes = app.facturas.filter(f => {
                     const fecha = new Date(f.fecha);
-                    return fecha.getMonth() + 1 === mesActual && fecha.getFullYear() === anoActual && f.odontologoId === o.id;
+                    return fecha.getMonth() + 1 === mesActual && 
+                           fecha.getFullYear() === anoActual && 
+                           f.odontologoId === o.id;
                 });
                 
                 const importeFacturado = facturasDelMes.reduce((sum, f) => sum + f.total, 0);
@@ -1747,7 +1749,7 @@
                 const honorariosCobrados = honorariosGenerados;
                 const saldo = honorariosGenerados - honorariosCobrados;
                 
-                div.innerHTML += `
+                html += `
                     <tr>
                         <td><strong>${o.nombre}</strong></td>
                         <td>$${importeFacturado.toLocaleString('es-MX')}</td>
@@ -1758,11 +1760,13 @@
                 `;
             });
             
-            div.innerHTML += `
+            html += `
                         </tbody>
                     </table>
                 </div>
             `;
+            
+            div.innerHTML = html;
         }
 
         function agregarNuevoOdonto() {
