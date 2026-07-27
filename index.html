@@ -1576,7 +1576,7 @@
                 return;
             }
 
-            const gananciaClin = precio - honorario;
+            const gananciaClin = precio - costo - honorario;
 
             const tratamiento = {
                 id: app.tratamientos.length + 1,
@@ -1626,7 +1626,7 @@
             `;
 
             app.tratamientos.forEach(t => {
-                const gananciaClin = t.precio - t.honorarioPromedio;
+                const gananciaClin = t.precio - t.costo - t.honorarioPromedio;
                 const margen = ((gananciaClin / t.precio) * 100).toFixed(1);
                 const margenColor = margen > 50 ? '#10b981' : margen > 30 ? '#f59e0b' : '#ef4444';
 
