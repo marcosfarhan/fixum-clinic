@@ -554,21 +554,10 @@
                             <div class="kpi-label">Honorarios Pendientes</div>
                             <div class="kpi-value" id="kpiHonorariosPendientes">$0</div>
                         </div>
-                    </div>
-                    <div class="table-container" style="margin-top: 20px;">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Últimas Facturas</th>
-                                    <th>Paciente</th>
-                                    <th>Total</th>
-                                    <th>Pagado</th>
-                                    <th>Deuda</th>
-                                    <th>Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody id="dashboardFacturas"></tbody>
-                        </table>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Saldo de Caja</div>
+                            <div class="kpi-value" id="kpiSaldoCaja">$0</div>
+                        </div>
                     </div>
                 </div>
 
@@ -1358,7 +1347,8 @@
         function renderFacturas() {
             const tbody = document.getElementById('facturaLista');
             tbody.innerHTML = '';
-            app.facturas.forEach(f => {
+            // Mostrar solo las últimas 10 facturas, ordenadas de más nueva a más vieja
+            app.facturas.slice(-10).reverse().forEach(f => {
                 const estadoBadge = f.deuda > 0 ? `<span class="badge badge-warning">DEUDA: $${f.deuda.toLocaleString('es-MX')}</span>` : `<span class="badge badge-success">PAGADA</span>`;
                 tbody.innerHTML += `
                     <tr>
@@ -1609,31 +1599,7 @@
             const div = document.getElementById('tratamientosDetalles');
             div.innerHTML = '';
 
-            const totalCosto = app.tratamientos.reduce((s, t) => s + t.costo, 0);
-            const totalPrecio = app.tratamientos.reduce((s, t) => s + t.precio, 0);
-            const totalHonorario = app.tratamientos.reduce((s, t) => s + t.honorarioPromedio, 0);
-            const totalGananciaClinica = totalPrecio - totalHonorario;
-
             let html = `
-                <div class="kpi-container" style="margin-bottom: 30px;">
-                    <div class="kpi-card">
-                        <div class="kpi-label">Total Costo (Todos)</div>
-                        <div class="kpi-value">$${totalCosto.toLocaleString('es-MX')}</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label">Total Precio Venta (Todos)</div>
-                        <div class="kpi-value">$${totalPrecio.toLocaleString('es-MX')}</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label">Total Ganancia Odontólogo (Promedio)</div>
-                        <div class="kpi-value">$${totalHonorario.toLocaleString('es-MX')}</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label">Total Ganancia Clínica</div>
-                        <div class="kpi-value">$${totalGananciaClinica.toLocaleString('es-MX')}</div>
-                    </div>
-                </div>
-
                 <div class="table-container">
                     <table>
                         <thead>
@@ -1811,27 +1777,15 @@
         // DASHBOARD
         function updateDashboard() {
             const ingresos = app.caja.filter(c => c.tipo === 'ingreso').reduce((s, c) => s + c.monto, 0);
+            const egresos = app.caja.filter(c => c.tipo === 'egreso').reduce((s, c) => s + c.monto, 0);
+            const saldoCaja = ingresos - egresos;
             const porCobrar = app.pacientes.reduce((s, p) => s + p.deuda, 0);
             const honorarios = app.odontos.reduce((s, o) => s + o.porCobrar, 0);
 
             document.getElementById('kpiIngresoHoy').textContent = '$' + ingresos.toLocaleString('es-MX');
             document.getElementById('kpiPorCobrar').textContent = '$' + porCobrar.toLocaleString('es-MX');
             document.getElementById('kpiHonorariosPendientes').textContent = '$' + honorarios.toLocaleString('es-MX');
-
-            const tbody = document.getElementById('dashboardFacturas');
-            tbody.innerHTML = '';
-            app.facturas.slice(-5).reverse().forEach(f => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>Factura #${f.id}</td>
-                        <td>${f.pacienteNombre}</td>
-                        <td>$${f.total.toLocaleString('es-MX')}</td>
-                        <td>$${f.pagado.toLocaleString('es-MX')}</td>
-                        <td><span class="badge badge-${f.deuda > 0 ? 'warning' : 'success'}">$${f.deuda.toLocaleString('es-MX')}</span></td>
-                        <td>${f.deuda > 0 ? 'Pendiente' : 'Pagada'}</td>
-                    </tr>
-                `;
-            });
+            document.getElementById('kpiSaldoCaja').textContent = '$' + saldoCaja.toLocaleString('es-MX');
         }
 
         // RENDER SELECTS
