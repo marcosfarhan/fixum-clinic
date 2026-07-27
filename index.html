@@ -1239,12 +1239,8 @@
             ];
             app.ultimoId.factura = 2;
 
-            app.caja = [
-                { id: 1, tipo: 'ingreso', facturaId: 1, descripcion: 'Pago María García - Implante', monto: 15000, metodo: 'efectivo', fecha: '2026-07-20', usuario: app.currentUser },
-                { id: 2, tipo: 'ingreso', facturaId: 2, descripcion: 'Pago Juan López - Parcial', monto: 2000, metodo: 'tarjeta', fecha: '2026-07-19', usuario: app.currentUser },
-                { id: 3, tipo: 'egreso', odontologoId: 1, descripcion: 'Pago Dr. Alberto Rivera', monto: 5000, metodo: 'transferencia', fecha: '2026-07-18', usuario: app.currentUser }
-            ];
-            app.ultimoId.caja = 3;
+            app.caja = [];
+            app.ultimoId.caja = 0;
 
             // Cargar facturas y caja desde Supabase - NO ESPERAR (en background)
             cargarFacturasDeSupabase();
