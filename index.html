@@ -545,15 +545,15 @@
                 <div id="dashboardModule" class="module-content active">
                     <div class="kpi-container">
                         <div class="kpi-card">
-                            <div class="kpi-label">Ingresos Hoy</div>
+                            <div class="kpi-label">Ingresos Mes en Curso</div>
                             <div class="kpi-value" id="kpiIngresoHoy">$0</div>
                         </div>
                         <div class="kpi-card">
-                            <div class="kpi-label">Total Por Cobrar</div>
+                            <div class="kpi-label">Total Por Cobrar Histórico</div>
                             <div class="kpi-value" id="kpiPorCobrar">$0</div>
                         </div>
                         <div class="kpi-card">
-                            <div class="kpi-label">Honorarios Pendientes</div>
+                            <div class="kpi-label">Honorarios Pendientes Histórico</div>
                             <div class="kpi-value" id="kpiHonorariosPendientes">$0</div>
                         </div>
                         <div class="kpi-card">
@@ -2016,7 +2016,18 @@
 
         // DASHBOARD
         function updateDashboard() {
-            const ingresos = app.caja.filter(c => c.tipo === 'ingreso').reduce((s, c) => s + c.monto, 0);
+            const hoy = new Date();
+            const mesActual = hoy.getMonth() + 1;
+            const anoActual = hoy.getFullYear();
+            
+            // Ingresos del mes en curso
+            const ingresos = app.caja.filter(c => {
+                if (c.tipo !== 'ingreso') return false;
+                if (!c.fecha) return false;
+                const fecha = new Date(c.fecha);
+                return fecha.getMonth() + 1 === mesActual && fecha.getFullYear() === anoActual;
+            }).reduce((s, c) => s + c.monto, 0);
+            
             const egresos = app.caja.filter(c => c.tipo === 'egreso').reduce((s, c) => s + c.monto, 0);
             const saldoCaja = ingresos - egresos;
             const porCobrar = app.pacientes.reduce((s, p) => s + p.deuda, 0);
