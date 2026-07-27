@@ -1194,11 +1194,8 @@
 
         // LOAD DATA
         function loadData() {
-            app.pacientes = [
-                { id: 1, nombre: 'María García', telefono: '+52 555 123 4567', email: 'maria@email.com', fechaNacimiento: '1985-03-15', facturas: [], cobrado: 0, deuda: 0 },
-                { id: 2, nombre: 'Juan López', telefono: '+52 555 987 6543', email: 'juan@email.com', fechaNacimiento: '1990-07-22', facturas: [], cobrado: 0, deuda: 0 }
-            ];
-            app.ultimoId.paciente = 2;
+            app.pacientes = [];
+            app.ultimoId.paciente = 0;
 
             app.tratamientos = [
                 { id: 1, nombre: 'Implante Titanio', categoria: 'implantes', costo: 3500, precio: 15000, honorarioPromedio: 5000, duracion: 120, descripcion: 'Implante dental de última generación' },
@@ -1209,35 +1206,11 @@
                 { id: 6, nombre: 'Consulta Inicial', categoria: 'consultas', costo: 50, precio: 900, honorarioPromedio: 200, duracion: 30, descripcion: 'Evaluación inicial' }
             ];
 
-            app.odontos = [
-                { 
-                    id: 1, 
-                    nombre: 'Dr. Alberto Rivera', 
-                    especialidad: 'Implantología', 
-                    celular: '+52 555 111 1111',
-                    honorarios: {1: 5000, 2: 800, 3: 1500, 4: 2000, 5: 300, 6: 200},
-                    porCobrar: 0,
-                    cobradoMes: 0,
-                    facturas: []
-                },
-                { 
-                    id: 2, 
-                    nombre: 'Dra. Ana Martínez', 
-                    especialidad: 'Prostodoncia', 
-                    celular: '+52 555 222 2222',
-                    honorarios: {1: 4500, 2: 700, 3: 1300, 4: 1800, 5: 250, 6: 150},
-                    porCobrar: 0,
-                    cobradoMes: 0,
-                    facturas: []
-                }
-            ];
-            app.ultimoId.odonto = 2;
+            app.odontos = [];
+            app.ultimoId.odonto = 0;
 
-            app.facturas = [
-                { id: 1, pacienteId: 1, pacienteNombre: 'María García', odontologoId: 1, odontologoNombre: 'Dr. Alberto Rivera', items: [{tratamientoId: 1, nombre: 'Implante Titanio', precio: 15000, honorario: 5000}], total: 15000, pagado: 15000, deuda: 0, metodo: 'efectivo', fecha: '2026-07-20', notas: '' },
-                { id: 2, pacienteId: 2, pacienteId: 2, pacienteNombre: 'Juan López', odontologoId: 2, odontologoNombre: 'Dra. Ana Martínez', items: [{tratamientoId: 3, nombre: 'Corona Porcelana', precio: 6000, honorario: 1300}], total: 6000, pagado: 2000, deuda: 4000, metodo: 'tarjeta', fecha: '2026-07-19', notas: '' }
-            ];
-            app.ultimoId.factura = 2;
+            app.facturas = [];
+            app.ultimoId.factura = 0;
 
             app.caja = [];
             app.ultimoId.caja = 0;
