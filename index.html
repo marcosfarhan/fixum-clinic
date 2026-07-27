@@ -1218,13 +1218,19 @@
             // Cargar en orden CORRECTO: pacientes → odontólogos → facturas → caja
             cargarPacientesDesdeSupabase();
             cargarOdontologosDesdeSupabase();
-            // Esperar un poco para que terminen, luego facturas
+            // Esperar MÁS tiempo para que terminen completamente
             setTimeout(() => {
+                console.log('⏰ Iniciando carga de facturas. Pacientes en memoria:', app.pacientes.length, 'Odontólogos:', app.odontos.length);
                 cargarFacturasDeSupabase();
                 cargarCajaDesdeSupabase();
                 cargarStockDesdeSupabase();
                 cargarTratamientosDesdeSupabase();
-            }, 500);
+                // Actualizar dashboard después de cargas
+                setTimeout(() => {
+                    console.log('🔄 Actualizando dashboard final');
+                    updateDashboard();
+                }, 1000);
+            }, 2000);
             
             // Actualizar AHORA (con datos por defecto mientras cargan)
             renderSelects();
