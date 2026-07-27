@@ -492,7 +492,7 @@
                 </div>
                 <div class="form-group">
                     <label>Rol</label>
-                    <select id="loginRole">
+                    <select id="loginRole" required>
                         <option value="">-- Seleccionar rol --</option>
                         <option value="ADMINISTRADOR">Administrador</option>
                         <option value="OPERADOR">Operador</option>
@@ -524,6 +524,7 @@
                 <div class="nav-item" onclick="switchModule('tratamientos', event)">🦷 Tratamientos</div>
                 <div class="nav-item" onclick="switchModule('pacientes', event)">👥 Pacientes</div>
                 <div class="nav-item" onclick="switchModule('odontos', event)">👨‍⚕️ Odontólogos</div>
+                <div class="nav-item" onclick="switchModule('config', event)" id="navConfig" style="display: none;">⚙️ Configuración</div>
             </nav>
             <div class="user-info">
                 <div><strong id="currentUser">Admin</strong></div>
@@ -1006,17 +1007,50 @@
                     <h3 style="margin-bottom: 20px;">Odontólogos Registrados</h3>
                     <div id="odontosDetalles"></div>
                 </div>
+
+                <!-- CONFIGURACIÓN MODULE -->
+                <div id="configModule" class="module-content">
+                    <div style="max-width: 600px;">
+                        <h2>⚙️ Configuración del Sistema</h2>
+                        
+                        <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin-top: 20px;">
+                            <h3 style="margin-top: 0;">Cambiar Contraseñas</h3>
+                            
+                            <div class="form-group">
+                                <label>Usuario</label>
+                                <select id="configUsuario" required>
+                                    <option value="">-- Seleccionar usuario --</option>
+                                    <option value="admin">Administrador (admin)</option>
+                                    <option value="operador">Operador (operador)</option>
+                                    <option value="auditoria">Auditoría (auditoria)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Nueva Contraseña</label>
+                                <input type="password" id="configNewPassword" placeholder="Ingresa nueva contraseña">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Confirmar Contraseña</label>
+                                <input type="password" id="configConfirmPassword" placeholder="Confirma la contraseña">
+                            </div>
+
+                            <button class="btn btn-primary" onclick="cambiarContraseña()" style="width: 100%;">Cambiar Contraseña</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // STATE
-        const app = {
-            currentUser: null,
-            pacientes: [],
-            odontos: [],
-            tratamientos: [],
+        // CREDENCIALES - Objeto global que se puede modificar
+        let credenciales = {
+            'admin': { password: 'admin123', role: 'ADMINISTRADOR' },
+            'operador': { password: 'op123', role: 'OPERADOR' },
+            'auditoria': { password: 'audit123', role: 'AUDITORIA' }
+        };
             facturas: [],
             caja: [],
             auditoria: [],
@@ -1027,22 +1061,47 @@
         // LOGIN
         function handleLogin() {
             const user = document.getElementById('loginUsername').value;
-            const role = document.getElementById('loginRole').value;
-            if (user && role) {
-                app.currentUser = { name: user, role: role };
+            const pass = document.getElementById('loginPassword').value;
+            const selectedRole = document.getElementById('loginRole').value;
+            
+            if (!user || !pass || !selectedRole) {
+                alert('Por favor completa usuario, contraseña y rol');
+                return;
+            }
+            
+            // Cargar credenciales desde Supabase antes de validar
+            cargarCredencialesDesdeSupabase().then(() => {
+                // Validar credenciales
+                if (!credenciales[user]) {
+                    alert('Usuario no existe');
+                    return;
+                }
+                
+                if (credenciales[user].password !== pass) {
+                    alert('Contraseña incorrecta');
+                    return;
+                }
+                
+                if (credenciales[user].role !== selectedRole) {
+                    alert('Rol incorrecto para este usuario');
+                    return;
+                }
+                
+                app.currentUser = { name: user, role: selectedRole };
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('appContainer').classList.remove('hidden');
                 document.getElementById('currentUser').textContent = user;
-                document.getElementById('userRole').textContent = role;
+                document.getElementById('userRole').textContent = selectedRole;
+                
+                // Mostrar Configuración solo si es ADMINISTRADOR
+                document.getElementById('navConfig').style.display = selectedRole === 'ADMINISTRADOR' ? 'block' : 'none';
                 
                 // Ocultar/mostrar elementos según rol
-                ocultarElementosPorRol(role);
+                ocultarElementosPorRol(selectedRole);
                 
                 loadData();
                 updateDashboard();
-            } else {
-                alert('Por favor completa usuario y rol');
-            }
+            });
         }
 
         function ocultarElementosPorRol(role) {
@@ -1107,6 +1166,53 @@
             if (confirm('¿Cerrar sesión?')) {
                 document.getElementById('loginScreen').classList.remove('hidden');
                 document.getElementById('appContainer').classList.add('hidden');
+                // Limpiar formulario
+                document.getElementById('loginUsername').value = '';
+                document.getElementById('loginPassword').value = '';
+                document.getElementById('loginRole').value = '';
+            }
+        }
+
+        async function cambiarContraseña() {
+            const usuario = document.getElementById('configUsuario').value;
+            const newPass = document.getElementById('configNewPassword').value;
+            const confirmPass = document.getElementById('configConfirmPassword').value;
+            
+            if (!usuario || !newPass || !confirmPass) {
+                alert('Por favor completa todos los campos');
+                return;
+            }
+            
+            if (newPass !== confirmPass) {
+                alert('Las contraseñas no coinciden');
+                return;
+            }
+            
+            if (newPass.length < 5) {
+                alert('La contraseña debe tener al menos 5 caracteres');
+                return;
+            }
+            
+            if (!credenciales[usuario]) {
+                alert('Usuario no existe');
+                return;
+            }
+            
+            // Cambiar contraseña localmente
+            credenciales[usuario].password = newPass;
+            
+            // Guardar en Supabase
+            const guardado = await guardarCredencialEnSupabase(usuario, newPass, credenciales[usuario].role);
+            
+            if (guardado) {
+                // Limpiar formulario
+                document.getElementById('configUsuario').value = '';
+                document.getElementById('configNewPassword').value = '';
+                document.getElementById('configConfirmPassword').value = '';
+                
+                alert(`✅ Contraseña de ${usuario} cambiada exitosamente y guardada`);
+            } else {
+                alert('❌ Error al guardar la contraseña en el servidor');
             }
         }
 
@@ -1126,7 +1232,8 @@
                 'caja': '💵 Caja',
                 'tratamientos': '🦷 Tratamientos',
                 'pacientes': '👥 Pacientes',
-                'odontos': '👨‍⚕️ Odontólogos'
+                'odontos': '👨‍⚕️ Odontólogos',
+                'config': '⚙️ Configuración'
             };
             document.getElementById('pageTitle').textContent = titles[module] || module;
 
@@ -1927,6 +2034,59 @@
                 console.log('✅ Factura guardada en Supabase');
             } catch(e) {
                 console.log('⚠️ Supabase:', e.message);
+            }
+        }
+
+        async function cargarCredencialesDesdeSupabase() {
+            try {
+                const response = await fetch('https://vmwdourgxzwesildzvjp.supabase.co/rest/v1/credenciales?select=usuario,password,rol', {
+                    headers: {
+                        'apikey': 'sb_publishable_QTrjuK7dgOr7Gq-RBa341w_V5cUSO2I',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    console.log(`✅ ${data.length} credenciales cargadas desde Supabase`);
+                    
+                    // Reemplazar credenciales locales con las de Supabase
+                    data.forEach(c => {
+                        credenciales[c.usuario] = {
+                            password: c.password,
+                            role: c.rol
+                        };
+                    });
+                    
+                    console.log('Credenciales actualizadas desde Supabase');
+                }
+            } catch(e) {
+                console.log('⚠️ Error cargando credenciales:', e.message);
+            }
+        }
+
+        async function guardarCredencialEnSupabase(usuario, password, rol) {
+            try {
+                const response = await fetch('https://vmwdourgxzwesildzvjp.supabase.co/rest/v1/credenciales?usuario=eq.' + usuario, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': 'sb_publishable_QTrjuK7dgOr7Gq-RBa341w_V5cUSO2I',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password: password, updated_at: new Date().toISOString() })
+                });
+                
+                if (response.ok) {
+                    console.log(`✅ Credencial de ${usuario} actualizada en Supabase`);
+                    return true;
+                } else {
+                    console.error('Error al guardar credencial:', response.statusText);
+                    return false;
+                }
+            } catch(e) {
+                console.error('❌ Error Supabase:', e.message);
+                return false;
             }
         }
 
