@@ -2155,7 +2155,7 @@
 
         async function cargarFacturasDeSupabase() {
             try {
-                const response = await fetch('https://vmwdourgxzwesildzvjp.supabase.co/rest/v1/facturas?select=id,descripcion,monto,fecha,usuario,paciente_nombre,odontologo_nombre', {
+                const response = await fetch('https://vmwdourgxzwesildzvjp.supabase.co/rest/v1/facturas?select=id,descripcion,monto,fecha,usuario,paciente_nombre,odontologo_nombre,pagado,deuda', {
                     headers: {
                         'apikey': 'sb_publishable_QTrjuK7dgOr7Gq-RBa341w_V5cUSO2I',
                         'Content-Type': 'application/json'
@@ -2170,18 +2170,33 @@
                     data.forEach(f => {
                         const existe = app.facturas.some(fact => fact.id === f.id);
                         if (!existe) {
-                            app.facturas.push({
+                            const factura = {
                                 id: f.id,
                                 pacienteNombre: f.paciente_nombre || 'N/A',
                                 odontologoNombre: f.odontologo_nombre || 'N/A',
                                 total: parseFloat(f.monto) || 0,
-                                pagado: parseFloat(f.monto) || 0,
-                                deuda: 0,
+                                pagado: parseFloat(f.pagado) || 0,
+                                deuda: parseFloat(f.deuda) || 0,
                                 metodo: 'N/A',
                                 fecha: f.fecha,
                                 usuario: f.usuario,
                                 items: []
-                            });
+                            };
+                            
+                            app.facturas.push(factura);
+                            
+                            // Actualizar deuda del paciente
+                            const paciente = app.pacientes.find(p => p.nombre === f.paciente_nombre);
+                            if (paciente) {
+                                paciente.deuda += factura.deuda;
+                                paciente.cobrado += factura.pagado;
+                            }
+                            
+                            // Actualizar honorarios pendientes del odontólogo
+                            const odonto = app.odontos.find(o => o.nombre === f.odontologo_nombre);
+                            if (odonto) {
+                                odonto.porCobrar += factura.deuda;
+                            }
                         }
                     });
                     
