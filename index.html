@@ -2112,9 +2112,10 @@
                 });
                 
                 const data = await response.json();
+                console.log('📊 Respuesta Supabase caja:', data);
                 
                 if (Array.isArray(data) && data.length > 0) {
-                    console.log(`✅ ${data.length} movimientos de caja cargados desde Supabase`);
+                    console.log(`✅ ${data.length} movimientos cargados desde Supabase`);
                     
                     data.forEach(c => {
                         const existe = app.caja.some(mov => mov.id === c.id);
@@ -2131,9 +2132,13 @@
                         }
                     });
                     
+                    console.log('💰 Total en app.caja después de cargar:', app.caja);
+                    console.log('✅ Ingresos totales:', app.caja.filter(c => c.tipo === 'ingreso').reduce((s, c) => s + c.monto, 0));
                     updateDashboard();
                     renderCaja();
                     console.log(`✅ Total: ${app.caja.length} movimientos en memoria`);
+                } else {
+                    console.log('⚠️ No hay datos en Supabase caja o respuesta vacía');
                 }
             } catch(e) {
                 console.log('⚠️ Error cargando caja:', e.message);
