@@ -1284,14 +1284,17 @@
                 return;
             }
             
-            const option = select.options[select.selectedIndex];
-            console.log('📋 Option selected:', option.text);
-            console.log('💰 data-precio:', option.dataset.precio, 'data-honorario:', option.dataset.honorario);
+            // Buscar el tratamiento en app.tratamientos para obtener valores CORRECTOS
+            const tratamiento = app.tratamientos.find(t => t.id === parseInt(select.value));
+            console.log('📋 Tratamiento encontrado:', tratamiento);
             
-            document.getElementById('factHonorario').value = option.dataset.honorario;
-            document.getElementById('factPrecio').value = option.dataset.precio;
-            
-            console.log('✅ Honorario seteado a:', option.dataset.honorario);
+            if (tratamiento) {
+                document.getElementById('factHonorario').value = tratamiento.honorarioPromedio;
+                document.getElementById('factPrecio').value = tratamiento.precio;
+                console.log('✅ Honorario seteado a:', tratamiento.honorarioPromedio);
+            } else {
+                console.log('❌ Tratamiento no encontrado en app.tratamientos');
+            }
         }
 
 
