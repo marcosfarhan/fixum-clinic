@@ -1275,6 +1275,7 @@
 
         function onTratamientoChange() {
             const select = document.getElementById('factTratamiento');
+            console.log('🔍 onTratamientoChange llamada. Select value:', select.value);
             
             if (!select.value) {
                 document.getElementById('factHonorario').value = '';
@@ -1289,8 +1290,13 @@
             }
             
             const option = select.options[select.selectedIndex];
+            console.log('📋 Option selected:', option.text);
+            console.log('💰 data-precio:', option.dataset.precio, 'data-honorario:', option.dataset.honorario);
+            
             document.getElementById('factHonorario').value = option.dataset.honorario;
             document.getElementById('factPrecio').value = option.dataset.precio;
+            
+            console.log('✅ Honorario seteado a:', option.dataset.honorario);
         }
 
 
