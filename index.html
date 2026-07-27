@@ -1215,13 +1215,16 @@
             app.caja = [];
             app.ultimoId.caja = 0;
 
-            // Cargar facturas y caja desde Supabase - NO ESPERAR (en background)
-            cargarFacturasDeSupabase();
-            cargarCajaDesdeSupabase();
-            cargarStockDesdeSupabase();
+            // Cargar en orden CORRECTO: pacientes → odontólogos → facturas → caja
             cargarPacientesDesdeSupabase();
-            cargarTratamientosDesdeSupabase();
             cargarOdontologosDesdeSupabase();
+            // Esperar un poco para que terminen, luego facturas
+            setTimeout(() => {
+                cargarFacturasDeSupabase();
+                cargarCajaDesdeSupabase();
+                cargarStockDesdeSupabase();
+                cargarTratamientosDesdeSupabase();
+            }, 500);
             
             // Actualizar AHORA (con datos por defecto mientras cargan)
             renderSelects();
