@@ -2020,23 +2020,29 @@
             const mesActual = hoy.getMonth() + 1;
             const anoActual = hoy.getFullYear();
             
-            // Ingresos del mes en curso
-            const ingresos = app.caja.filter(c => {
+            // Ingresos del mes en curso (SOLO ESTE MES)
+            const ingresosMesActual = app.caja.filter(c => {
                 if (c.tipo !== 'ingreso') return false;
                 if (!c.fecha) return false;
                 const fecha = new Date(c.fecha);
                 return fecha.getMonth() + 1 === mesActual && fecha.getFullYear() === anoActual;
             }).reduce((s, c) => s + c.monto, 0);
             
-            const egresos = app.caja.filter(c => c.tipo === 'egreso').reduce((s, c) => s + c.monto, 0);
-            const saldoCaja = ingresos - egresos;
-            const porCobrar = app.pacientes.reduce((s, p) => s + p.deuda, 0);
-            const honorarios = app.odontos.reduce((s, o) => s + o.porCobrar, 0);
+            // Saldo de caja TOTAL histórico (TODOS LOS INGRESOS - TODOS LOS EGRESOS)
+            const ingresosTotal = app.caja.filter(c => c.tipo === 'ingreso').reduce((s, c) => s + c.monto, 0);
+            const egresosTotal = app.caja.filter(c => c.tipo === 'egreso').reduce((s, c) => s + c.monto, 0);
+            const saldoCajaTotal = ingresosTotal - egresosTotal;
+            
+            // Total por cobrar (HISTÓRICO)
+            const porCobrarTotal = app.pacientes.reduce((s, p) => s + p.deuda, 0);
+            
+            // Honorarios pendientes (HISTÓRICO)
+            const honorariosTotal = app.odontos.reduce((s, o) => s + o.porCobrar, 0);
 
-            document.getElementById('kpiIngresoHoy').textContent = '$' + ingresos.toLocaleString('es-MX');
-            document.getElementById('kpiPorCobrar').textContent = '$' + porCobrar.toLocaleString('es-MX');
-            document.getElementById('kpiHonorariosPendientes').textContent = '$' + honorarios.toLocaleString('es-MX');
-            document.getElementById('kpiSaldoCaja').textContent = '$' + saldoCaja.toLocaleString('es-MX');
+            document.getElementById('kpiIngresoHoy').textContent = '$' + ingresosMesActual.toLocaleString('es-MX');
+            document.getElementById('kpiPorCobrar').textContent = '$' + porCobrarTotal.toLocaleString('es-MX');
+            document.getElementById('kpiHonorariosPendientes').textContent = '$' + honorariosTotal.toLocaleString('es-MX');
+            document.getElementById('kpiSaldoCaja').textContent = '$' + saldoCajaTotal.toLocaleString('es-MX');
         }
 
         // RENDER SELECTS
