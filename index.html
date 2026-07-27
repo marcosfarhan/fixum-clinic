@@ -945,6 +945,10 @@
                                 <label>Email</label>
                                 <input type="email" id="nuevoPacienteEmail">
                             </div>
+                            <div class="form-field">
+                                <label>Fecha de Nacimiento</label>
+                                <input type="date" id="nuevoPacienteFechaNacimiento">
+                            </div>
                         </div>
                         <div class="button-group">
                             <button class="btn btn-primary" onclick="agregarNuevoPaciente()">Agregar Paciente</button>
@@ -958,6 +962,7 @@
                                     <th>Nombre</th>
                                     <th>Teléfono</th>
                                     <th>Email</th>
+                                    <th>Fecha Nacimiento</th>
                                     <th>Facturas</th>
                                     <th>Cobrado</th>
                                     <th>Deuda</th>
@@ -1099,8 +1104,8 @@
         // LOAD DATA
         function loadData() {
             app.pacientes = [
-                { id: 1, nombre: 'María García', telefono: '+52 555 123 4567', email: 'maria@email.com', facturas: [], cobrado: 0, deuda: 0 },
-                { id: 2, nombre: 'Juan López', telefono: '+52 555 987 6543', email: 'juan@email.com', facturas: [], cobrado: 0, deuda: 0 }
+                { id: 1, nombre: 'María García', telefono: '+52 555 123 4567', email: 'maria@email.com', fechaNacimiento: '1985-03-15', facturas: [], cobrado: 0, deuda: 0 },
+                { id: 2, nombre: 'Juan López', telefono: '+52 555 987 6543', email: 'juan@email.com', fechaNacimiento: '1990-07-22', facturas: [], cobrado: 0, deuda: 0 }
             ];
             app.ultimoId.paciente = 2;
 
@@ -1656,6 +1661,7 @@
                         <td>${p.nombre}</td>
                         <td>${p.telefono}</td>
                         <td>${p.email}</td>
+                        <td>${p.fechaNacimiento || 'N/A'}</td>
                         <td>${p.facturas.length}</td>
                         <td>$${p.cobrado.toLocaleString('es-MX')}</td>
                         <td><span class="badge badge-${p.deuda > 0 ? 'warning' : 'success'}">$${p.deuda.toLocaleString('es-MX')}</span></td>
@@ -1676,6 +1682,7 @@
             const nombre = document.getElementById('nuevoPacienteNombre').value;
             const telefono = document.getElementById('nuevoPacienteTelefono').value;
             const email = document.getElementById('nuevoPacienteEmail').value;
+            const fechaNacimiento = document.getElementById('nuevoPacienteFechaNacimiento').value;
 
             if (!nombre) {
                 alert('El nombre es obligatorio');
@@ -1687,6 +1694,7 @@
                 nombre: nombre,
                 telefono: telefono,
                 email: email,
+                fechaNacimiento: fechaNacimiento,
                 facturas: [],
                 cobrado: 0,
                 deuda: 0
@@ -1697,6 +1705,7 @@
             document.getElementById('nuevoPacienteNombre').value = '';
             document.getElementById('nuevoPacienteTelefono').value = '';
             document.getElementById('nuevoPacienteEmail').value = '';
+            document.getElementById('nuevoPacienteFechaNacimiento').value = '';
             renderPacientes();
             renderSelects();
         }
@@ -1704,44 +1713,56 @@
         // ODONTÓLOGOS
         function renderOdontos() {
             const div = document.getElementById('odontosDetalles');
-            div.innerHTML = '';
+            const mesActual = new Date().getMonth() + 1;
+            const anoActual = new Date().getFullYear();
+            
+            div.innerHTML = `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Importe Facturado (Mes)</th>
+                                <th>Honorarios Generados</th>
+                                <th>Honorarios Cobrados</th>
+                                <th>Saldo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
             app.odontos.forEach(o => {
-                div.innerHTML += `
-                    <div class="form-container">
-                        <h4>${o.nombre}</h4>
-                        <p><strong>Especialidad:</strong> ${o.especialidad}</p>
-                        <p><strong>Celular:</strong> ${o.celular}</p>
-                        <p><strong>Por Cobrar:</strong> <span class="font-bold" style="color: #ef4444;">$${o.porCobrar.toLocaleString('es-MX')}</span></p>
-                        <p><strong>Cobrado (Mes):</strong> <span class="font-bold" style="color: #10b981;">$${o.cobradoMes.toLocaleString('es-MX')}</span></p>
-                        
-                        <h5 style="margin-top: 15px; margin-bottom: 10px;">Aranceles (Honorarios Fijos):</h5>
-                        <table style="font-size: 12px; width: 100%; margin-bottom: 15px;">
-                            <thead>
-                                <tr style="background: #f0f0f0;">
-                                    <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Tratamiento</th>
-                                    <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Honorario</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                `;
-                
-                app.tratamientos.forEach(t => {
-                    const honorario = o.honorarios[t.id] || 0;
-                    div.innerHTML += `
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ddd;">${t.nombre}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">$${honorario.toLocaleString('es-MX')}</td>
-                        </tr>
-                    `;
+                // Calcular métricas del mes corriente
+                const facturasDelMes = app.facturas.filter(f => {
+                    const fecha = new Date(f.fecha);
+                    return fecha.getMonth() + 1 === mesActual && fecha.getFullYear() === anoActual && f.odontologoId === o.id;
                 });
-
+                
+                const importeFacturado = facturasDelMes.reduce((sum, f) => sum + f.total, 0);
+                const honorariosGenerados = facturasDelMes.reduce((sum, f) => {
+                    return sum + f.items.reduce((s, item) => s + item.honorario, 0);
+                }, 0);
+                
+                // Para este ejemplo, suponemos que honorarios cobrados = generados
+                const honorariosCobrados = honorariosGenerados;
+                const saldo = honorariosGenerados - honorariosCobrados;
+                
                 div.innerHTML += `
-                            </tbody>
-                        </table>
-                        <p style="font-size: 12px; color: #666;">Facturas: ${o.facturas.length}</p>
-                    </div>
+                    <tr>
+                        <td><strong>${o.nombre}</strong></td>
+                        <td>$${importeFacturado.toLocaleString('es-MX')}</td>
+                        <td>$${honorariosGenerados.toLocaleString('es-MX')}</td>
+                        <td>$${honorariosCobrados.toLocaleString('es-MX')}</td>
+                        <td><strong style="color: ${saldo > 0 ? '#ef4444' : '#10b981'};">$${saldo.toLocaleString('es-MX')}</strong></td>
+                    </tr>
                 `;
             });
+            
+            div.innerHTML += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
         }
 
         function agregarNuevoOdonto() {
