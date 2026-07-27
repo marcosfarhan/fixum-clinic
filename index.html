@@ -1859,7 +1859,7 @@
 
         async function cargarFacturasDeSupabase() {
             try {
-                const response = await fetch('https://vmwdourgxzwesildzvjp.supabase.co/rest/v1/facturas?select=id,descripcion,monto,fecha,usuario', {
+                const response = await fetch('https://vmwdourgxzwesildzvjp.supabase.co/rest/v1/facturas?select=id,descripcion,monto,fecha,usuario,paciente_nombre,odontologo_nombre', {
                     headers: {
                         'apikey': 'sb_publishable_QTrjuK7dgOr7Gq-RBa341w_V5cUSO2I',
                         'Content-Type': 'application/json'
@@ -1876,8 +1876,8 @@
                         if (!existe) {
                             app.facturas.push({
                                 id: f.id,
-                                pacienteNombre: f.descripcion || 'N/A',
-                                odontologoNombre: 'N/A',
+                                pacienteNombre: f.paciente_nombre || 'N/A',
+                                odontologoNombre: f.odontologo_nombre || 'N/A',
                                 total: parseFloat(f.monto) || 0,
                                 pagado: parseFloat(f.monto) || 0,
                                 deuda: 0,
@@ -1905,7 +1905,9 @@
                     descripcion: factura.concepto || `Factura #${factura.id}`,
                     monto: parseFloat(factura.total) || 0,
                     fecha: new Date().toISOString().split('T')[0],
-                    usuario: app.currentUser ? (app.currentUser.name || 'admin') : 'admin'
+                    usuario: app.currentUser ? (app.currentUser.name || 'admin') : 'admin',
+                    paciente_nombre: factura.pacienteNombre || 'N/A',
+                    odontologo_nombre: factura.odontologoNombre || 'N/A'
                 }]);
                 console.log('✅ Factura guardada en Supabase');
             } catch(e) {
