@@ -1145,7 +1145,6 @@
             document.getElementById('currentUser').textContent = user;
             document.getElementById('userRole').textContent = selectedRole;
             loadData();
-            updateDashboard();
         }
 
         function handleLogout() {
@@ -1247,15 +1246,16 @@
             ];
             app.ultimoId.caja = 3;
 
-            renderSelects();
-            updateDashboard();
-            
-            // Cargar facturas y caja desde Supabase
+            // Cargar facturas y caja desde Supabase - NO ESPERAR (en background)
             cargarFacturasDeSupabase();
             cargarCajaDesdeSupabase();
             cargarStockDesdeSupabase();
             cargarPacientesDesdeSupabase();
             cargarTratamientosDesdeSupabase();
+            
+            // Actualizar AHORA (con datos por defecto mientras cargan)
+            renderSelects();
+            updateDashboard();
         }
 
         // FACTURACIÓN
@@ -2115,6 +2115,7 @@
                     });
                     
                     updateDashboard();
+                    renderCaja();
                     console.log(`✅ Total: ${app.caja.length} movimientos en memoria`);
                 }
             } catch(e) {
