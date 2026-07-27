@@ -2076,6 +2076,7 @@
                 const val = factTratamiento.value;
                 factTratamiento.innerHTML = '<option value="">Seleccionar tratamiento...</option>';
                 app.tratamientos.forEach(t => {
+                    console.log('📋 Renderizando tratamiento:', t.nombre, '| precio:', t.precio, '| honorarioPromedio:', t.honorarioPromedio);
                     factTratamiento.innerHTML += `<option value="${t.id}" data-precio="${t.precio}" data-honorario="${t.honorarioPromedio}">${t.nombre} (Precio: $${t.precio.toLocaleString('es-MX')})</option>`;
                 });
                 factTratamiento.value = val;
