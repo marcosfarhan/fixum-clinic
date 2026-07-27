@@ -2192,19 +2192,25 @@
                                 items: []
                             };
                             
+                            console.log('💾 Factura cargada:', factura.id, '| Paciente:', factura.pacienteNombre, '| Deuda:', factura.deuda);
+                            
                             app.facturas.push(factura);
                             
                             // Actualizar deuda del paciente
                             const paciente = app.pacientes.find(p => p.nombre === f.paciente_nombre);
+                            console.log('🔍 Buscando paciente:', f.paciente_nombre, '| Encontrado:', paciente ? paciente.nombre : 'NO');
                             if (paciente) {
                                 paciente.deuda += factura.deuda;
                                 paciente.cobrado += factura.pagado;
+                                console.log('✅ Actualizado paciente:', paciente.nombre, '| Nueva deuda:', paciente.deuda);
                             }
                             
                             // Actualizar honorarios pendientes del odontólogo
                             const odonto = app.odontos.find(o => o.nombre === f.odontologo_nombre);
+                            console.log('🔍 Buscando odontólogo:', f.odontologo_nombre, '| Encontrado:', odonto ? odonto.nombre : 'NO');
                             if (odonto) {
                                 odonto.porCobrar += factura.deuda;
+                                console.log('✅ Actualizado odontólogo:', odonto.nombre, '| Nuevo porCobrar:', odonto.porCobrar);
                             }
                         }
                     });
