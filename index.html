@@ -524,6 +524,8 @@
                 <div class="nav-item" onclick="switchModule('tratamientos', event)">🦷 Tratamientos</div>
                 <div class="nav-item" onclick="switchModule('pacientes', event)">👥 Pacientes</div>
                 <div class="nav-item" onclick="switchModule('odontos', event)">👨‍⚕️ Odontólogos</div>
+                <div class="nav-item" onclick="switchModule('stock', event)">📦 Stock de Materiales</div>
+                <div class="nav-item" onclick="switchModule('reportes', event)">📋 Reportes</div>
             </nav>
             <div class="user-info">
                 <div><strong id="currentUser">Admin</strong></div>
@@ -1000,9 +1002,95 @@
                     <h3 style="margin-bottom: 20px;">Odontólogos Registrados</h3>
                     <div id="odontosDetalles"></div>
                 </div>
+
+                <!-- STOCK DE MATERIALES -->
+                <div id="stockModule" class="module-content">
+                    <div class="form-container" style="margin-bottom: 30px;">
+                        <h3 style="margin-bottom: 20px;">Agregar Material</h3>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Nombre Material *</label>
+                                <input type="text" id="nuevoMaterialNombre" placeholder="Ej: Resina A2">
+                            </div>
+                            <div class="form-field">
+                                <label>Cantidad *</label>
+                                <input type="number" id="nuevoMaterialCantidad" placeholder="0" min="0">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Precio Unitario *</label>
+                                <input type="number" id="nuevoMaterialPrecio" placeholder="0" min="0" step="0.01">
+                            </div>
+                            <div class="form-field">
+                                <label>Unidad (ml, gr, pz, etc)</label>
+                                <input type="text" id="nuevoMaterialUnidad" placeholder="ml">
+                            </div>
+                        </div>
+                        <div class="button-group">
+                            <button class="btn btn-primary" onclick="agregarNuevoMaterial()">➕ Agregar Material</button>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Material</th>
+                                    <th>Cantidad</th>
+                                    <th>Unidad</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Valor Total</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stockLista"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- REPORTES -->
+                <div id="reportesModule" class="module-content">
+                    <div style="max-width: 800px;">
+                        <h3 style="margin-bottom: 20px;">Generar Reportes en PDF</h3>
+                        
+                        <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                            <div class="button-group" style="flex-wrap: wrap; gap: 10px;">
+                                <button class="btn btn-primary" onclick="generarReporteOdontologo()">📋 Odontólogos</button>
+                                <button class="btn btn-primary" onclick="generarReportePacientes()">👥 Pacientes</button>
+                                <button class="btn btn-primary" onclick="generarReporteTratamientos()">🦷 Tratamientos</button>
+                                <button class="btn btn-primary" onclick="generarReporteFacturacion()">💰 Facturación</button>
+                                <button class="btn btn-primary" onclick="generarReporteIngresos()">📈 Ingresos</button>
+                                <button class="btn btn-primary" onclick="generarReporteEgresos()">📉 Egresos</button>
+                            </div>
+                        </div>
+
+                        <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #ddd;">
+                            <h4>Reportes con Rango de Fechas</h4>
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>Desde:</label>
+                                    <input type="date" id="reportFechaDesde">
+                                </div>
+                                <div class="form-field">
+                                    <label>Hasta:</label>
+                                    <input type="date" id="reportFechaHasta">
+                                </div>
+                            </div>
+                            <div class="button-group" style="flex-wrap: wrap; gap: 10px;">
+                                <button class="btn btn-success" onclick="generarReporteFacturacionConFechas()">📊 Facturación (Rango)</button>
+                                <button class="btn btn-success" onclick="generarReporteIngresosConFechas()">📊 Ingresos (Rango)</button>
+                                <button class="btn btn-success" onclick="generarReporteEgresosConFechas()">📊 Egresos (Rango)</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
         // STATE
@@ -1013,8 +1101,9 @@
             tratamientos: [],
             facturas: [],
             caja: [],
+            stock: [],
             facturaEnEdicion: { tratamientos: [] },
-            ultimoId: { paciente: 0, odonto: 0, factura: 0, caja: 0 }
+            ultimoId: { paciente: 0, odonto: 0, factura: 0, caja: 0, material: 0 }
         };
 
         // LOGIN
@@ -1082,7 +1171,9 @@
                 'caja': '💵 Caja',
                 'tratamientos': '🦷 Tratamientos',
                 'pacientes': '👥 Pacientes',
-                'odontos': '👨‍⚕️ Odontólogos'
+                'odontos': '👨‍⚕️ Odontólogos',
+                'stock': '📦 Stock de Materiales',
+                'reportes': '📋 Reportes'
             };
             document.getElementById('pageTitle').textContent = titles[module] || module;
 
@@ -1092,6 +1183,7 @@
             else if (module === 'tratamientos') renderTratamientos();
             else if (module === 'pacientes') renderPacientes();
             else if (module === 'odontos') renderOdontos();
+            else if (module === 'stock') renderStock();
         }
 
         function switchTab(btn, tabId) {
@@ -1161,6 +1253,9 @@
             // Cargar facturas y caja desde Supabase
             cargarFacturasDeSupabase();
             cargarCajaDesdeSupabase();
+            cargarStockDesdeSupabase();
+            cargarPacientesDesdeSupabase();
+            cargarTratamientosDesdeSupabase();
         }
 
         // FACTURACIÓN
@@ -1564,6 +1659,63 @@
             renderSelects();
         }
 
+        async function guardarTratamientoEnSupabase(tratamiento) {
+            try {
+                await supabaseClient.from('tratamientos').insert([{
+                    nombre: tratamiento.nombre,
+                    categoria: tratamiento.categoria,
+                    costo: parseFloat(tratamiento.costo) || 0,
+                    precio: parseFloat(tratamiento.precio) || 0,
+                    honorario_promedio: parseFloat(tratamiento.honorarioPromedio) || 0,
+                    duracion: parseInt(tratamiento.duracion) || 0,
+                    descripcion: tratamiento.descripcion,
+                    usuario: app.currentUser ? (app.currentUser.name || 'admin') : 'admin'
+                }]);
+                console.log('✅ Tratamiento guardado en Supabase');
+            } catch(e) {
+                console.error('❌ Error guardando tratamiento:', e.message);
+            }
+        }
+
+        async function cargarTratamientosDesdeSupabase() {
+            try {
+                const response = await fetch('https://vmwdourgxzwesildzvjp.supabase.co/rest/v1/tratamientos?select=id,nombre,categoria,costo,precio,honorario_promedio,duracion,descripcion,usuario', {
+                    headers: {
+                        'apikey': 'sb_publishable_QTrjuK7dgOr7Gq-RBa341w_V5cUSO2I',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    console.log(`✅ ${data.length} tratamientos cargados desde Supabase`);
+                    
+                    data.forEach(t => {
+                        const existe = app.tratamientos.some(trat => trat.id === t.id);
+                        if (!existe) {
+                            app.tratamientos.push({
+                                id: t.id,
+                                nombre: t.nombre,
+                                categoria: t.categoria,
+                                costo: parseFloat(t.costo) || 0,
+                                precio: parseFloat(t.precio) || 0,
+                                honorarioPromedio: parseFloat(t.honorario_promedio) || 0,
+                                gananciaClin: (parseFloat(t.precio) || 0) - (parseFloat(t.costo) || 0) - (parseFloat(t.honorario_promedio) || 0),
+                                duracion: parseInt(t.duracion) || 0,
+                                descripcion: t.descripcion
+                            });
+                        }
+                    });
+                    
+                    renderSelects();
+                    console.log(`✅ Total: ${app.tratamientos.length} tratamientos en memoria`);
+                }
+            } catch(e) {
+                console.log('⚠️ Error cargando tratamientos:', e.message);
+            }
+        }
+
         // TRATAMIENTOS
         function agregarNuevoTratamiento() {
             const nombre = document.getElementById('nuevoTratNombre').value;
@@ -1594,7 +1746,9 @@
             };
 
             app.tratamientos.push(tratamiento);
-            alert('✅ Tratamiento agregado:\n\n' + nombre + '\nPrecio: $' + precio.toLocaleString('es-MX') + '\nGanancia Clínica: $' + gananciaClin.toLocaleString('es-MX'));
+            guardarTratamientoEnSupabase(tratamiento);
+            
+            alert('✅ Tratamiento agregado y guardado:\n\n' + nombre + '\nPrecio: $' + precio.toLocaleString('es-MX') + '\nGanancia Clínica: $' + gananciaClin.toLocaleString('es-MX'));
 
             document.getElementById('nuevoTratNombre').value = '';
             document.getElementById('nuevoTratCosto').value = '';
@@ -1654,6 +1808,59 @@
             div.innerHTML = html;
         }
 
+        async function guardarPacienteEnSupabase(paciente) {
+            try {
+                await supabaseClient.from('pacientes').insert([{
+                    nombre: paciente.nombre,
+                    telefono: paciente.telefono,
+                    email: paciente.email,
+                    fecha_nacimiento: paciente.fechaNacimiento,
+                    usuario: app.currentUser ? (app.currentUser.name || 'admin') : 'admin'
+                }]);
+                console.log('✅ Paciente guardado en Supabase');
+            } catch(e) {
+                console.error('❌ Error guardando paciente:', e.message);
+            }
+        }
+
+        async function cargarPacientesDesdeSupabase() {
+            try {
+                const response = await fetch('https://vmwdourgxzwesildzvjp.supabase.co/rest/v1/pacientes?select=id,nombre,telefono,email,fecha_nacimiento,usuario', {
+                    headers: {
+                        'apikey': 'sb_publishable_QTrjuK7dgOr7Gq-RBa341w_V5cUSO2I',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    console.log(`✅ ${data.length} pacientes cargados desde Supabase`);
+                    
+                    data.forEach(p => {
+                        const existe = app.pacientes.some(pac => pac.id === p.id);
+                        if (!existe) {
+                            app.pacientes.push({
+                                id: p.id,
+                                nombre: p.nombre,
+                                telefono: p.telefono || '',
+                                email: p.email || '',
+                                fechaNacimiento: p.fecha_nacimiento,
+                                facturas: [],
+                                cobrado: 0,
+                                deuda: 0
+                            });
+                        }
+                    });
+                    
+                    renderSelects();
+                    console.log(`✅ Total: ${app.pacientes.length} pacientes en memoria`);
+                }
+            } catch(e) {
+                console.log('⚠️ Error cargando pacientes:', e.message);
+            }
+        }
+
         // PACIENTES
         function renderPacientes() {
             const tbody = document.getElementById('pacientesLista');
@@ -1704,7 +1911,9 @@
             };
 
             app.pacientes.push(p);
-            alert('✅ Paciente agregado');
+            guardarPacienteEnSupabase(p);
+            
+            alert('✅ Paciente agregado y guardado');
             document.getElementById('nuevoPacienteNombre').value = '';
             document.getElementById('nuevoPacienteTelefono').value = '';
             document.getElementById('nuevoPacienteEmail').value = '';
@@ -1969,6 +2178,333 @@
             } catch(e) {
                 console.error('❌ Error Supabase:', e.message);
             }
+        }
+
+        async function guardarMaterialEnSupabase(material) {
+            try {
+                await supabaseClient.from('stock').insert([{
+                    nombre: material.nombre,
+                    cantidad: parseFloat(material.cantidad) || 0,
+                    precio: parseFloat(material.precio) || 0,
+                    unidad: material.unidad,
+                    usuario: app.currentUser ? (app.currentUser.name || 'admin') : 'admin'
+                }]);
+                console.log('✅ Material guardado en Supabase');
+            } catch(e) {
+                console.error('❌ Error guardando material:', e.message);
+            }
+        }
+
+        async function cargarStockDesdeSupabase() {
+            try {
+                const response = await fetch('https://vmwdourgxzwesildzvjp.supabase.co/rest/v1/stock?select=id,nombre,cantidad,precio,unidad,usuario', {
+                    headers: {
+                        'apikey': 'sb_publishable_QTrjuK7dgOr7Gq-RBa341w_V5cUSO2I',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    console.log(`✅ ${data.length} materiales cargados desde Supabase`);
+                    
+                    data.forEach(s => {
+                        const existe = app.stock.some(mat => mat.id === s.id);
+                        if (!existe) {
+                            app.stock.push({
+                                id: s.id,
+                                nombre: s.nombre,
+                                cantidad: parseFloat(s.cantidad) || 0,
+                                precio: parseFloat(s.precio) || 0,
+                                unidad: s.unidad,
+                                total: (parseFloat(s.cantidad) || 0) * (parseFloat(s.precio) || 0)
+                            });
+                        }
+                    });
+                    
+                    console.log(`✅ Total: ${app.stock.length} materiales en memoria`);
+                }
+            } catch(e) {
+                console.log('⚠️ Error cargando stock:', e.message);
+            }
+        }
+
+        // STOCK DE MATERIALES
+        function agregarNuevoMaterial() {
+            const nombre = document.getElementById('nuevoMaterialNombre').value;
+            const cantidad = parseFloat(document.getElementById('nuevoMaterialCantidad').value);
+            const precio = parseFloat(document.getElementById('nuevoMaterialPrecio').value);
+            const unidad = document.getElementById('nuevoMaterialUnidad').value;
+
+            if (!nombre || !cantidad || !precio) {
+                alert('Completa: Nombre, Cantidad y Precio');
+                return;
+            }
+
+            const material = {
+                nombre: nombre,
+                cantidad: cantidad,
+                precio: precio,
+                unidad: unidad || 'unidad'
+            };
+
+            const materialConId = {
+                id: ++app.ultimoId.material,
+                nombre: nombre,
+                cantidad: cantidad,
+                precio: precio,
+                unidad: unidad || 'unidad',
+                total: cantidad * precio
+            };
+
+            app.stock.push(materialConId);
+            guardarMaterialEnSupabase(material);
+            
+            alert('✅ Material agregado y guardado');
+            document.getElementById('nuevoMaterialNombre').value = '';
+            document.getElementById('nuevoMaterialCantidad').value = '';
+            document.getElementById('nuevoMaterialPrecio').value = '';
+            document.getElementById('nuevoMaterialUnidad').value = '';
+            renderStock();
+        }
+
+        function renderStock() {
+            const tbody = document.getElementById('stockLista');
+            tbody.innerHTML = '';
+            let totalStock = 0;
+            app.stock.forEach(m => {
+                const total = m.cantidad * m.precio;
+                totalStock += total;
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${m.nombre}</td>
+                        <td>${m.cantidad}</td>
+                        <td>${m.unidad}</td>
+                        <td>$${m.precio.toLocaleString('es-MX')}</td>
+                        <td>$${total.toLocaleString('es-MX')}</td>
+                        <td><button class="btn btn-small btn-danger" onclick="eliminarMaterial(${m.id})">🗑️</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function eliminarMaterial(id) {
+            if (confirm('¿Eliminar este material?')) {
+                app.stock = app.stock.filter(m => m.id !== id);
+                renderStock();
+            }
+        }
+
+        // REPORTES
+        function generarReporteOdontologo() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            let y = 20;
+
+            doc.setFontSize(16);
+            doc.text('REPORTE DE ODONTÓLOGOS', 20, y);
+            y += 15;
+
+            doc.setFontSize(11);
+            app.odontos.forEach(o => {
+                doc.text(`${o.nombre} - ${o.especialidad}`, 20, y);
+                doc.text(`Celular: ${o.celular}`, 20, y + 5);
+                y += 15;
+            });
+
+            doc.save('reporte-odontologos.pdf');
+            alert('✅ PDF generado: reporte-odontologos.pdf');
+        }
+
+        function generarReportePacientes() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            let y = 20;
+
+            doc.setFontSize(16);
+            doc.text('REPORTE DE PACIENTES', 20, y);
+            y += 15;
+
+            doc.setFontSize(11);
+            app.pacientes.forEach(p => {
+                doc.text(`${p.nombre} - Tel: ${p.telefono}`, 20, y);
+                doc.text(`Email: ${p.email}`, 20, y + 5);
+                doc.text(`Facturas: ${p.facturas.length} | Cobrado: $${p.cobrado.toLocaleString('es-MX')} | Deuda: $${p.deuda.toLocaleString('es-MX')}`, 20, y + 10);
+                y += 20;
+            });
+
+            doc.save('reporte-pacientes.pdf');
+            alert('✅ PDF generado: reporte-pacientes.pdf');
+        }
+
+        function generarReporteTratamientos() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            let y = 20;
+
+            doc.setFontSize(16);
+            doc.text('REPORTE DE TRATAMIENTOS', 20, y);
+            y += 15;
+
+            doc.setFontSize(10);
+            app.tratamientos.forEach(t => {
+                const ganancia = t.precio - t.costo - t.honorarioPromedio;
+                doc.text(`${t.nombre} (${t.categoria})`, 20, y);
+                doc.text(`Precio: $${t.precio} | Costo: $${t.costo} | Ganancia: $${ganancia}`, 20, y + 5);
+                y += 15;
+            });
+
+            doc.save('reporte-tratamientos.pdf');
+            alert('✅ PDF generado: reporte-tratamientos.pdf');
+        }
+
+        function generarReporteFacturacion() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            let y = 20;
+
+            doc.setFontSize(16);
+            doc.text('REPORTE DE FACTURACIÓN', 20, y);
+            y += 15;
+
+            doc.setFontSize(10);
+            app.facturas.forEach(f => {
+                doc.text(`Factura #${f.id} - ${f.pacienteNombre} - Dr. ${f.odontologoNombre}`, 20, y);
+                doc.text(`Total: $${f.total.toLocaleString('es-MX')} | Pagado: $${f.pagado.toLocaleString('es-MX')} | Deuda: $${f.deuda.toLocaleString('es-MX')}`, 20, y + 5);
+                y += 12;
+            });
+
+            doc.save('reporte-facturacion.pdf');
+            alert('✅ PDF generado: reporte-facturacion.pdf');
+        }
+
+        function generarReporteIngreso() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            let y = 20;
+
+            doc.setFontSize(16);
+            doc.text('REPORTE DE INGRESOS', 20, y);
+            y += 15;
+
+            doc.setFontSize(10);
+            app.caja.filter(c => c.tipo === 'ingreso').forEach(c => {
+                doc.text(`${c.fecha} - ${c.descripcion}`, 20, y);
+                doc.text(`Monto: $${c.monto.toLocaleString('es-MX')} | ${c.metodo}`, 20, y + 5);
+                y += 12;
+            });
+
+            doc.save('reporte-ingresos.pdf');
+            alert('✅ PDF generado: reporte-ingresos.pdf');
+        }
+
+        function generarReporteIngresos() {
+            generarReporteIngreso();
+        }
+
+        function generarReporteEgresos() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            let y = 20;
+
+            doc.setFontSize(16);
+            doc.text('REPORTE DE EGRESOS', 20, y);
+            y += 15;
+
+            doc.setFontSize(10);
+            app.caja.filter(c => c.tipo === 'egreso').forEach(c => {
+                doc.text(`${c.fecha} - ${c.descripcion}`, 20, y);
+                doc.text(`Monto: $${c.monto.toLocaleString('es-MX')} | ${c.metodo}`, 20, y + 5);
+                y += 12;
+            });
+
+            doc.save('reporte-egresos.pdf');
+            alert('✅ PDF generado: reporte-egresos.pdf');
+        }
+
+        function generarReporteFacturacionConFechas() {
+            const desde = document.getElementById('reportFechaDesde').value;
+            const hasta = document.getElementById('reportFechaHasta').value;
+
+            if (!desde || !hasta) {
+                alert('Selecciona ambas fechas');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            let y = 20;
+
+            doc.setFontSize(16);
+            doc.text(`REPORTE DE FACTURACIÓN (${desde} a ${hasta})`, 20, y);
+            y += 15;
+
+            doc.setFontSize(10);
+            app.facturas.filter(f => f.fecha >= desde && f.fecha <= hasta).forEach(f => {
+                doc.text(`Factura #${f.id} - ${f.pacienteNombre}`, 20, y);
+                doc.text(`Total: $${f.total.toLocaleString('es-MX')} | ${f.fecha}`, 20, y + 5);
+                y += 12;
+            });
+
+            doc.save(`reporte-facturacion-${desde}-${hasta}.pdf`);
+            alert('✅ PDF generado');
+        }
+
+        function generarReporteIngresosConFechas() {
+            const desde = document.getElementById('reportFechaDesde').value;
+            const hasta = document.getElementById('reportFechaHasta').value;
+
+            if (!desde || !hasta) {
+                alert('Selecciona ambas fechas');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            let y = 20;
+
+            doc.setFontSize(16);
+            doc.text(`REPORTE DE INGRESOS (${desde} a ${hasta})`, 20, y);
+            y += 15;
+
+            doc.setFontSize(10);
+            app.caja.filter(c => c.tipo === 'ingreso' && c.fecha >= desde && c.fecha <= hasta).forEach(c => {
+                doc.text(`${c.fecha} - ${c.descripcion}`, 20, y);
+                doc.text(`$${c.monto.toLocaleString('es-MX')}`, 20, y + 5);
+                y += 12;
+            });
+
+            doc.save(`reporte-ingresos-${desde}-${hasta}.pdf`);
+            alert('✅ PDF generado');
+        }
+
+        function generarReporteEgresosConFechas() {
+            const desde = document.getElementById('reportFechaDesde').value;
+            const hasta = document.getElementById('reportFechaHasta').value;
+
+            if (!desde || !hasta) {
+                alert('Selecciona ambas fechas');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            let y = 20;
+
+            doc.setFontSize(16);
+            doc.text(`REPORTE DE EGRESOS (${desde} a ${hasta})`, 20, y);
+            y += 15;
+
+            doc.setFontSize(10);
+            app.caja.filter(c => c.tipo === 'egreso' && c.fecha >= desde && c.fecha <= hasta).forEach(c => {
+                doc.text(`${c.fecha} - ${c.descripcion}`, 20, y);
+                doc.text(`$${c.monto.toLocaleString('es-MX')}`, 20, y + 5);
+                y += 12;
+            });
+
+            doc.save(`reporte-egresos-${desde}-${hasta}.pdf`);
+            alert('✅ PDF generado');
         }
 
         // INIT
