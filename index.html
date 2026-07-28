@@ -720,6 +720,14 @@
                             <div class="kpi-label">Ganancia Neta</div>
                             <div class="kpi-value" id="cajaGananciaNeta">$0</div>
                         </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Ingresos Efectivo</div>
+                            <div class="kpi-value" id="cajaIngresosEfectivo">$0</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-label">Ingresos Tarjeta/Transferencia</div>
+                            <div class="kpi-value" id="cajaIngresosTarjeta">$0</div>
+                        </div>
                     </div>
 
                     <div class="form-container" style="margin-top: 20px;">
@@ -1652,6 +1660,8 @@
         function renderCaja() {
             const ingresos = app.caja.filter(c => c.tipo === 'ingreso').reduce((s, c) => s + c.monto, 0);
             const egresos = app.caja.filter(c => c.tipo === 'egreso').reduce((s, c) => s + c.monto, 0);
+            const ingresosEfectivo = app.caja.filter(c => c.tipo === 'ingreso' && c.metodo === 'efectivo').reduce((s, c) => s + c.monto, 0);
+            const ingresosTarjeta = app.caja.filter(c => c.tipo === 'ingreso' && (c.metodo === 'tarjeta' || c.metodo === 'transferencia')).reduce((s, c) => s + c.monto, 0);
             const honorariosPendientes = app.odontos.reduce((s, o) => s + o.porCobrar, 0);
             const ganancia = ingresos - egresos - honorariosPendientes;
 
@@ -1659,6 +1669,8 @@
             document.getElementById('cajaTotalEgresos').textContent = '$' + egresos.toLocaleString('es-MX');
             document.getElementById('cajaHonorariosPendientes').textContent = '$' + honorariosPendientes.toLocaleString('es-MX');
             document.getElementById('cajaGananciaNeta').textContent = '$' + ganancia.toLocaleString('es-MX');
+            document.getElementById('cajaIngresosEfectivo').textContent = '$' + ingresosEfectivo.toLocaleString('es-MX');
+            document.getElementById('cajaIngresosTarjeta').textContent = '$' + ingresosTarjeta.toLocaleString('es-MX');
 
             const tbody = document.getElementById('cajaHistorial');
             tbody.innerHTML = '';
