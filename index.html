@@ -1611,6 +1611,7 @@
             document.getElementById('egresoVariosDesc').value = '';
 
             renderCaja();
+            renderOdontos();
             updateDashboard();
         }
 
@@ -1855,7 +1856,7 @@
 
         async function cargarOdontologosDesdeSupabase() {
             try {
-                const response = await fetch('https://vmwdourgxzwesildzvjp.supabase.co/rest/v1/odontologos?select=id,nombre,especialidad,celular,usuario', {
+                const response = await fetch('https://vmwdourgxzwesildzvjp.supabase.co/rest/v1/odontologos?select=id,nombre,especialidad,celular,usuario,por_cobrar', {
                     headers: {
                         'apikey': 'sb_publishable_QTrjuK7dgOr7Gq-RBa341w_V5cUSO2I',
                         'Content-Type': 'application/json'
@@ -1876,7 +1877,7 @@
                                 especialidad: o.especialidad,
                                 celular: o.celular,
                                 honorarios: {},
-                                porCobrar: 0,
+                                porCobrar: parseFloat(o.por_cobrar) || 0,
                                 cobradoMes: 0,
                                 facturas: []
                             });
@@ -1974,28 +1975,32 @@
             `;
             
             app.odontos.forEach(o => {
-                // Calcular métricas del mes corriente
+                // Calcular métricas del mes corriente usando nombre
                 const facturasDelMes = app.facturas.filter(f => {
                     const fecha = new Date(f.fecha);
                     return fecha.getMonth() + 1 === mesActual && 
                            fecha.getFullYear() === anoActual && 
-                           f.odontologoId === o.id;
+                           f.odontologoNombre === o.nombre;
                 });
                 
                 const importeFacturado = facturasDelMes.reduce((sum, f) => sum + f.total, 0);
-                const honorariosGenerados = facturasDelMes.reduce((sum, f) => {
-                    return sum + f.items.reduce((s, item) => s + item.honorario, 0);
-                }, 0);
                 
-                // Para este ejemplo, suponemos que honorarios cobrados = generados
-                const honorariosCobrados = honorariosGenerados;
-                const saldo = honorariosGenerados - honorariosCobrados;
+                // Honorarios generados = porCobrar + lo que ya pagó
+                // Para este mes usamos facturasDelMes.deuda
+                const honorariosGeneradosMes = facturasDelMes.reduce((sum, f) => sum + f.total, 0);
+                
+                // Honorarios cobrados = honorarios del mes menos lo pendiente
+                const honorarioPendiente = facturasDelMes.reduce((sum, f) => sum + f.deuda, 0);
+                const honorariosCobrados = honorariosGeneradosMes - honorarioPendiente;
+                
+                // Saldo = porCobrar actual del odontólogo
+                const saldo = o.porCobrar;
                 
                 html += `
                     <tr>
                         <td><strong>${o.nombre}</strong></td>
                         <td>$${importeFacturado.toLocaleString('es-MX')}</td>
-                        <td>$${honorariosGenerados.toLocaleString('es-MX')}</td>
+                        <td>$${honorariosGeneradosMes.toLocaleString('es-MX')}</td>
                         <td>$${honorariosCobrados.toLocaleString('es-MX')}</td>
                         <td><strong style="color: ${saldo > 0 ? '#ef4444' : '#10b981'};">$${saldo.toLocaleString('es-MX')}</strong></td>
                     </tr>
@@ -2261,6 +2266,7 @@
                     
                     // Actualizar tabla y dashboard
                     renderFacturas();
+                    renderOdontos();
                     updateDashboard();
                     console.log(`✅ Total: ${app.facturas.length} facturas en memoria`);
                 }
