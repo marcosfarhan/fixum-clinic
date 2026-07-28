@@ -538,6 +538,13 @@
         <div class="main-content">
             <div class="top-bar">
                 <h2 id="pageTitle">Dashboard</h2>
+                
+                <!-- SELECTOR DE FECHA PARA PRUEBAS -->
+                <div style="background: #f0f0f0; padding: 15px; margin-bottom: 20px; border-radius: 5px; border-left: 4px solid #fbbf24;">
+                    <label style="font-weight: bold; margin-right: 10px;">🧪 Fecha de Prueba (para cambiar mes):</label>
+                    <input type="date" id="fechaPrueba" onchange="cambiarFechaPrueba()" style="padding: 5px 10px; border: 1px solid #ccc; border-radius: 3px;">
+                    <button onclick="resetearFechaPrueba()" style="margin-left: 10px; padding: 5px 15px; background: #ef4444; color: white; border: none; border-radius: 3px; cursor: pointer;">Usar fecha actual</button>
+                </div>
             </div>
 
             <div class="content-area">
@@ -1096,6 +1103,7 @@
         // STATE
         const app = {
             currentUser: null,
+            fechaPrueba: null,
             pacientes: [],
             odontos: [],
             tratamientos: [],
@@ -1105,6 +1113,32 @@
             facturaEnEdicion: { tratamientos: [] },
             ultimoId: { paciente: 0, odonto: 0, factura: 0, caja: 0, material: 0 }
         };
+
+        function cambiarFechaPrueba() {
+            const fecha = document.getElementById('fechaPrueba').value;
+            if (fecha) {
+                app.fechaPrueba = fecha;
+                console.log('🧪 Fecha de prueba seteada a:', fecha);
+                updateDashboard();
+                renderOdontos();
+            }
+        }
+
+        function resetearFechaPrueba() {
+            app.fechaPrueba = null;
+            document.getElementById('fechaPrueba').value = '';
+            console.log('🧪 Fecha de prueba reseteada. Usando fecha actual.');
+            updateDashboard();
+            renderOdontos();
+        }
+
+        // LOGIN
+        function getFechaPrueba() {
+            if (app.fechaPrueba) {
+                return new Date(app.fechaPrueba);
+            }
+            return new Date();
+        }
 
         // LOGIN
         function handleLogin() {
@@ -1382,7 +1416,7 @@
                 pagado: montoPago,
                 deuda: totalPrecio - montoPago,
                 metodo: metodoPago,
-                fecha: new Date().toISOString().split('T')[0],
+                fecha: getFechaPrueba().toISOString().split('T')[0],
                 notas: notas
             };
 
@@ -1591,7 +1625,7 @@
                 descripcion: descripcion,
                 monto: monto,
                 metodo: metodo,
-                fecha: new Date().toISOString().split('T')[0],
+                fecha: getFechaPrueba().toISOString().split('T')[0],
                 nota: nota,
                 detalles: detalles,
                 usuario: app.currentUser
@@ -1956,8 +1990,9 @@
         // ODONTÓLOGOS
         function renderOdontos() {
             const div = document.getElementById('odontosDetalles');
-            const mesActual = new Date().getMonth() + 1;
-            const anoActual = new Date().getFullYear();
+            const hoy = getFechaPrueba();
+            const mesActual = hoy.getMonth() + 1;
+            const anoActual = hoy.getFullYear();
             
             let html = `
                 <div class="table-container" style="margin-top: 20px;">
@@ -2051,7 +2086,7 @@
 
         // DASHBOARD
         function updateDashboard() {
-            const hoy = new Date();
+            const hoy = getFechaPrueba();
             const mesActual = hoy.getMonth() + 1;
             const anoActual = hoy.getFullYear();
             
@@ -2192,7 +2227,7 @@
                                 descripcion: c.descripcion,
                                 monto: parseFloat(c.monto) || 0,
                                 metodo: c.metodo,
-                                fecha: new Date().toISOString().split('T')[0],
+                                fecha: getFechaPrueba().toISOString().split('T')[0],
                                 usuario: c.usuario
                             });
                         }
@@ -2280,7 +2315,7 @@
                 await supabaseClient.from('facturas').insert([{
                     descripcion: factura.concepto || `Factura #${factura.id}`,
                     monto: parseFloat(factura.total) || 0,
-                    fecha: new Date().toISOString().split('T')[0],
+                    fecha: getFechaPrueba().toISOString().split('T')[0],
                     usuario: app.currentUser ? (app.currentUser.name || 'admin') : 'admin',
                     paciente_nombre: factura.pacienteNombre || 'N/A',
                     odontologo_nombre: factura.odontologoNombre || 'N/A'
