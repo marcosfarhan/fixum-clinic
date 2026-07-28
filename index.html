@@ -2327,12 +2327,14 @@
                 await supabaseClient.from('facturas').insert([{
                     descripcion: factura.concepto || `Factura #${factura.id}`,
                     monto: parseFloat(factura.total) || 0,
+                    pagado: parseFloat(factura.pagado) || 0,
+                    deuda: parseFloat(factura.deuda) || 0,
                     fecha: getFechaPrueba().toISOString().split('T')[0],
                     usuario: app.currentUser ? (app.currentUser.name || 'admin') : 'admin',
                     paciente_nombre: factura.pacienteNombre || 'N/A',
                     odontologo_nombre: factura.odontologoNombre || 'N/A'
                 }]);
-                console.log('✅ Factura guardada en Supabase');
+                console.log('✅ Factura guardada en Supabase:', factura);
             } catch(e) {
                 console.error('❌ Error Supabase:', e.message);
             }
