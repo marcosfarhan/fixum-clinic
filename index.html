@@ -1538,6 +1538,9 @@
                 // Sincronizar con odontólogo
                 odonto.porCobrar -= monto;
                 odonto.cobradoMes += monto;
+                
+                // Guardar en Supabase también
+                actualizarOdontologoEnSupabase(odontologoId, odonto.porCobrar);
             } else if (tipo === 'pago_proveedores') {
                 const proveedor = document.getElementById('egresoProveedorNombre').value;
                 const compraType = document.getElementById('egresoProveedorTipo').value;
@@ -2138,6 +2141,25 @@
                 console.log('✅ Movimiento de caja guardado en Supabase');
             } catch(e) {
                 console.error('❌ Error guardando caja:', e.message);
+            }
+        }
+
+        async function actualizarOdontologoEnSupabase(odontologoId, porCobrar) {
+            try {
+                const response = await fetch(`https://vmwdourgxzwesildzvjp.supabase.co/rest/v1/odontologos?id=eq.${odontologoId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': 'sb_publishable_QTrjuK7dgOr7Gq-RBa341w_V5cUSO2I',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ por_cobrar: porCobrar })
+                });
+                
+                if (response.ok) {
+                    console.log('✅ porCobrar actualizado en Supabase para odontólogo:', odontologoId, 'Nuevo valor:', porCobrar);
+                }
+            } catch(e) {
+                console.log('⚠️ Error actualizando porCobrar:', e.message);
             }
         }
 
