@@ -731,6 +731,37 @@
                     </div>
 
                     <div class="form-container" style="margin-top: 20px;">
+                        <h3 style="margin-bottom: 20px;">Registrar Ingreso</h3>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Descripción del Ingreso *</label>
+                                <input type="text" id="ingresoDescripcion" placeholder="Ej: Pago María García - Implante, Consulta...">
+                            </div>
+                            <div class="form-field">
+                                <label>Monto *</label>
+                                <input type="number" id="ingresoMonto" min="0" placeholder="0.00" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Método de Pago *</label>
+                                <select id="ingresoMetodo" required>
+                                    <option value="">Seleccionar método...</option>
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="tarjeta">Tarjeta de Crédito/Débito</option>
+                                    <option value="transferencia">Transferencia Bancaria</option>
+                                    <option value="cheque">Cheque</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label>Nota / Referencia (Comprobante, Factura)</label>
+                                <input type="text" id="ingresoNota" placeholder="Ej: Comprobante #123, Ref banc...">
+                            </div>
+                        </div>
+                        <button class="btn btn-success" onclick="registrarIngresoCompleto()" style="margin-top: 15px;">💰 Registrar Ingreso</button>
+                    </div>
+
+                    <div class="form-container" style="margin-top: 20px;">
                         <h3 style="margin-bottom: 20px;">Registrar Egreso</h3>
                         <div class="form-row">
                             <div class="form-field">
@@ -1545,6 +1576,42 @@
             } else if (tipo === 'varios') {
                 document.getElementById('egresoVariosSection').style.display = 'block';
             }
+        }
+
+        function registrarIngresoCompleto() {
+            const descripcion = document.getElementById('ingresoDescripcion').value.trim();
+            const monto = parseFloat(document.getElementById('ingresoMonto').value) || 0;
+            const metodo = document.getElementById('ingresoMetodo').value;
+            const nota = document.getElementById('ingresoNota').value.trim();
+
+            if (!descripcion || monto <= 0 || !metodo) {
+                alert('Completa: Descripción, Monto y Método de Pago');
+                return;
+            }
+
+            const movimiento = {
+                id: ++app.ultimoId.caja,
+                tipo: 'ingreso',
+                descripcion: descripcion,
+                monto: monto,
+                metodo: metodo,
+                fecha: getFechaPrueba().toISOString().split('T')[0],
+                usuario: app.currentUser ? app.currentUser.name : 'admin',
+                nota: nota
+            };
+
+            app.caja.push(movimiento);
+            guardarMovimientoCajaEnSupabase(movimiento);
+            alert('✅ Ingreso registrado: ' + descripcion + '\n$' + monto.toLocaleString('es-MX'));
+
+            // Limpiar formulario
+            document.getElementById('ingresoDescripcion').value = '';
+            document.getElementById('ingresoMonto').value = '';
+            document.getElementById('ingresoMetodo').value = '';
+            document.getElementById('ingresoNota').value = '';
+
+            renderCaja();
+            updateDashboard();
         }
 
         function onSelectOdontoEgreso() {
