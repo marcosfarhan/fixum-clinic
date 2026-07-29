@@ -1143,7 +1143,13 @@
         // LOGIN
         function getFechaPrueba() {
             if (app.fechaPrueba) {
-                return new Date(app.fechaPrueba);
+                // Parser manual sin timezone
+                const partes = app.fechaPrueba.split('-');
+                const ano = parseInt(partes[0]);
+                const mes = parseInt(partes[1]);
+                const dia = parseInt(partes[2]);
+                // Retorna un Date en UTC para evitar timezone
+                return new Date(Date.UTC(ano, mes - 1, dia));
             }
             return new Date();
         }
@@ -2003,8 +2009,8 @@
         function renderOdontos() {
             const div = document.getElementById('odontosDetalles');
             const hoy = getFechaPrueba();
-            const mesActual = hoy.getMonth() + 1;
-            const anoActual = hoy.getFullYear();
+            const mesActual = hoy.getUTCMonth() + 1;
+            const anoActual = hoy.getUTCFullYear();
             
             let html = `
                 <div class="table-container" style="margin-top: 20px;">
@@ -2101,8 +2107,8 @@
         // DASHBOARD
         function updateDashboard() {
             const hoy = getFechaPrueba();
-            const mesActual = hoy.getMonth() + 1;
-            const anoActual = hoy.getFullYear();
+            const mesActual = hoy.getUTCMonth() + 1;
+            const anoActual = hoy.getUTCFullYear();
             
             // Ingresos del mes en curso (SOLO ESTE MES)
             const ingresosMesActual = app.caja.filter(c => {
