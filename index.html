@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -525,6 +526,7 @@
                 <div class="nav-item" onclick="switchModule('pacientes', event)">👥 Pacientes</div>
                 <div class="nav-item" onclick="switchModule('odontos', event)">👨‍⚕️ Odontólogos</div>
                 <div class="nav-item" onclick="switchModule('stock', event)">📦 Stock de Materiales</div>
+                <div class="nav-item" onclick="switchModule('implantes', event)">🦷 Fixum Implantes</div>
                 <div class="nav-item" onclick="switchModule('reportes', event)">📋 Reportes</div>
             </nav>
             <div class="user-info">
@@ -1119,6 +1121,89 @@
                     </div>
                 </div>
 
+                <!-- FIXUM IMPLANTES -->
+                <div id="implantesModule" class="module-content">
+                    <div class="form-container">
+                        <h3 style="margin-bottom: 20px;">Agregar Implante Dental</h3>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Marca/Modelo *</label>
+                                <input type="text" id="implanteMarca" placeholder="Ej: Nobel Biocare, Straumann, Zimmer...">
+                            </div>
+                            <div class="form-field">
+                                <label>Diámetro (mm) *</label>
+                                <input type="number" id="implanteDiametro" placeholder="Ej: 3.5, 4.0, 4.5" step="0.1">
+                            </div>
+                            <div class="form-field">
+                                <label>Largo (mm) *</label>
+                                <input type="number" id="implanteLargo" placeholder="Ej: 8, 10, 12" step="0.5">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Tipo de Conexión *</label>
+                                <select id="implanteTipoConexion">
+                                    <option value="">Seleccionar tipo...</option>
+                                    <option value="Hexágono Externo">Hexágono Externo</option>
+                                    <option value="Hexágono Interno">Hexágono Interno</option>
+                                    <option value="Morse Cónico">Morse Cónico</option>
+                                    <option value="Autre">Otro</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label>Material *</label>
+                                <select id="implanteMaterial">
+                                    <option value="">Seleccionar material...</option>
+                                    <option value="Titanio Grado 5">Titanio Grado 5</option>
+                                    <option value="Titanio Grado 2">Titanio Grado 2</option>
+                                    <option value="Titanio Puro">Titanio Puro</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label>Cantidad en Stock *</label>
+                                <input type="number" id="implanteCantidad" min="0" placeholder="0">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Precio Unitario ($) *</label>
+                                <input type="number" id="implantePrecio" min="0" placeholder="0.00" step="0.01">
+                            </div>
+                            <div class="form-field">
+                                <label>Proveedor</label>
+                                <input type="text" id="implanteProveedor" placeholder="Nombre del proveedor">
+                            </div>
+                            <div class="form-field">
+                                <label>Fecha de Vencimiento</label>
+                                <input type="date" id="implanteFechaVencimiento">
+                            </div>
+                        </div>
+                        <button class="btn btn-success" onclick="agregarImplante()" style="margin-top: 15px;">➕ Agregar Implante</button>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <h3 style="margin-bottom: 20px;">Stock de Implantes Fixum</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Marca/Modelo</th>
+                                        <th>Dimensiones</th>
+                                        <th>Conexión</th>
+                                        <th>Material</th>
+                                        <th>Stock</th>
+                                        <th>Precio Unit.</th>
+                                        <th>Vencimiento</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="implantesLista"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- REPORTES -->
                 <div id="reportesModule" class="module-content">
                     <div style="max-width: 800px;">
@@ -1174,8 +1259,9 @@
             facturas: [],
             caja: [],
             stock: [],
+            implantes: [],
             facturaEnEdicion: { tratamientos: [] },
-            ultimoId: { paciente: 0, odonto: 0, factura: 0, caja: 0, material: 0 }
+            ultimoId: { paciente: 0, odonto: 0, factura: 0, caja: 0, material: 0, implante: 0 }
         };
 
         function cambiarFechaPrueba() {
@@ -1276,6 +1362,7 @@
                 'pacientes': '👥 Pacientes',
                 'odontos': '👨‍⚕️ Odontólogos',
                 'stock': '📦 Stock de Materiales',
+                'implantes': '🦷 Fixum Implantes',
                 'reportes': '📋 Reportes'
             };
             document.getElementById('pageTitle').textContent = titles[module] || module;
@@ -1287,6 +1374,7 @@
             else if (module === 'pacientes') renderPacientes();
             else if (module === 'odontos') renderOdontos();
             else if (module === 'stock') renderStock();
+            else if (module === 'implantes') renderImplantes();
         }
 
         function switchTab(btn, tabId) {
@@ -2728,6 +2816,94 @@
             if (confirm('¿Eliminar este material?')) {
                 app.stock = app.stock.filter(m => m.id !== id);
                 renderStock();
+            }
+        }
+
+        function agregarImplante() {
+            const marca = document.getElementById('implanteMarca').value.trim();
+            const diametro = parseFloat(document.getElementById('implanteDiametro').value) || 0;
+            const largo = parseFloat(document.getElementById('implanteLargo').value) || 0;
+            const tipoConexion = document.getElementById('implanteTipoConexion').value;
+            const material = document.getElementById('implanteMaterial').value;
+            const cantidad = parseInt(document.getElementById('implanteCantidad').value) || 0;
+            const precio = parseFloat(document.getElementById('implantePrecio').value) || 0;
+            const proveedor = document.getElementById('implanteProveedor').value.trim();
+            const fechaVencimiento = document.getElementById('implanteFechaVencimiento').value;
+
+            if (!marca || diametro <= 0 || largo <= 0 || !tipoConexion || !material || cantidad < 0 || precio < 0) {
+                alert('Completa todos los campos obligatorios correctamente');
+                return;
+            }
+
+            const implante = {
+                id: ++app.ultimoId.implante,
+                marca: marca,
+                diametro: diametro,
+                largo: largo,
+                dimensiones: `${diametro}x${largo}mm`,
+                tipoConexion: tipoConexion,
+                material: material,
+                cantidad: cantidad,
+                precio: precio,
+                proveedor: proveedor,
+                fechaVencimiento: fechaVencimiento,
+                usuario: app.currentUser ? app.currentUser.name : 'admin',
+                fechaAgregado: new Date().toISOString().split('T')[0]
+            };
+
+            app.implantes.push(implante);
+            alert('✅ Implante agregado: ' + marca + ' (' + implante.dimensiones + ')');
+
+            // Limpiar formulario
+            document.getElementById('implanteMarca').value = '';
+            document.getElementById('implanteDiametro').value = '';
+            document.getElementById('implanteLargo').value = '';
+            document.getElementById('implanteTipoConexion').value = '';
+            document.getElementById('implanteMaterial').value = '';
+            document.getElementById('implanteCantidad').value = '';
+            document.getElementById('implantePrecio').value = '';
+            document.getElementById('implanteProveedor').value = '';
+            document.getElementById('implanteFechaVencimiento').value = '';
+
+            renderImplantes();
+        }
+
+        function renderImplantes() {
+            const tbody = document.getElementById('implantesLista');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+
+            if (app.implantes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 20px; color: #666;">No hay implantes registrados</td></tr>';
+                return;
+            }
+
+            app.implantes.forEach(i => {
+                const vencido = i.fechaVencimiento && new Date(i.fechaVencimiento) < new Date() ? '🔴' : '';
+                const colorStock = i.cantidad <= 5 ? 'color: #ef4444;' : '';
+                tbody.innerHTML += `
+                    <tr>
+                        <td>#${i.id}</td>
+                        <td><strong>${i.marca}</strong></td>
+                        <td>${i.dimensiones}</td>
+                        <td>${i.tipoConexion}</td>
+                        <td>${i.material}</td>
+                        <td style="${colorStock}"><strong>${i.cantidad}</strong></td>
+                        <td>$${i.precio.toLocaleString('es-MX')}</td>
+                        <td>${i.fechaVencimiento ? i.fechaVencimiento + ' ' + vencido : 'N/A'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="eliminarImplante(${i.id})" style="padding: 3px 8px; font-size: 12px;">🗑️ Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function eliminarImplante(id) {
+            if (confirm('¿Eliminar este implante?')) {
+                app.implantes = app.implantes.filter(i => i.id !== id);
+                renderImplantes();
             }
         }
 
