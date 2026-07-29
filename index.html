@@ -2024,10 +2024,12 @@
             app.odontos.forEach(o => {
                 // Calcular métricas del mes corriente usando nombre
                 const facturasDelMes = app.facturas.filter(f => {
-                    const fecha = new Date(f.fecha);
-                    return fecha.getMonth() + 1 === mesActual && 
-                           fecha.getFullYear() === anoActual && 
-                           f.odontologoNombre === o.nombre;
+                    if (!f.fecha) return false;
+                    // Parser seguro sin problemas de timezone
+                    const partes = f.fecha.split('-');
+                    const mes = parseInt(partes[1]);
+                    const ano = parseInt(partes[0]);
+                    return mes === mesActual && ano === anoActual && f.odontologoNombre === o.nombre;
                 });
                 
                 const importeFacturado = facturasDelMes.reduce((sum, f) => sum + f.total, 0);
@@ -2106,8 +2108,11 @@
             const ingresosMesActual = app.caja.filter(c => {
                 if (c.tipo !== 'ingreso') return false;
                 if (!c.fecha) return false;
-                const fecha = new Date(c.fecha);
-                return fecha.getMonth() + 1 === mesActual && fecha.getFullYear() === anoActual;
+                // Parser seguro sin problemas de timezone
+                const partes = c.fecha.split('-');
+                const mes = parseInt(partes[1]);
+                const ano = parseInt(partes[0]);
+                return mes === mesActual && ano === anoActual;
             }).reduce((s, c) => s + c.monto, 0);
             
             // Saldo de caja TOTAL histórico (TODOS LOS INGRESOS - TODOS LOS EGRESOS)
