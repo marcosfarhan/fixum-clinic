@@ -568,6 +568,18 @@
                             <div class="kpi-value" id="kpiSaldoCaja">$0</div>
                         </div>
                     </div>
+
+                    <!-- GRÁFICOS -->
+                    <div style="margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <h4 style="margin-bottom: 20px;">Ventas Mes a Mes</h4>
+                            <canvas id="chartVentasMes" style="max-height: 300px;"></canvas>
+                        </div>
+                        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <h4 style="margin-bottom: 20px;">Facturación por Tratamiento</h4>
+                            <canvas id="chartTratamientos" style="max-height: 300px;"></canvas>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- FACTURACIÓN -->
@@ -2246,6 +2258,136 @@
             document.getElementById('kpiPorCobrar').textContent = '$' + porCobrarTotal.toLocaleString('es-MX');
             document.getElementById('kpiHonorariosPendientes').textContent = '$' + honorariosTotal.toLocaleString('es-MX');
             document.getElementById('kpiSaldoCaja').textContent = '$' + saldoCajaTotal.toLocaleString('es-MX');
+            
+            // Renderizar gráficos
+            renderGraficoVentasMes();
+            renderGraficoTratamientos();
+        }
+
+        function renderGraficoVentasMes() {
+            // Calcular ingresos por mes (últimos 12 meses)
+            const hoy = getFechaPrueba();
+            const meses = {};
+            const etiquetas = [];
+            
+            for (let i = 11; i >= 0; i--) {
+                const fecha = new Date(hoy);
+                fecha.setUTCMonth(fecha.getUTCMonth() - i);
+                const mes = fecha.getUTCMonth() + 1;
+                const ano = fecha.getUTCFullYear();
+                const key = `${ano}-${String(mes).padStart(2, '0')}`;
+                meses[key] = 0;
+                etiquetas.push(`${mes}/${ano}`);
+            }
+            
+            // Contar ingresos por mes
+            app.caja.forEach(c => {
+                if (c.tipo === 'ingreso' && c.fecha) {
+                    const partes = c.fecha.split('-');
+                    const key = `${partes[0]}-${partes[1]}`;
+                    if (meses.hasOwnProperty(key)) {
+                        meses[key] += c.monto;
+                    }
+                }
+            });
+            
+            const datos = Object.values(meses);
+            
+            const ctx = document.getElementById('chartVentasMes');
+            if (!ctx) return;
+            
+            // Destruir gráfico anterior si existe
+            if (window.chartVentasInstance) {
+                window.chartVentasInstance.destroy();
+            }
+            
+            window.chartVentasInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: etiquetas,
+                    datasets: [{
+                        label: 'Ingresos',
+                        data: datos,
+                        backgroundColor: '#2864f0',
+                        borderColor: '#1e40af',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString('es-MX');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderGraficoTratamientos() {
+            // Calcular facturación por tratamiento
+            const facturacionPorTratamiento = {};
+            
+            app.facturas.forEach(f => {
+                if (f.descripcion) {
+                    // Extraer nombre del tratamiento de la descripción
+                    facturacionPorTratamiento[f.descripcion] = (facturacionPorTratamiento[f.descripcion] || 0) + f.total;
+                }
+            });
+            
+            // Alternativamente, agrupar por tratamientos desde app.tratamientos
+            const tratamientosAgrupados = {};
+            app.facturas.forEach(f => {
+                app.tratamientos.forEach(t => {
+                    if (f.descripcion && f.descripcion.includes(t.nombre)) {
+                        tratamientosAgrupados[t.nombre] = (tratamientosAgrupados[t.nombre] || 0) + f.total;
+                    }
+                });
+            });
+            
+            const etiquetas = Object.keys(tratamientosAgrupados);
+            const datos = Object.values(tratamientosAgrupados);
+            
+            const ctx = document.getElementById('chartTratamientos');
+            if (!ctx) return;
+            
+            // Destruir gráfico anterior si existe
+            if (window.chartTratamientosInstance) {
+                window.chartTratamientosInstance.destroy();
+            }
+            
+            const colores = ['#2864f0', '#f0c800', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+            
+            window.chartTratamientosInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: etiquetas.length > 0 ? etiquetas : ['Sin datos'],
+                    datasets: [{
+                        data: datos.length > 0 ? datos : [1],
+                        backgroundColor: colores.slice(0, etiquetas.length),
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
         }
 
         // RENDER SELECTS
