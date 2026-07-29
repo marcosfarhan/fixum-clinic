@@ -1136,6 +1136,7 @@
                                 </div>
                             </div>
                             <div class="button-group" style="flex-wrap: wrap; gap: 10px;">
+                                <button class="btn btn-success" onclick="generarReporteOdontologoConFechas()">📊 Odontólogos (Rango)</button>
                                 <button class="btn btn-success" onclick="generarReporteFacturacionConFechas()">📊 Facturación (Rango)</button>
                                 <button class="btn btn-success" onclick="generarReporteIngresosConFechas()">📊 Ingresos (Rango)</button>
                                 <button class="btn btn-success" onclick="generarReporteEgresosConFechas()">📊 Egresos (Rango)</button>
@@ -2588,15 +2589,33 @@
             }
         }
 
-        // REPORTES
-        function generarReporteOdontologo() {
+        function generarReporteOdontologoConFechas() {
+            const fechaDesde = document.getElementById('reportFechaDesde').value;
+            const fechaHasta = document.getElementById('reportFechaHasta').value;
+
+            if (!fechaDesde || !fechaHasta) {
+                alert('Ingresa ambas fechas (Desde y Hasta)');
+                return;
+            }
+
+            if (fechaDesde > fechaHasta) {
+                alert('La fecha "Desde" debe ser menor o igual a la fecha "Hasta"');
+                return;
+            }
+
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             let y = 20;
 
+            // Encabezado con período
             doc.setFontSize(16);
             doc.text('REPORTE DE ODONTÓLOGOS', 20, y);
-            y += 15;
+            y += 8;
+            
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text(`Período: ${fechaDesde} a ${fechaHasta}`, 20, y);
+            y += 12;
 
             // Encabezados de tabla
             doc.setFontSize(10);
@@ -2615,9 +2634,68 @@
             // Datos
             doc.setFont(undefined, 'normal');
             doc.setFontSize(10);
-            
+
+            app.odontos.forEach(o => {
+                // Filtrar facturas por rango de fechas
+                const facturasEnRango = app.facturas.filter(f => {
+                    if (!f.fecha) return false;
+                    return f.fecha >= fechaDesde && f.fecha <= fechaHasta && f.odontologoNombre === o.nombre;
+                });
+                
+                const facturacion = facturasEnRango.reduce((sum, f) => sum + f.total, 0);
+                const honorariosGenerados = facturasEnRango.reduce((sum, f) => sum + f.total, 0);
+                const honorarioPendiente = facturasEnRango.reduce((sum, f) => sum + f.deuda, 0);
+                const honorariosCobrados = honorariosGenerados - honorarioPendiente;
+                const saldo = o.porCobrar;
+
+                doc.text(o.nombre, 20, y);
+                doc.text(`$${facturacion.toLocaleString('es-MX')}`, 60, y);
+                doc.text(`$${honorariosGenerados.toLocaleString('es-MX')}`, 100, y);
+                doc.text(`$${honorariosCobrados.toLocaleString('es-MX')}`, 140, y);
+                doc.text(`$${saldo.toLocaleString('es-MX')}`, 175, y);
+                y += 10;
+            });
+
+            doc.save(`reporte-odontologos-${fechaDesde}-${fechaHasta}.pdf`);
+            alert(`✅ PDF generado: reporte-odontologos-${fechaDesde}-${fechaHasta}.pdf`);
+        }
+
+        // REPORTES
+        function generarReporteOdontologo() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            let y = 20;
+
             const mesActual = getFechaPrueba().getUTCMonth() + 1;
             const anoActual = getFechaPrueba().getUTCFullYear();
+            const fechaReporte = getFechaPrueba().toISOString().split('T')[0];
+
+            doc.setFontSize(16);
+            doc.text('REPORTE DE ODONTÓLOGOS', 20, y);
+            y += 8;
+            
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text(`Mes: ${mesActual}/${anoActual} (Generado: ${fechaReporte})`, 20, y);
+            y += 12;
+
+            // Encabezados de tabla
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'bold');
+            doc.text('Nombre', 20, y);
+            doc.text('Facturación', 60, y);
+            doc.text('Hon. Generados', 100, y);
+            doc.text('Hon. Cobrados', 140, y);
+            doc.text('Saldo', 175, y);
+            y += 10;
+
+            // Línea separadora
+            doc.setLineWidth(0.5);
+            doc.line(20, y - 3, 200, y - 3);
+
+            // Datos
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
 
             app.odontos.forEach(o => {
                 // Calcular facturación del mes
@@ -2643,8 +2721,8 @@
                 y += 10;
             });
 
-            doc.save('reporte-odontologos.pdf');
-            alert('✅ PDF generado: reporte-odontologos.pdf');
+            doc.save(`reporte-odontologos-mes-${mesActual}-${anoActual}.pdf`);
+            alert(`✅ PDF generado: reporte-odontologos-mes-${mesActual}-${anoActual}.pdf`);
         }
 
         function generarReportePacientes() {
