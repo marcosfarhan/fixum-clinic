@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -2274,6 +2275,7 @@
             }
 
             // Pacientes - Facturación
+            [document.getElementById('factPaciente')].forEach(s => {
                 if (s) {
                     const val = s.value;
                     s.innerHTML = '<option value="">Seleccionar paciente...</option>';
