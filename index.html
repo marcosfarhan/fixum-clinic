@@ -2603,6 +2603,9 @@
                 return;
             }
 
+            console.log('📊 Generando reporte | Desde:', fechaDesde, '| Hasta:', fechaHasta);
+            console.log('📋 Total facturas en app:', app.facturas.length);
+            
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             let y = 20;
@@ -2639,8 +2642,13 @@
                 // Filtrar facturas por rango de fechas
                 const facturasEnRango = app.facturas.filter(f => {
                     if (!f.fecha) return false;
-                    return f.fecha >= fechaDesde && f.fecha <= fechaHasta && f.odontologoNombre === o.nombre;
+                    const cumpleFecha = f.fecha >= fechaDesde && f.fecha <= fechaHasta;
+                    const cumpleOdonto = f.odontologoNombre === o.nombre;
+                    console.log('Factura:', f.id, '| Fecha:', f.fecha, '| Odonto:', f.odontologoNombre, '| Cumple fecha:', cumpleFecha, '| Cumple odonto:', cumpleOdonto);
+                    return cumpleFecha && cumpleOdonto;
                 });
+                
+                console.log('Odontólogo:', o.nombre, '| Facturas en rango:', facturasEnRango.length);
                 
                 const facturacion = facturasEnRango.reduce((sum, f) => sum + f.total, 0);
                 const honorariosGenerados = facturasEnRango.reduce((sum, f) => sum + f.total, 0);
